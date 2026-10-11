@@ -1,6 +1,6 @@
 // Keeps Cardshare working offline once installed. The page is fetched fresh when there is
 // signal and falls back to the cached copy without; everything else comes from cache first.
-var CACHE = "cardshare-v2";
+var CACHE = "cardshare-v3";
 var CORE = ["./", "qrcode.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", function (e) {
@@ -17,6 +17,9 @@ self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
   if (req.mode === "navigate") {
+    // Only the app itself is kept for offline use. Other pages, such as About, always come from the network,
+    // so they can never take the app's place in the cache.
+    if (new URL(req.url).pathname !== new URL(self.registration.scope).pathname) return;
     e.respondWith(fetch(req).then(function (res) {
       var copy = res.clone();
       caches.open(CACHE).then(function (c) { c.put("./", copy); });

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Cardshare is a free contact card that lives on your phone. Show a QR, and any phone camera saves your details. No sign-up, no app, nothing leaves your phone.">
+<meta name="theme-color" content="#1b1d25">
+<title>About Cardshare</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@800&display=swap">
+<style>
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* Layout: one narrow column, the pitch and a live demo QR first, then three steps. Same tokens and themes as the app. */
+:root{
+  color-scheme:dark;
+  --ground:#1b1d25; --panel:#2a2c38; --panel-hi:#343644; --line:#3d4050;
+  --ink:#f3f2f8; --ink-soft:#a9a8b8; --ink-dim:#77768a;
+  --violet:#7461f2; --violet-hi:#8d7cff; --lime:#c8e62b; --lime-hi:#bfff6b;
+  --paper:#ffffff; --paper-ink:#15161c;
+  --hair:rgba(255,255,255,.06); --sheen:rgba(255,255,255,.08); --glow:rgba(116,97,242,.22); --on-accent:#fff; --lift:rgba(116,97,242,.8); --focus:var(--lime-hi); --num:var(--lime-hi);
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --brand:"Poppins","Arial Black",system-ui,sans-serif;
+  --r:22px;
+}
+:root[data-theme="daylight"]{
+  color-scheme:light;
+  --ground:#f4f3f8; --panel:#ffffff; --panel-hi:#eceaf4; --line:#d3d0df;
+  --ink:#1b1c24; --ink-soft:#5a596a; --ink-dim:#878697;
+  --violet:#6654e8; --violet-hi:#5b48e0;
+  --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0; --num:#5b48e0;
+}
+:root[data-theme="ocean"]{
+  --ground:#0f1c22; --panel:#182a32; --panel-hi:#223944; --line:#2f4a57;
+  --ink:#eef6f8; --ink-soft:#9bb4bd; --ink-dim:#6c8691;
+  --violet:#2fb3c6; --violet-hi:#5fd0e0; --glow:rgba(47,179,198,.2); --on-accent:#06222a; --lift:rgba(47,179,198,.55);
+}
+:root[data-theme="ember"]{
+  --ground:#211815; --panel:#2f221d; --panel-hi:#3d2d26; --line:#523c33;
+  --ink:#f8f1ec; --ink-soft:#c0a99c; --ink-dim:#8e786c;
+  --violet:#f0764a; --violet-hi:#ff9a70; --glow:rgba(240,118,74,.18); --on-accent:#2a0f05; --lift:rgba(240,118,74,.55);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16px/1.5 var(--body);
+  background-image:radial-gradient(50% 36% at 85% 12%,var(--glow),transparent 70%);background-repeat:no-repeat}
+a{color:var(--violet-hi)}
+a:focus-visible{outline:2px solid var(--focus);outline-offset:3px;border-radius:6px}
+.page{max-width:880px;margin:0 auto;padding-inline:22px;padding-block:28px 56px;display:flex;flex-direction:column;gap:56px;overflow-x:clip}
+.logo{position:relative;align-self:flex-start;font:800 26px/1 var(--brand);letter-spacing:-.05em;color:#8d7cff;padding:12px 6px;display:flex;gap:.28em;text-decoration:none}
+.logo span{position:relative;z-index:1}
+.logo::before,.logo::after{content:"";position:absolute;transform:skewX(-20deg)}
+.logo::before{background:#c8e62b;left:28%;right:38%;top:22%;bottom:0}
+.logo::after{background:#bfff6b;left:45%;right:20%;top:0;bottom:16%}
+
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:40px;align-items:center}
+section{min-width:0}
+.hero-text{display:flex;flex-direction:column;gap:18px;min-width:0}
+h1{font:600 clamp(34px,7vw,52px)/1.05 var(--body);letter-spacing:-.03em;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--violet-hi)}
+.lede{margin:0;font-size:18px;color:var(--ink-soft);max-width:34ch;text-wrap:balance}
+.cta{display:flex;flex-direction:column;gap:10px;align-items:flex-start;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:16px 30px;font:600 16px var(--body);text-decoration:none;
+  background:linear-gradient(180deg,var(--violet-hi),var(--violet));color:var(--on-accent);box-shadow:0 12px 30px -10px var(--lift),inset 0 1px 0 rgba(255,255,255,.3)}
+.facts{margin:0;font-size:13.5px;color:var(--ink-dim)}
+
+.demo{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--sheen);padding:14px 14px 18px;text-align:center}
+.demo h2{font:600 15px var(--body);margin:2px 0 12px}
+.qrbox{background:var(--paper);border-radius:14px;padding:14px;aspect-ratio:1;max-width:100%;color:var(--paper-ink);font-size:13px;display:flex;align-items:center;justify-content:center}
+.qrbox svg{display:block;width:100%;height:100%}
+.who{margin-top:12px;display:flex;flex-direction:column;gap:1px}
+.who .n{font-size:13px;color:var(--ink-soft)}
+.who .p{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.try{margin:12px 0 0;font-size:13px;color:var(--ink-soft);text-wrap:balance}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px}
+.steps li{display:flex;flex-direction:column;gap:8px;min-width:0}
+.steps b{font:800 34px/1 var(--brand);color:var(--num);letter-spacing:-.04em}
+.steps h3{font:600 18px/1.25 var(--body);margin:0}
+.steps p{margin:0;color:var(--ink-soft);font-size:15px}
+
+.more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;border-top:1px solid var(--hair);padding-top:36px}
+.more div{min-width:0}
+.more h3{font:600 15px var(--body);margin:0 0 6px}
+.more p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips i{font-style:normal;width:34px;height:34px;border-radius:50%;background:var(--panel-hi);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11.5px;box-shadow:inset 0 1px 0 var(--sheen)}
+
+.foot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;justify-content:space-between;color:var(--ink-dim);font-size:13.5px}
+.foot a{font-weight:600}
+
+/* the demo sits in a phone, with the logo's two slanted blocks behind it */
+.visual{position:relative;justify-self:center;width:100%;max-width:320px}
+.visual::before,.visual::after{content:"";position:absolute;transform:skewX(-20deg);border-radius:6px;z-index:0}
+.visual::before{background:#c8e62b;left:-9%;right:38%;top:34%;bottom:-5%}
+.visual::after{background:#bfff6b;left:30%;right:-9%;top:-5%;bottom:30%}
+.phone{position:relative;z-index:1;background:#0d0e13;border-radius:40px;padding:11px;box-shadow:0 30px 60px -30px rgba(0,0,0,.7)}
+.phone::before{content:"";display:block;width:74px;height:7px;border-radius:999px;background:#2a2c38;margin:6px auto 12px}
+.phone .demo{border-radius:30px}
+
+.kicker{margin:0 0 16px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+.why{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.why article{background:var(--panel);border-radius:var(--r);padding:22px;box-shadow:inset 0 1px 0 var(--sheen);min-width:0}
+.why h3{font:600 17px/1.25 var(--body);margin:0 0 8px;text-wrap:balance}
+.why p{margin:0;color:var(--ink-soft);font-size:14.5px}
+
+.tablewrap{overflow-x:auto;border-radius:var(--r);background:var(--panel);box-shadow:inset 0 1px 0 var(--sheen)}
+table{border-collapse:collapse;width:100%;min-width:580px;font-size:14px}
+th,td{padding:13px 14px;text-align:center;border-top:1px solid var(--hair);white-space:nowrap}
+thead th{border-top:0;font-weight:600;font-size:13px;color:var(--ink-soft)}
+tbody th{text-align:left;font-weight:500;white-space:normal}
+.us{background:var(--panel-hi);font-weight:600}
+thead .us{color:var(--violet-hi)}
+td.y::before{content:"\2713\00a0";color:var(--num);font-weight:700}
+td.n{color:var(--ink-dim)}
+td.n::before{content:"\2715\00a0"}
+td.m{color:var(--ink-soft)}
+.fine{margin:12px 2px 0;font-size:12.5px;color:var(--ink-dim)}
+.fb{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--sheen);padding:20px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick button{border:1px solid var(--line);background:none;color:var(--ink-soft);font:500 14px var(--body);padding:8px 16px;border-radius:999px;cursor:pointer}
+.pick button[aria-checked="true"]{background:var(--violet);border-color:var(--violet);color:var(--on-accent)}
+.pick button:focus-visible,.fb textarea:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.fb textarea{width:100%;resize:vertical;background:var(--ground);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px;font:400 15px/1.45 var(--body)}
+.fb textarea::placeholder{color:var(--ink-dim)}
+.fb .btn{padding:13px 28px;font-size:15px}
+.fb .fine{margin:0}
+.vh{position:absolute;opacity:0;width:1px;height:1px;overflow:hidden}
+.faq{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--sheen);padding:4px 20px}
+.faq details + details{border-top:1px solid var(--hair)}
+.faq summary{cursor:pointer;padding:15px 0;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--ink-dim);font-weight:400;font-size:20px;line-height:1}
+.faq details[open] summary::after{content:"\2212"}
+.faq summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+.faq p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px;max-width:62ch}
+
+@media (max-width:700px){
+  .why{grid-template-columns:minmax(0,1fr)}
+  .page{gap:44px}
+  .hero{grid-template-columns:minmax(0,1fr);gap:30px}
+  .visual{max-width:290px}
+  .cta{align-items:stretch}
+  .facts{text-align:center}
+  .steps,.more{grid-template-columns:minmax(0,1fr);gap:22px}
+  .steps li{display:grid;grid-template-columns:44px minmax(0,1fr);column-gap:6px;row-gap:4px}
+  .steps b{grid-row:span 2}
+}
+</style>
+<script>try{var t=localStorage.getItem("cardshare-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<main class="page">
+  <a class="logo" href="../" aria-label="Cardshare, open the app"><span>card</span><span>share</span></a>
+
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Your contact card, <em>as a QR.</em></h1>
+      <p class="lede">Make it once. Show it to any phone. Your details never leave yours.</p>
+      <div class="cta">
+        <a class="btn" href="../">Open Cardshare</a>
+        <p class="facts">Free · No sign-up · Nothing to install · Just your card</p>
+      </div>
+    </div>
+    <div class="visual">
+      <div class="phone">
+        <div class="demo">
+          <h2>Personal</h2>
+          <div class="qrbox" id="qr">QR could not load.</div>
+          <div class="who"><span class="n">Leena Thomas · example card</span><span class="p">+44 7700 900781</span></div>
+          <p class="try">Try it: point a phone camera here. It offers to save Leena as a contact.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Why you might need it</p>
+    <div class="why">
+      <article><h3>iPhone to Android, and back</h3><p>NameDrop is great between two iPhones, and stops there. A QR code is read by every phone camera.</p></article>
+      <article><h3>You choose what to share</h3><p>Your personal card, your work card, or just one link. Show only the one that fits the moment.</p></article>
+      <article><h3>Change it in seconds</h3><p>New number or job title? Edit, save, and your QR is up to date. Nothing to reprint.</p></article>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">How it works</p>
+    <ol class="steps">
+      <li><b aria-hidden="true">1</b><h3>Add your details</h3><p>Name, number, email. One card for personal, one for work.</p></li>
+      <li><b aria-hidden="true">2</b><h3>Show your QR</h3><p>Tap Share and hold up your phone. It works with no signal.</p></li>
+      <li><b aria-hidden="true">3</b><h3>They point their camera</h3><p>Their phone offers to save you. They need no app, on iPhone or Android.</p></li>
+    </ol>
+  </section>
+
+  <section>
+    <p class="kicker">How it compares</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col"><span hidden>Feature</span></th><th scope="col" class="us">Cardshare</th><th scope="col">NameDrop</th><th scope="col">WhatsApp QR</th><th scope="col">Card apps</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Works between iPhone and Android</th><td class="us y">Yes</td><td class="n">No</td><td class="y">Yes</td><td class="y">Yes</td></tr>
+          <tr><th scope="row">Nothing for you to install</th><td class="us y">Yes</td><td class="y">Built in</td><td class="n">No</td><td class="m">Varies</td></tr>
+          <tr><th scope="row">Nothing for them to install</th><td class="us y">Yes</td><td class="m">iPhone only</td><td class="n">No</td><td class="m">Usually</td></tr>
+          <tr><th scope="row">No account needed</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+          <tr><th scope="row">Works with no signal</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="m">Varies</td></tr>
+          <tr><th scope="row">Saves a full contact</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">Chat only</td><td class="y">Yes</td></tr>
+          <tr><th scope="row">Your details stay on your phone</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fine">“Card apps” means app-based digital business cards in general. Details differ by app and plan.</p>
+  </section>
+
+  <section>
+    <p class="kicker">Questions</p>
+    <div class="faq">
+      <details><summary>Is it free?</summary><p>Yes. There is no paid plan and no trial. If it helps you, you can buy me a beer.</p></details>
+      <details><summary>Does the other person need anything?</summary><p>No. Their phone camera reads the QR and offers to save you, on iPhone or Android.</p></details>
+      <details><summary>Where are my details kept?</summary><p>In your own browser, on your phone. There is no account and no server, so they go nowhere else.</p></details>
+      <details><summary>Can I share more than my number?</summary><p>Yes. Add your WhatsApp, LinkedIn, Instagram, website and other links, then tap Links to show a QR for any one of them.</p></details>
+      <details><summary>How do I keep it on my phone?</summary><p>iPhone: tap Share, then Add to Home Screen. Android: open the browser menu, then Install app. It opens like any other app, even with no signal.</p></details>
+      <details><summary>What if I change phones?</summary><p>Your cards live only on the phone you made them on, so you would type them in again on the new one. It takes about a minute.</p></details>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Requests, comments and bugs</p>
+    <div class="fb">
+      <div class="pick" role="radiogroup" aria-label="What would you like to send?">
+        <button type="button" role="radio" aria-checked="true" data-kind="Request" data-ph="What should Cardshare do next?">Request</button>
+        <button type="button" role="radio" aria-checked="false" data-kind="Comment" data-ph="Tell me what you think.">Comment</button>
+        <button type="button" role="radio" aria-checked="false" data-kind="Bug" data-ph="What happened, and on which phone?">Bug</button>
+      </div>
+      <label class="vh" for="fb-text">Your message</label>
+      <textarea id="fb-text" rows="4" placeholder="What should Cardshare do next?"></textarea>
+      <a class="btn" id="fb-send" href="https://github.com/mx-create/Cardshare/issues/new" target="_blank" rel="noopener">Send</a>
+      <p class="fine">Opens GitHub with your message filled in. Posting needs a free GitHub account, and what you post there is public.</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Cardshare is free to use.</span>
+    <span><a href="../">Open the app</a> · <a href="https://buy.stripe.com/fZu14mbnDgVS5qx26cawo00" target="_blank" rel="noopener">Buy me a beer</a></span>
+  </footer>
+</main>
+
+<script src="../qrcode.js"></script>
+<script>
+(function(){
+  // Match the theme picked in the app, when this page sits beside it on the same site.
+  try{var t=localStorage.getItem("cardshare-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}
+  // The demo is a real contact QR for an invented person. The number is from the UK range reserved for fiction.
+  var card=["BEGIN:VCARD","VERSION:3.0","N:Thomas;Leena;;;","FN:Leena Thomas","TITLE:Example card","TEL;TYPE=CELL:+447700900781","EMAIL:leena@example.com","END:VCARD"].join("\r\n");
+  // Feedback: no server here, so Send opens a new GitHub issue with the type and message already filled in.
+  var kind="Request",text=document.getElementById("fb-text"),send=document.getElementById("fb-send"),picks=document.querySelectorAll(".pick button");
+  function link(){
+    var t=text.value.trim(),first=t.split("\n")[0].slice(0,60);
+    send.href="https://github.com/mx-create/Cardshare/issues/new?title="+encodeURIComponent(kind+(first?": "+first:""))+"&body="+encodeURIComponent(t?t+"\n\n(Sent from the Cardshare page)":"");
+  }
+  picks.forEach(function(b){b.addEventListener("click",function(){
+    kind=b.dataset.kind;text.placeholder=b.dataset.ph;
+    picks.forEach(function(x){x.setAttribute("aria-checked",String(x===b))});link();
+  })});
+  text.addEventListener("input",link);link();
+  if(typeof qrcode!=="function")return;
+  var q=qrcode(0,"M");q.addData(card,"Byte");q.make();
+  var n=q.getModuleCount(),d="";
+  for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(q.isDark(r,c))d+="M"+c+" "+r+"h1v1h-1z";
+  document.getElementById("qr").innerHTML='<svg viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges" role="img" aria-label="Example contact QR code"><path fill="#15161c" d="'+d+'"/></svg>';
+})();
+</script>
+</body>
+</html>
