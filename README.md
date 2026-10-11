@@ -18,6 +18,7 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 | `index.html` | The whole app: markup, styles and script |
 | `qrcode.js` | QR generator (Kazuhiko Arase, MIT licence) |
 | `sw.js` | Keeps the app working with no signal |
+| `about/index.html` | The product and how-to page, at `/about` |
 | `manifest.webmanifest`, `icons/` | Home-screen name and icons |
 
 ## Putting it online
@@ -26,8 +27,8 @@ Plain static files with no build step. Upload the folder to any web host, at the
 subfolder; every path inside is relative. It has to be served over HTTPS for the home-screen install and
 offline mode to work.
 
-When `index.html`, `qrcode.js` or the icons change, bump `CACHE` in `sw.js` (for example `cardshare-v2` to
-`cardshare-v3`) so phones that already installed it pick up the new files.
+When `index.html`, `qrcode.js` or the icons change, bump `CACHE` in `sw.js` (for example `cardshare-v3` to
+`cardshare-v4`) so phones that already installed it pick up the new files.
 
 ## Where the data lives
 
