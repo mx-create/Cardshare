@@ -32,14 +32,16 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   --brand:"Poppins","Arial Black",system-ui,sans-serif;
   --r:22px;
   /* tokens that differ per theme beyond the palette: hairlines, top sheen on raised surfaces, the page glow, text on the accent, focus ring */
-  --hair:rgba(255,255,255,.06); --sheen:rgba(255,255,255,.08); --glow:rgba(116,97,242,.22); --on-accent:#fff; --lift:rgba(116,97,242,.8); --focus:var(--lime-hi);
+  --hair:rgba(255,255,255,.06); --sheen:rgba(255,255,255,.08);
+  --glass:rgba(255,255,255,.05); --glass-hi:rgba(255,255,255,.14); --glass-line:rgba(255,255,255,.2); --glow:rgba(116,97,242,.22); --on-accent:#fff; --lift:rgba(116,97,242,.8); --focus:var(--lime-hi);
 }
 :root[data-theme="daylight"]{
   color-scheme:light;
   --ground:#f4f3f8; --panel:#ffffff; --panel-hi:#eceaf4; --line:#d3d0df;
   --ink:#1b1c24; --ink-soft:#5a596a; --ink-dim:#878697;
   --violet:#6654e8; --violet-hi:#5b48e0; --lime:#a9cf12; --lime-hi:#b9f04c;
-  --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0;
+  --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7);
+  --glass:rgba(255,255,255,.45); --glass-hi:rgba(255,255,255,.8); --glass-line:rgba(255,255,255,.9); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0;
 }
 :root[data-theme="ocean"]{
   --ground:#0f1c22; --panel:#182a32; --panel-hi:#223944; --line:#2f4a57;
@@ -70,9 +72,20 @@ body{background:var(--ground);color:var(--ink);font:400 15px/1.45 var(--body);
 .seg.pick button[aria-selected="true"]{background:var(--violet);color:var(--on-accent)}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .view{display:flex;flex-direction:column;gap:18px}
-.intro{text-align:center;margin-top:-6px}
-.intro h1{font:600 21px/1.25 var(--body);letter-spacing:-.015em;margin:0 auto;max-width:22ch;text-wrap:balance}
-.intro p{margin:6px 0 0;color:var(--ink-soft);font-size:14.5px}
+/* first-visit bubble: says what Cardshare is, floating in frosted glass under the logo so it takes no room in the layout */
+.intro{position:absolute;top:calc(100% + 12px);left:0;right:0;z-index:5;text-align:center;padding:20px 20px 16px;border-radius:26px;
+  background:linear-gradient(135deg,var(--glass-hi),var(--glass));border:1px solid var(--glass-line);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:0 24px 50px -14px rgba(0,0,0,.55),inset 0 1px 0 var(--glass-line);animation:bubble .45s cubic-bezier(.2,.9,.3,1.2) .2s both;transform-origin:50% 0}
+.intro::before{content:"";position:absolute;top:-8px;left:calc(50% - 8px);width:16px;height:16px;transform:rotate(45deg);border-radius:4px 0 0 0;
+  background:var(--glass-hi);border:1px solid var(--glass-line);border-right:0;border-bottom:0;clip-path:polygon(0 0,100% 0,0 100%);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.intro.out{animation:unbubble .22s ease-in forwards}
+.intro h1{font:600 20px/1.25 var(--body);letter-spacing:-.015em;margin:0 auto;max-width:22ch;text-wrap:balance}
+.intro p{margin:6px 0 14px;color:var(--ink-soft);font-size:14.5px}
+.intro .btn{margin:0 auto;background:var(--glass-hi);border:1px solid var(--glass-line);box-shadow:none}
+@keyframes bubble{from{opacity:0;transform:translateY(-6px) scale(.92)}}
+@keyframes unbubble{to{opacity:0;transform:translateY(-6px) scale(.95)}}
+@media (prefers-reduced-motion:reduce){.intro,.intro.out{animation:none}}
 .privacy{margin:-6px 0 -4px}
 .eyebrow{text-align:center;color:var(--ink-soft);font-size:14px;margin:0}
 .panel{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--sheen)}
@@ -152,16 +165,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 <main class="app">
   <div class="top" id="top">
     <div class="logo" id="logo" aria-label="card share"><span>card</span><span>share</span></div>
+    <!-- what Cardshare is: a bubble on the first visit only, gone once dismissed or once a card is saved -->
+    <header class="intro" id="intro" hidden>
+      <h1>Make a free contact card and share it by QR with any phone.</h1>
+      <p>No sign-up, no app.</p>
+      <button class="btn small" id="intro-ok" type="button">Got it</button>
+    </header>
     <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="dialog" aria-label="Change theme">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
     </button>
   </div>
-
-  <!-- what Cardshare is, for anyone who has not saved a card yet; returning users go straight to their QR -->
-  <header class="intro" id="intro">
-    <h1>Make a free contact card and share it by QR with any phone.</h1>
-    <p>No sign-up, no app.</p>
-  </header>
 
   <div class="seg two" role="tablist" aria-label="Screens">
     <button role="tab" id="tab-edit" data-view="edit" aria-selected="false">My card</button>
@@ -364,9 +377,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     $("edit-note").textContent=onLinks?"Each link gets its own QR on the Share tab. Usernames only, except Spotify and your own link, which take a pasted link."
       :isNew?"Fill in only what you want to share. You can change it any time.":"";
   }
+  // The intro bubble shows until it is dismissed (Got it, a tap or focus anywhere else, Escape) or a card is saved.
+  var IKEY="cardshare-intro-seen",introSeen=false;
+  try{introSeen=localStorage.getItem(IKEY)==="1"}catch(e){}
+  function hideIntro(now){
+    var i=$("intro");if(i.hidden)return;
+    introSeen=true;try{localStorage.setItem(IKEY,"1")}catch(e){}
+    if(now||matchMedia("(prefers-reduced-motion: reduce)").matches){i.hidden=true;return}
+    i.classList.add("out");setTimeout(function(){i.hidden=true},220);
+  }
+  function outside(e){if(!$("intro").contains(e.target))hideIntro()}
+  $("intro-ok").addEventListener("click",function(){hideIntro()});
+  document.addEventListener("pointerdown",outside);document.addEventListener("focusin",outside);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")hideIntro()});
   function show(view){
     ["edit","share"].forEach(function(v){$("view-"+v).hidden=v!==view;$("tab-"+v).setAttribute("aria-selected",String(v===view))});
-    $("intro").hidden=!isNew;
+    if(!isNew)hideIntro(true);
   }
   // After a save or a change of theme the logo gives way to a nudge for a few seconds, then comes back; "lead" is the bold
   // word it opens with. The first save on a phone that can add Cardshare to its home screen offers that, once; any other
@@ -475,6 +501,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
   // First visit opens on the blank form; once cards are saved, the app always opens on the QR.
   loadForm();renderShare();show(isNew?"edit":"share");
+  if(isNew&&!introSeen)$("intro").hidden=false;
 })();
 </script>
 
