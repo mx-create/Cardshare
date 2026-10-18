@@ -8,6 +8,8 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 - **My card:** Personal, Work and Links, each saved with one button.
 - **Share:** a QR for the Personal or Work card (their camera offers to save you as a contact), or for any one
   link (website, WhatsApp, LinkedIn, Instagram, X, YouTube, TikTok, Facebook, Telegram, Spotify, one custom link).
+- **Get paid:** a QR for your Monzo or Revolut page (monzo.me / revolut.me username) or a Stripe payment link. They
+  scan, choose the amount and pay on that service's own page.
 - **Themes:** Midnight, Daylight, Ocean and Ember, from the round button beside the logo.
 - **Works offline** once opened, and can be added to the home screen.
 
