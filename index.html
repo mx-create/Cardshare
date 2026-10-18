@@ -103,6 +103,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .who .n{font-size:13.5px;color:var(--ink-soft)}
 .who .p{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .who .t{font-size:14.5px;color:var(--ink-dim)}
+.amount{display:flex;align-items:center;gap:6px;margin-top:14px;padding:0 16px;border-radius:999px;background:var(--panel-hi);box-shadow:inset 0 1px 0 var(--sheen)}
+.amount span{color:var(--ink-soft);font:600 18px var(--body)}
+.amount input{flex:1;min-width:0;background:none;border:0;color:var(--ink);font:600 18px var(--body);font-variant-numeric:tabular-nums;padding:12px 0}
+.amount input::placeholder{color:var(--ink-dim);font-weight:400;font-size:15px}
+.amount:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.amount input:focus-visible{outline:0}
 .reveal{background:var(--panel);border:1px dashed var(--line);border-radius:16px;padding:14px;font-size:13.5px;color:var(--ink-soft)}
 .reveal b{color:var(--ink);font-weight:600}
 /* top slot: the logo, swapped for a few seconds after a save for a nudge built by showTip(): add to home screen once, then a thank-you */
@@ -211,11 +217,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     <p class="sub">Get paid</p>
     <div class="panel fields">
       <div class="field"><input id="l-monzo" placeholder="monzo.me username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-monzo">Monzo</label></div>
-      <div class="field"><input id="l-monzoAmount" inputmode="decimal" placeholder="optional, e.g. 12.50" autocomplete="off"><label for="l-monzoAmount">Monzo amount £</label></div>
       <div class="field"><input id="l-revolut" placeholder="revolut.me username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-revolut">Revolut</label></div>
       <div class="field"><input id="l-stripe" inputmode="url" placeholder="paste your Stripe payment link" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-stripe">Stripe</label></div>
       <div class="field"><input id="l-upi" type="email" inputmode="email" placeholder="yourname@bank" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-upi">UPI ID</label></div>
-      <div class="field"><input id="l-upiAmount" inputmode="decimal" placeholder="optional, e.g. 500" autocomplete="off"><label for="l-upiAmount">UPI amount ₹</label></div>
     </div>
     </div>
     <button class="btn primary" id="save-card" type="button">Save and show my QR</button>
@@ -232,6 +236,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         <button class="btn small" id="empty-btn" type="button" hidden></button>
       </div>
       <div class="who"><span class="n" id="w-name"></span><span class="p" id="w-tel"></span><span class="t" id="w-title"></span></div>
+      <!-- Monzo and UPI only: an amount for this payment; the QR redraws as it is typed. Kept for this visit, not saved. -->
+      <label class="amount" id="amount-row" hidden><span id="amount-cur">£</span><input id="amount" inputmode="decimal" placeholder="Amount (optional)" autocomplete="off" aria-label="Amount"></label>
     </div>
     <div class="seg pick" role="tablist" aria-label="What to share">
       <button role="tab" id="sk-personal" data-kind="personal" aria-selected="true">Personal</button>
@@ -279,7 +285,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     {k:"facebook",n:"Facebook",m:"fb",u:"https://www.facebook.com/"},{k:"telegram",n:"Telegram",m:"TG",u:"https://t.me/"}];
   // Payment pages: a username on monzo.me or revolut.me, or a pasted Stripe payment link.
   var PAY=[{k:"monzo",n:"Monzo",u:"https://monzo.me/"},{k:"revolut",n:"Revolut",u:"https://revolut.me/"}];
-  var LK=["whatsapp"].concat(SOC.map(function(s){return s.k}),["spotify","customLabel","customUrl","monzo","monzoAmount","revolut","stripe","upi","upiAmount"]);
+  var LK=["whatsapp"].concat(SOC.map(function(s){return s.k}),["spotify","customLabel","customUrl","monzo","revolut","stripe","upi"]);
   function blank(){return {name:"",title:"",org:"",tel:"",email:""}}
   function blankLinks(){var o={};LK.forEach(function(k){o[k]=""});return o}
   function copy(o){return JSON.parse(JSON.stringify(o))}
@@ -295,6 +301,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   var links=blankLinks();LK.forEach(function(k){if(data.links&&typeof data.links[k]==="string")links[k]=data.links[k]});
   data={web:data.web||"",cards:data.cards,links:links};
   var draft=copy(data),editKind="personal",shareKind="personal",linkSel="",tipOn=false;
+  var amt={monzo:"",upi:""}; // typed on Share for this visit only
   var $=function(id){return document.getElementById(id)};
 
   function url(w){return /^https?:/i.test(w)?w:"https://"+w}
@@ -342,12 +349,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     SOC.forEach(function(s){var h=handle(L[s.k]);if(h)items.push({id:s.k,n:s.n,m:s.m,url:s.u+encodeURIComponent(h),show:"@"+h})});
     var sp=safeUrl(L.spotify);if(sp&&/(^|\.)spotify\.com$/.test(new URL(sp).hostname))items.push({id:"spotify",n:"Spotify",m:"SP",url:sp,show:"Spotify"});
     var cu=safeUrl(L.customUrl);if(cu)items.push({id:"custom",n:L.customLabel||host(cu),m:"\u2197",url:cu,show:host(cu)});
-    PAY.forEach(function(p){var h=payHandle(L[p.k],p.u);if(!h)return;var a=p.k==="monzo"?amount(L.monzoAmount):"";
+    PAY.forEach(function(p){var h=payHandle(L[p.k],p.u);if(!h)return;var a=p.k==="monzo"?amount(amt.monzo):"";
       items.push({id:p.k,n:p.n,m:p.n.slice(0,2),url:p.u+encodeURIComponent(h)+(a?"/"+a:""),show:host(p.u)+"/"+h+(a?" \u00b7 \u00a3"+a:""),pay:true,amt:a})});
     var st=safeUrl(L.stripe);if(st&&/^(buy|donate)\.stripe\.com$/.test(new URL(st).hostname))items.push({id:"stripe",n:"Stripe",m:"St",url:st,show:"Stripe checkout",pay:true});
     // UPI: a upi://pay code for Google Pay, PhonePe, Paytm and other UPI apps, with the card's name and an optional amount in rupees.
     var vpa=upiId(L.upi);
-    if(vpa){var ua=amount(L.upiAmount),pn=(data.cards.personal.name||data.cards.work.name||"").trim();
+    if(vpa){var ua=amount(amt.upi),pn=(data.cards.personal.name||data.cards.work.name||"").trim();
       items.push({id:"upi",n:"UPI",m:"UPI",url:"upi://pay?pa="+vpa+(pn?"&pn="+encodeURIComponent(pn):"")+(ua?"&am="+ua:"")+"&cu=INR",show:vpa+(ua?" \u00b7 \u20b9"+ua:""),pay:true,upi:true,amt:ua})}
     // Always there: a QR to Cardshare itself, so whoever asks can make their own card.
     items.push({id:"cardshare",n:"Cardshare",m:"cs",url:"https://cardshare.io",show:"cardshare.io",app:true});
@@ -399,15 +406,19 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     select("sk-",["personal","work","links"],shareKind);
     $("qrbox").classList.remove("empty");$("qr").hidden=false;$("empty-msg").hidden=true;$("empty-btn").hidden=true;
     var isLinks=shareKind==="links",items=isLinks?linkItems():[];
+    $("amount-row").hidden=true;
     $("sk-links").textContent="Links";
     if(isLinks){
       $("qr-title").textContent="Links";
       var own=items.length>1;
       var it=items.filter(function(x){return x.id===linkSel})[0]||items[0];linkSel=it.id;
       drawChips(items);drawQR(it.url);
+      if(it.id in amt){$("amount-row").hidden=false;$("amount-cur").textContent=it.upi?"\u20b9":"\u00a3";if(document.activeElement!==$("amount"))$("amount").value=amt[it.id]}
       $("sk-links").textContent=items.length>1?it.n+" \u25BE":it.n; // the button names the link it is showing
       $("qr-title").textContent=it.pay?"Pay with "+it.n:it.n;$("w-name").textContent=it.pay?"Scan to pay":it.app?"Make your own card":"Opens in their browser";$("w-tel").textContent=it.show;$("w-title").textContent="";
-      $("share-help").textContent=it.app?"Their camera opens Cardshare so they can make their own card."+(own?"":" Add your own links under My card \u2192 Links.")
+      var bad=(it.id in amt)&&amt[it.id].trim()&&!it.amt;
+      $("share-help").textContent=bad?"Type the amount as a number, like 12.50. Until then they choose the amount."
+        :it.app?"Their camera opens Cardshare so they can make their own card."+(own?"":" Add your own links under My card \u2192 Links.")
         :it.upi?"They scan it with any UPI app, such as Google Pay, PhonePe or Paytm"+(it.amt?", with \u20b9"+it.amt+" filled in.":", and enter the amount.")+" They need signal; you don't."
         :it.amt?"Their camera opens your Monzo page with \u00a3"+it.amt+" filled in. They need signal; you don't."
         :it.pay?(it.id==="stripe"?"Their camera opens your Stripe checkout to pay.":"Their camera opens your "+it.n+" page, where they choose the amount and pay.")+" They need signal; you don't."
@@ -493,11 +504,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     draft.web=(draft.web||"").trim();
     LK.forEach(function(k){draft.links[k]=(draft.links[k]||"").trim()});
     SOC.forEach(function(s){draft.links[s.k]=handle(draft.links[s.k])});
-    var pasted=(draft.links.monzo.replace(/[?#].*$/,"").match(/monzo\.me\/[^\/]+\/([\d.,]+)/i)||[])[1];
-    if(pasted&&!draft.links.monzoAmount)draft.links.monzoAmount=pasted;
     PAY.forEach(function(p){draft.links[p.k]=payHandle(draft.links[p.k],p.u)});
-    draft.links.monzoAmount=amount(draft.links.monzoAmount);
-    draft.links.upi=draft.links.upi.trim().toLowerCase();draft.links.upiAmount=amount(draft.links.upiAmount);
+    draft.links.upi=draft.links.upi.trim().toLowerCase();
   }
   function store(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
   function openEdit(kind,focus){if(kind)editKind=kind;loadForm();show("edit");$(focus||"f-name").focus()}
@@ -513,6 +521,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("f-web").addEventListener("input",function(){draft.web=$("f-web").value});
   LK.forEach(function(k){$("l-"+k).addEventListener("input",function(){draft.links[k]=$("l-"+k).value})});
   $("card-form").addEventListener("submit",function(e){e.preventDefault()});
+  $("amount").addEventListener("input",function(){if(linkSel in amt){amt[linkSel]=$("amount").value;renderShare()}});
   $("empty-btn").addEventListener("click",function(){shareKind==="links"?openLinks("f-web"):openEdit(shareKind)});
   $("save-card").addEventListener("click",function(){
     if(editKind==="links"){saveLinks();return}
