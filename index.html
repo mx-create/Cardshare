@@ -214,6 +214,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       <div class="field"><input id="l-monzoAmount" inputmode="decimal" placeholder="optional, e.g. 12.50" autocomplete="off"><label for="l-monzoAmount">Monzo amount £</label></div>
       <div class="field"><input id="l-revolut" placeholder="revolut.me username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-revolut">Revolut</label></div>
       <div class="field"><input id="l-stripe" inputmode="url" placeholder="paste your Stripe payment link" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-stripe">Stripe</label></div>
+      <div class="field"><input id="l-upi" type="email" inputmode="email" placeholder="yourname@bank" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-upi">UPI ID</label></div>
+      <div class="field"><input id="l-upiAmount" inputmode="decimal" placeholder="optional, e.g. 500" autocomplete="off"><label for="l-upiAmount">UPI amount ₹</label></div>
     </div>
     </div>
     <button class="btn primary" id="save-card" type="button">Save and show my QR</button>
@@ -277,7 +279,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     {k:"facebook",n:"Facebook",m:"fb",u:"https://www.facebook.com/"},{k:"telegram",n:"Telegram",m:"TG",u:"https://t.me/"}];
   // Payment pages: a username on monzo.me or revolut.me, or a pasted Stripe payment link.
   var PAY=[{k:"monzo",n:"Monzo",u:"https://monzo.me/"},{k:"revolut",n:"Revolut",u:"https://revolut.me/"}];
-  var LK=["whatsapp"].concat(SOC.map(function(s){return s.k}),["spotify","customLabel","customUrl","monzo","monzoAmount","revolut","stripe"]);
+  var LK=["whatsapp"].concat(SOC.map(function(s){return s.k}),["spotify","customLabel","customUrl","monzo","monzoAmount","revolut","stripe","upi","upiAmount"]);
   function blank(){return {name:"",title:"",org:"",tel:"",email:""}}
   function blankLinks(){var o={};LK.forEach(function(k){o[k]=""});return o}
   function copy(o){return JSON.parse(JSON.stringify(o))}
@@ -324,8 +326,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   // For Monzo and Revolut: a bare username, an @name, or a pasted monzo.me / revolut.me link (an amount after the name is dropped).
   function payHandle(v,base){v=String(v||"").trim().replace(/^https?:\/\//i,"").replace(/^www\./i,"").replace(/[?#].*$/,"");
     var b=base.replace(/^https:\/\//,"");if(v.toLowerCase().indexOf(b)===0)v=v.slice(b.length);return v.split("/")[0].replace(/^@/,"")}
-  // A Monzo amount in pounds: "12.5", "£12.50" or "1,000" become "12.50" or "1000"; anything else is dropped.
-  function amount(v){v=String(v||"").replace(/[£,\s]/g,"");if(!/^\d+(\.\d{1,2})?$/.test(v)||!(+v>0))return "";return v.indexOf(".")<0?v:(+v).toFixed(2)}
+  // An amount in pounds or rupees: "12.5", "£12.50", "₹1,000" become "12.50" or "1000"; anything else is dropped.
+  function amount(v){v=String(v||"").replace(/[£₹,\s]/g,"");if(!/^\d+(\.\d{1,2})?$/.test(v)||!(+v>0))return "";return v.indexOf(".")<0?v:(+v).toFixed(2)}
+  // A UPI ID (VPA) such as name@okaxis: letters, digits, dot, dash and underscore, then @ and the bank's handle.
+  function upiId(v){v=String(v||"").trim().toLowerCase();return /^[a-z0-9._-]{2,256}@[a-z][a-z0-9.]{1,63}$/.test(v)?v:""}
   function safeUrl(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{var u=new URL(v);return /^https?:$/.test(u.protocol)&&u.hostname.indexOf(".")>0?u.href:""}catch(e){return ""}}
   function host(u){return new URL(u).hostname.replace(/^www\./,"")}
 
@@ -341,6 +345,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     PAY.forEach(function(p){var h=payHandle(L[p.k],p.u);if(!h)return;var a=p.k==="monzo"?amount(L.monzoAmount):"";
       items.push({id:p.k,n:p.n,m:p.n.slice(0,2),url:p.u+encodeURIComponent(h)+(a?"/"+a:""),show:host(p.u)+"/"+h+(a?" \u00b7 \u00a3"+a:""),pay:true,amt:a})});
     var st=safeUrl(L.stripe);if(st&&/^(buy|donate)\.stripe\.com$/.test(new URL(st).hostname))items.push({id:"stripe",n:"Stripe",m:"St",url:st,show:"Stripe checkout",pay:true});
+    // UPI: a upi://pay code for Google Pay, PhonePe, Paytm and other UPI apps, with the card's name and an optional amount in rupees.
+    var vpa=upiId(L.upi);
+    if(vpa){var ua=amount(L.upiAmount),pn=(data.cards.personal.name||data.cards.work.name||"").trim();
+      items.push({id:"upi",n:"UPI",m:"UPI",url:"upi://pay?pa="+vpa+(pn?"&pn="+encodeURIComponent(pn):"")+(ua?"&am="+ua:"")+"&cu=INR",show:vpa+(ua?" \u00b7 \u20b9"+ua:""),pay:true,upi:true,amt:ua})}
     // Always there: a QR to Cardshare itself, so whoever asks can make their own card.
     items.push({id:"cardshare",n:"Cardshare",m:"cs",url:"https://cardshare.io",show:"cardshare.io",app:true});
     return items;
@@ -359,6 +367,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     monzo:"M4.244 1.174a.443.443 0 00-.271.13l-3.97 3.97-.001.001c3.884 3.882 8.093 8.092 11.748 11.748v-8.57L4.602 1.305a.443.443 0 00-.358-.131zm15.483 0a.443.443 0 00-.329.13L12.25 8.456v8.568L24 5.275c-1.316-1.322-2.647-2.648-3.97-3.97a.443.443 0 00-.301-.131zM0 5.979l.002 10.955c0 .294.118.577.326.785l4.973 4.976c.28.282.76.083.758-.314V12.037zm23.998.003l-6.06 6.061v10.338c-.004.399.48.6.76.314l4.974-4.976c.208-.208.326-.49.326-.785z",
     revolut:"M21.408 20.114c.449.999-.003 2.261-.94 2.77-.536.292-1.15.563-1.763.715a14.797 14.797 0 0 1-3.084.401c-1.662 0-3.329-.952-4.047-2.11-.185.4-.855 1.203-2.03 1.581-.741.24-1.635.529-3.502.527-1.673-.001-2.627-.76-3.13-1.396-.804-1.012-.922-2.298-.765-3.164l.008-.042c.631-3.167 1.494-8.925 1.892-11.81l.004-.028c.108-.8.219-1.6.285-2.406.032-.406.054-.814.058-1.221.004-.385-.031-.77-.028-1.154.004-.363.063-.73.233-1.052A2.391 2.391 0 0 1 5.917.619c.587-.196 1.2-.275 1.811-.346A48.39 48.39 0 0 1 9.604.086 31.823 31.823 0 0 1 11.9 0c1.31-.001 2.63.02 3.921.287 1.316.271 2.646.79 3.684 1.699.711.623 1.276 1.408 1.7 2.268.372.758.523 1.555.613 2.164a9.047 9.047 0 0 1-.124 3.286 7.203 7.203 0 0 1-.953 2.215c-.494.768-1.129 1.465-1.937 2.128.492 1.43 1.776 4.222 2.604 6.067zM6.688 2.922c.032.53.036 1.064.013 1.596a23.53 23.53 0 0 1-.13 1.626c-.06.538-.132 1.075-.205 1.611l-.024.175c-.23 1.677-.471 3.352-.725 5.024a280.578 280.578 0 0 1-.866 5.255c-.139.816-.45 1.861-.024 2.64.38.695 1.354.78 2.034.71 2.474-.253 2.867-.803 2.867-.803-.493-.547-.064-3.039.432-6.388h1.759l1.84 5.567s.543 1.724 2.05 1.641c1.932-.106 3.353-.548 3.558-.793-.595-.332-2.296-4.585-3.222-7.708.448-.274.883-.571 1.294-.904.56-.457 1.08-.984 1.477-1.603a4.75 4.75 0 0 0 .63-1.453 5.72 5.72 0 0 0 .125-.842 6.494 6.494 0 0 0-.046-1.486c-.07-.472-.173-.997-.383-1.422-.392-.797-.946-1.492-1.701-1.936-1.275-.75-2.745-.892-4.177-.97a26.434 26.434 0 0 0-4.657.152c-.174.02-1.926.175-1.918.31zm4.734 2.155c-.296 2.085-.533 3.842-.96 6.577 1.153-.025 3.77.434 4.346-3.304.477-3.11-1.649-3.398-3.386-3.273Z",
     stripe:"M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.594-7.305h.003z",
+    upi:"M4 4l7.5 8L4 20z|M11 4l9 8-9 8z",
     cardshare:"M11 3h10l-3.5 12h-10z|M6.5 9h10L13 21H3z",
     web:"M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M12 3a9 9 0 1 0 0 18 9 9 0 1 0 0-18",
     custom:"M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"};
@@ -399,6 +408,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       $("sk-links").textContent=items.length>1?it.n+" \u25BE":it.n; // the button names the link it is showing
       $("qr-title").textContent=it.pay?"Pay with "+it.n:it.n;$("w-name").textContent=it.pay?"Scan to pay":it.app?"Make your own card":"Opens in their browser";$("w-tel").textContent=it.show;$("w-title").textContent="";
       $("share-help").textContent=it.app?"Their camera opens Cardshare so they can make their own card."+(own?"":" Add your own links under My card \u2192 Links.")
+        :it.upi?"They scan it with any UPI app, such as Google Pay, PhonePe or Paytm"+(it.amt?", with \u20b9"+it.amt+" filled in.":", and enter the amount.")+" They need signal; you don't."
         :it.amt?"Their camera opens your Monzo page with \u00a3"+it.amt+" filled in. They need signal; you don't."
         :it.pay?(it.id==="stripe"?"Their camera opens your Stripe checkout to pay.":"Their camera opens your "+it.n+" page, where they choose the amount and pay.")+" They need signal; you don't."
         :"Their camera opens your "+(it.id==="web"?"website":it.n)+". Showing the QR needs no signal on your phone.";
@@ -420,7 +430,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     $("f-web").value=draft.web||"";
     LK.forEach(function(k){$("l-"+k).value=draft.links[k]||""});
     $("save-card").textContent=onLinks?"Save and show QR":"Save and show my QR";
-    $("edit-note").textContent=onLinks?"Usernames only, except Spotify, Stripe and your own link, which take a pasted link."
+    $("edit-note").textContent=onLinks?"Usernames only, except Spotify, Stripe and your own link, which take a pasted link. UPI takes your UPI ID."
       :isNew?"Fill in only what you want to share. You can change it any time.":"";
   }
   function show(view){
@@ -487,6 +497,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     if(pasted&&!draft.links.monzoAmount)draft.links.monzoAmount=pasted;
     PAY.forEach(function(p){draft.links[p.k]=payHandle(draft.links[p.k],p.u)});
     draft.links.monzoAmount=amount(draft.links.monzoAmount);
+    draft.links.upi=draft.links.upi.trim().toLowerCase();draft.links.upiAmount=amount(draft.links.upiAmount);
   }
   function store(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
   function openEdit(kind,focus){if(kind)editKind=kind;loadForm();show("edit");$(focus||"f-name").focus()}
@@ -513,6 +524,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   });
   // Links save on their own, so they can be changed without touching a card.
   function saveLinks(){
+    if((draft.links.upi||"").trim()&&!upiId(draft.links.upi)){$("edit-note").textContent="That UPI ID doesn't look right. It looks like name@bank, for example ada@okaxis.";$("l-upi").focus();return}
     cleanLinks();data.web=draft.web;data.links=copy(draft.links);isNew=false;shareKind="links";
     store();renderShare();loadForm();show("share");
     showTip("Saved.",true);

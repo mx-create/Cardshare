@@ -10,6 +10,8 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
   link (website, WhatsApp, LinkedIn, Instagram, X, YouTube, TikTok, Facebook, Telegram, Spotify, one custom link).
 - **Get paid:** a QR for your Monzo or Revolut page (monzo.me / revolut.me username) or a Stripe payment link. They
   scan and pay on that service's own page. Monzo can carry a fixed amount; otherwise they choose it.
+- **UPI:** a QR with your UPI ID (and optionally an amount in rupees) that Google Pay, PhonePe, Paytm and other UPI
+  apps read as a payment to you, in the standard `upi://pay` format.
 - **Cardshare:** always in the Links picker, a QR to cardshare.io so whoever scans it can make their own card.
 - **Themes:** Midnight, Daylight, Ocean and Ember, from the round button beside the logo.
 - **Works offline** once opened, and can be added to the home screen.
