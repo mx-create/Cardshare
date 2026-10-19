@@ -14,6 +14,13 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 - **UPI:** a QR with your UPI ID that Google Pay, PhonePe, Paytm and other UPI apps read as a payment to you, in the
   standard `upi://pay` format.
 - **Cardshare:** always in the Links picker, a QR to cardshare.io so whoever scans it can make their own card.
+- **Checks as you type:** the mobile and WhatsApp fields have a country-code chip, picked from the phone's own
+  language settings and changeable from a searchable list, or switched by typing `+` and a code. Numbers are grouped
+  as typed, held to that country's length (a leading 0 is dropped) and stored as `+<code><number>`; a number that
+  doesn't look like a mobile gets a warning. Email needs an @ and a finished domain, and a likely typo (gmial.com)
+  is offered as a fix. A number cut short or a broken email stops the save, with the reason under the field.
+- **QR size:** a meter under the card form once the card gets dense; a card too big to scan reliably can't be saved,
+  and Share shows what is taking the space with a way to shorten each part (or leave the website off the card).
 - **Themes:** Midnight, Daylight, Ocean and Ember, from the round button beside the logo.
 - **Works offline** once opened, and can be added to the home screen.
 

@@ -33,6 +33,7 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   --r:22px;
   /* tokens that differ per theme beyond the palette: hairlines, top sheen on raised surfaces, the page glow, text on the accent, focus ring */
   --hair:rgba(255,255,255,.06); --sheen:rgba(255,255,255,.08);
+  --ok:#a6e86b; --warn:#f2b84b; --err:#ff8a7a;
   --glass:rgba(255,255,255,.05); --glass-hi:rgba(255,255,255,.14); --glass-line:rgba(255,255,255,.2); --glow:rgba(116,97,242,.22); --on-accent:#fff; --lift:rgba(116,97,242,.8); --focus:var(--lime-hi);
 }
 :root[data-theme="daylight"]{
@@ -41,6 +42,7 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   --ink:#1b1c24; --ink-soft:#5a596a; --ink-dim:#878697;
   --violet:#6654e8; --violet-hi:#5b48e0; --lime:#a9cf12; --lime-hi:#b9f04c;
   --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7);
+  --ok:#2f7d1f; --warn:#9a5b00; --err:#c8321f;
   --glass:rgba(255,255,255,.45); --glass-hi:rgba(255,255,255,.8); --glass-line:rgba(255,255,255,.9); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0;
 }
 :root[data-theme="ocean"]{
@@ -89,6 +91,50 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .field input{flex:1;min-width:0;background:none;border:0;color:var(--ink);font:500 15.5px var(--body);padding:15px 0}
 .field input::placeholder{color:var(--ink-dim);font-weight:400}
 .field label{color:var(--ink-dim);font-size:12.5px;white-space:nowrap}
+/* fields that can say something underneath: phone (with its country chip) and email */
+.field.col{flex-direction:column;align-items:stretch;gap:0}
+.field.bad{box-shadow:inset 0 0 0 1.5px var(--err);border-radius:14px}
+.frow{display:flex;align-items:center;gap:10px}
+.field.col input{padding-block:13px}
+.frow input{font-variant-numeric:tabular-nums}
+.cc{flex:none;display:flex;align-items:center;gap:5px;border:0;border-radius:10px;background:var(--panel-hi);color:var(--ink);font:600 13.5px var(--body);padding:7px 9px;cursor:pointer;font-variant-numeric:tabular-nums}
+.cc small{color:var(--ink-soft);font-size:10.5px;letter-spacing:.06em}
+.fmsg{margin:-2px 0 12px;display:flex;align-items:center;gap:10px;font-size:12.5px;line-height:1.4;color:var(--ink-soft)}
+.fmsg span{flex:1;min-width:0}
+.fmsg.ok{color:var(--ok)}.fmsg.warn{color:var(--warn)}.fmsg.err{color:var(--err)}
+.fmsg button{flex:none;border:0;border-radius:999px;padding:6px 11px;background:var(--panel-hi);color:var(--ink);font:600 12px var(--body);cursor:pointer}
+.field.check{gap:10px;padding-block:12px;color:var(--ink-soft);font-size:13.5px;cursor:pointer}
+.field.check input{flex:none;width:18px;height:18px;margin:0;accent-color:var(--violet)}
+/* QR size, under the card form when the card gets dense */
+.qrmeter{display:flex;flex-direction:column;gap:7px;padding:0 4px}
+.qm-top{display:flex;justify-content:space-between;font-size:12.5px}
+.qm-top span{font-weight:600}
+.qm-bar,.qm-key{display:grid;grid-template-columns:2fr 2fr 1fr;gap:3px}
+.qm-bar{position:relative;height:8px}
+.qm-bar i{background:var(--ok);opacity:.85}.qm-bar i:nth-child(2){background:var(--warn)}.qm-bar i:nth-child(3){background:var(--err)}
+.qm-bar i:first-child{border-radius:4px 0 0 4px}.qm-bar i:nth-child(3){border-radius:0 4px 4px 0}
+.qm-bar span{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--ground)}
+.qm-key{font-size:10.5px;color:var(--ink-dim)}
+.qrmeter p{margin:2px 0 0;font-size:12.5px;line-height:1.45;color:var(--ink-soft)}
+/* Share, when the card is too big for one QR */
+.toobig{display:flex;flex-direction:column;gap:12px;text-align:left;padding:4px 4px 2px}
+.toobig h3{margin:0;text-align:center;font-size:18px;font-weight:600}
+.toobig>p{margin:0 auto;text-align:center;font-size:13.5px;line-height:1.5;color:var(--ink-soft);max-width:32ch}
+.tb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair)}
+.tb-row div{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.tb-row div span{display:flex;justify-content:space-between;font-size:13.5px}
+.tb-row div span em{font-style:normal;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.tb-row b{display:block;height:6px;border-radius:3px;background:var(--err)}
+.tb-row .btn{flex:none}
+/* the country list */
+.ccsearch{width:100%;box-sizing:border-box;border:0;border-radius:12px;background:var(--panel-hi);color:var(--ink);font:400 15px var(--body);padding:12px 14px}
+.cclist{display:flex;flex-direction:column;max-height:45vh;overflow-y:auto;margin:0 -6px}
+.cclist button{display:flex;align-items:center;gap:12px;border:0;border-radius:12px;background:none;padding:11px 12px;color:var(--ink);font:500 14.5px var(--body);text-align:left;cursor:pointer}
+.cclist button[aria-selected="true"]{background:var(--panel-hi)}
+.cclist small{width:26px;flex:none;color:var(--ink-soft);font-size:11px;letter-spacing:.06em}
+.cclist span{flex:1;min-width:0}
+.cclist span em{display:block;font-style:normal;font-size:11.5px;font-weight:400;color:var(--violet-hi)}
+.cclist b{font-weight:500;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .btn{display:flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:999px;padding:15px 18px;font:600 15px var(--body);cursor:pointer;text-decoration:none;color:var(--ink);background:var(--panel-hi);box-shadow:inset 0 1px 0 var(--sheen)}
 .btn.primary{background:linear-gradient(180deg,var(--violet-hi),var(--violet));color:var(--on-accent);box-shadow:0 10px 26px -8px var(--lift),inset 0 1px 0 rgba(255,255,255,.3)}
 .btn.small{width:auto;padding:9px 14px;font-size:13px}
@@ -196,13 +242,20 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       <div class="field"><input id="f-name" placeholder="Your name"><label for="f-name">Name</label></div>
       <div class="field"><input id="f-title" placeholder="What you do"><label for="f-title">Title</label></div>
       <div class="field"><input id="f-org" placeholder="Company or brand"><label for="f-org">Company</label></div>
-      <div class="field"><input id="f-tel" type="tel" inputmode="tel" placeholder="+44 7700 900123"><label for="f-tel">Mobile</label></div>
-      <div class="field"><input id="f-email" type="email" inputmode="email" placeholder="you@example.com"><label for="f-email">Email</label></div>
+      <div class="field col" id="f-tel-field"><div class="frow"><button class="cc" id="f-tel-cc" type="button" aria-haspopup="dialog"></button><input id="f-tel" type="tel" inputmode="tel"><label for="f-tel">Mobile</label></div><p class="fmsg" id="f-tel-msg" hidden></p></div>
+      <div class="field col" id="f-email-field"><div class="frow"><input id="f-email" type="email" inputmode="email" placeholder="you@example.com" autocapitalize="off" spellcheck="false"><label for="f-email">Email</label></div><p class="fmsg" id="f-email-msg" hidden></p></div>
     </form>
+    <div class="qrmeter" id="qrmeter" hidden>
+      <div class="qm-top"><span>QR size</span><b id="qm-state"></b></div>
+      <div class="qm-bar" aria-hidden="true"><i></i><i></i><i></i><span id="qm-mark"></span></div>
+      <div class="qm-key" aria-hidden="true"><span>Quick to scan</span><span>Dense</span><span>Too big</span></div>
+      <p id="qm-text"></p>
+    </div>
     <div class="view" id="link-form" hidden>
     <div class="panel fields">
       <div class="field"><input id="f-web" inputmode="url" placeholder="yoursite.com" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="f-web">Website</label></div>
-      <div class="field"><input id="l-whatsapp" type="tel" inputmode="tel" placeholder="+44 7700 900123" autocomplete="off"><label for="l-whatsapp">WhatsApp</label></div>
+      <label class="field check"><input type="checkbox" id="f-webcard"><span>Also put it on my contact card</span></label>
+      <div class="field col" id="l-whatsapp-field"><div class="frow"><button class="cc" id="l-whatsapp-cc" type="button" aria-haspopup="dialog"></button><input id="l-whatsapp" type="tel" inputmode="tel" autocomplete="off"><label for="l-whatsapp">WhatsApp</label></div><p class="fmsg" id="l-whatsapp-msg" hidden></p></div>
       <div class="field"><input id="l-linkedin" placeholder="username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-linkedin">LinkedIn</label></div>
       <div class="field"><input id="l-instagram" placeholder="username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-instagram">Instagram</label></div>
       <div class="field"><input id="l-x" placeholder="username" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="l-x">X</label></div>
@@ -235,6 +288,12 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         <span id="empty-msg" hidden></span>
         <button class="btn small" id="empty-btn" type="button" hidden></button>
       </div>
+      <div class="toobig" id="toobig" hidden>
+        <h3>Too much for one QR</h3>
+        <p>A code this dense won't scan reliably from a screen. Trim one of these and it will fit.</p>
+        <div id="tb-rows"></div>
+        <button class="btn primary" id="tb-edit" type="button">Edit my card</button>
+      </div>
       <div class="who"><span class="n" id="w-name"></span><span class="p" id="w-tel"></span><span class="t" id="w-title"></span></div>
       <!-- Monzo and UPI only: an amount for this payment; the QR redraws as it is typed. Kept for this visit, not saved. -->
       <label class="amount" id="amount-row" hidden><span id="amount-cur">£</span><input id="amount" inputmode="decimal" placeholder="Amount (optional)" autocomplete="off" aria-label="Amount"></label>
@@ -262,6 +321,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       <p class="eyebrow">Which link?</p>
       <div class="chips" id="chips"></div>
       <button class="textbtn" id="picker-edit" type="button">Edit links</button>
+    </div>
+  </dialog>
+
+  <!-- pops up from the country chip on a phone field: pick the country code -->
+  <dialog class="picker" id="ccp" aria-label="Choose a country code">
+    <div class="picker-in">
+      <p class="eyebrow">Country code</p>
+      <input class="ccsearch" id="cc-search" type="search" placeholder="Search country or +code" autocomplete="off" aria-label="Search countries">
+      <div class="cclist" id="cc-list"></div>
+      <p class="note">Not listed? Type + and the country code at the start of the number.</p>
     </div>
   </dialog>
 
@@ -299,7 +368,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   if(!data)data={web:"",cards:{personal:blank(),work:blank()}};
   data.cards.personal=Object.assign(blank(),data.cards.personal);data.cards.work=Object.assign(blank(),data.cards.work);
   var links=blankLinks();LK.forEach(function(k){if(data.links&&typeof data.links[k]==="string")links[k]=data.links[k]});
-  data={web:data.web||"",cards:data.cards,links:links};
+  data={web:data.web||"",webCard:data.webCard!==false,cards:data.cards,links:links};
   var draft=copy(data),editKind="personal",shareKind="personal",linkSel="",tipOn=false;
   var amt={monzo:"",upi:""}; // typed on Share for this visit only
   var $=function(id){return document.getElementById(id)};
@@ -311,7 +380,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     var L=["BEGIN:VCARD","VERSION:3.0","N:"+esc(last)+";"+esc(first)+";;;","FN:"+esc(c.name)];
     if(c.org)L.push("ORG:"+esc(c.org));
     if(c.title)L.push("TITLE:"+esc(c.title));
-    if(c.tel)L.push("TEL;TYPE=CELL:"+c.tel.replace(/[^\d+]/g,""));
+    var tel=e164(readPhone(c.tel,HOME));if(tel)L.push("TEL;TYPE=CELL:"+tel);
     if(c.email)L.push("EMAIL:"+esc(c.email));
     if(web)L.push("URL:"+url(web));
     L.push("END:VCARD");return L.join("\r\n");
@@ -340,12 +409,164 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   function safeUrl(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{var u=new URL(v);return /^https?:$/.test(u.protocol)&&u.hostname.indexOf(".")>0?u.href:""}catch(e){return ""}}
   function host(u){return new URL(u).hostname.replace(/^www\./,"")}
 
+  // Phone numbers are kept as +<country code><number>. The field shows the country as a chip and the number grouped as typed.
+  // d: country code; l: digits after it ([min,max] or [exact]); t: a leading 0 is a trunk prefix and dropped;
+  // m and h: how mobiles start, and that in words; g: digit groups. Any other country: type + and its code ("XX").
+  var CC=[
+    {i:"GB",d:"44",l:[10],t:1,m:/^7/,h:"7",g:[4,6]},{i:"IE",d:"353",l:[9],t:1,m:/^8/,h:"8",g:[2,3,4]},
+    {i:"US",d:"1",l:[10],g:[3,3,4]},{i:"CA",d:"1",l:[10],g:[3,3,4]},
+    {i:"IN",d:"91",l:[10],t:1,m:/^[6-9]/,h:"6, 7, 8 or 9",g:[5,5]},{i:"PK",d:"92",l:[10],t:1,m:/^3/,h:"3",g:[3,7]},
+    {i:"BD",d:"880",l:[10],t:1,m:/^1/,h:"1",g:[4,6]},{i:"AE",d:"971",l:[9],t:1,m:/^5/,h:"5",g:[2,3,4]},
+    {i:"SA",d:"966",l:[9],t:1,m:/^5/,h:"5",g:[2,3,4]},{i:"AU",d:"61",l:[9],t:1,m:/^4/,h:"4",g:[3,3,3]},
+    {i:"NZ",d:"64",l:[8,10],t:1,m:/^2/,h:"2",g:[2,3,5]},{i:"DE",d:"49",l:[10,11],t:1,m:/^1[5-7]/,h:"15, 16 or 17",g:[3,8]},
+    {i:"FR",d:"33",l:[9],t:1,m:/^[67]/,h:"6 or 7",g:[1,2,2,2,2]},{i:"ES",d:"34",l:[9],m:/^[67]/,h:"6 or 7",g:[3,3,3]},
+    {i:"IT",d:"39",l:[6,11],m:/^3/,h:"3",g:[3,3,5]},{i:"NL",d:"31",l:[9],t:1,m:/^6/,h:"6",g:[1,4,4]},
+    {i:"PT",d:"351",l:[9],m:/^9/,h:"9",g:[3,3,3]},{i:"PL",d:"48",l:[9],g:[3,3,3]},
+    {i:"SE",d:"46",l:[7,9],t:1,m:/^7/,h:"7",g:[2,3,4]},{i:"CH",d:"41",l:[9],t:1,m:/^7/,h:"7",g:[2,3,4]},
+    {i:"NG",d:"234",l:[10],t:1,m:/^[789]/,h:"7, 8 or 9",g:[3,3,4]},{i:"KE",d:"254",l:[9],t:1,m:/^[17]/,h:"1 or 7",g:[3,6]},
+    {i:"ZA",d:"27",l:[9],t:1,m:/^[678]/,h:"6, 7 or 8",g:[2,3,4]},{i:"SG",d:"65",l:[8],m:/^[89]/,h:"8 or 9",g:[4,4]},
+    {i:"HK",d:"852",l:[8],g:[4,4]},{i:"PH",d:"63",l:[10],t:1,m:/^9/,h:"9",g:[3,3,4]},
+    {i:"CN",d:"86",l:[10,11],t:1,g:[3,4,4]},{i:"JP",d:"81",l:[9,10],t:1,g:[2,4,4]},
+    {i:"BR",d:"55",l:[10,11],t:1,g:[2,5,4]},{i:"MX",d:"52",l:[10],g:[2,4,4]}];
+  var OTHER={i:"XX",d:"",l:[8,15],g:[3,3,3,3,3]};
+  function cc(i){return CC.filter(function(c){return c.i===i})[0]||OTHER}
+  var regionName=(function(){try{var n=new Intl.DisplayNames([navigator.language||"en"],{type:"region"});return function(i){return n.of(i)||i}}catch(e){return function(i){return i}}})();
+  function cname(i){return i==="XX"?"Other country":regionName(i)}
+  // The country this phone is set up for, from its language settings (en-GB, hi-IN …); nothing is looked up online.
+  var HOME=(function(){
+    var langs=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||""]),byLang={hi:"IN",bn:"BD",ur:"PK",fr:"FR",de:"DE",es:"ES",it:"IT",nl:"NL",pt:"PT",pl:"PL",sv:"SE",ja:"JP",zh:"CN",ar:"AE"};
+    for(var k=0;k<langs.length;k++){var m=/[-_]([a-z]{2})(?:$|[-_])/i.exec(langs[k]);if(m&&cc(m[1].toUpperCase())!==OTHER)return m[1].toUpperCase()}
+    for(k=0;k<langs.length;k++){var b=byLang[String(langs[k]).slice(0,2).toLowerCase()];if(b)return b}
+    return "GB";
+  })();
+  function lenText(c){return c.l.length>1?c.l[0]+" to "+c.l[1]:String(c.l[0])}
+  function group(d,g){var out=[],i=0;for(var n=0;n<g.length&&i<d.length;n++){out.push(n===g.length-1?d.slice(i):d.slice(i,i+g[n]));i+=g[n]}return out.join(" ")}
+  // Reads what was typed or stored ("+44 7700…", "0044…", "07700…", bare digits) for the country on the chip.
+  function readPhone(raw,iso){
+    raw=String(raw||"").trim();var note="";
+    if(/^(\+|00)/.test(raw)){
+      var d=raw.replace(/^(\+|00)/,"").replace(/\D/g,""),hit=null;
+      CC.forEach(function(c){if(d.indexOf(c.d)===0&&(!hit||c.d.length>hit.d.length||(c.d===hit.d&&(c.i===iso||c.i===HOME))))hit=c});
+      if(!hit)return {iso:"XX",nat:d.slice(0,15),note:""};
+      if(hit.i!==iso)note="Switched to "+cname(hit.i)+" from the +"+hit.d+".";
+      iso=hit.i;raw=d.slice(hit.d.length);
+    }
+    var c=cc(iso),nat=raw.replace(/\D/g,"");
+    if(c===OTHER)return {iso:"XX",nat:nat.slice(0,15),note:note};
+    if(c.t&&nat.charAt(0)==="0"){nat=nat.replace(/^0+/,"");note="Removed the leading 0. It isn\u2019t used after +"+c.d+"."}
+    var max=c.l[c.l.length-1];
+    if(nat.length>max){nat=nat.slice(0,max);note=cname(c.i)+" numbers have "+lenText(c)+" digits after +"+c.d+"."}
+    return {iso:c.i,nat:nat,note:note};
+  }
+  function fmtNat(p){return p.iso==="XX"?(p.nat?"+"+group(p.nat,OTHER.g):""):group(p.nat,cc(p.iso).g)}
+  function e164(p){return p.nat?"+"+(p.iso==="XX"?"":cc(p.iso).d)+p.nat:""}
+  function pretty(p){return p.iso==="XX"?fmtNat(p):(p.nat?"+"+cc(p.iso).d+" "+fmtNat(p):"")}
+  function prettyPhone(v){return v?pretty(readPhone(v,HOME)):""}
+  // ok, warn (saves anyway), short (blocks the save once they have left the field) or none.
+  function phoneCheck(p,forWhatsApp){
+    if(!p.nat)return {k:"none"};
+    var c=cc(p.iso),n=p.nat.length;
+    if(n<c.l[0])return {k:"short",t:(c===OTHER?n+" digits. Include the country code":n+" of "+lenText(c)+" digits")};
+    if(c.m&&!c.m.test(p.nat))return {k:"warn",t:"Mobile numbers for +"+c.d+" start with "+c.h+". "+(forWhatsApp?"WhatsApp needs a mobile number.":"Is this a landline? It works for calls, not WhatsApp.")};
+    return {k:"ok",t:"Saved as "+pretty(p)};
+  }
+
+  // One phone field: its chip, its input and the line under it. onChange gets the number as +<code><number>.
+  function PhoneField(id,forWhatsApp,onChange){
+    var f={iso:HOME,nat:"",note:"",left:false,typed:false},inp=$(id),chip=$(id+"-cc"),msg=$(id+"-msg"),box=$(id+"-field");
+    function paint(){
+      var c=cc(f.iso),r=phoneCheck(f,forWhatsApp),cls="",txt="";
+      chip.innerHTML="";var sm=document.createElement("small");sm.textContent=c===OTHER?"":c.i;chip.append(sm,c===OTHER?"+ \u2026":"+"+c.d);
+      chip.setAttribute("aria-label","Country code: "+cname(c.i)+(c===OTHER?"":", +"+c.d)+". Change");
+      inp.placeholder=c===OTHER?"+ country code and number":(c.i==="GB"?"7700 900123":group("9876543210123".slice(0,c.l[c.l.length-1]),c.g));
+      if(r.k==="none")txt=document.activeElement===inp?"Using "+cname(c.i)+(c===OTHER?"":" (+"+c.d+")")+" from this phone\u2019s settings. Tap the code to change.":"";
+      else if(r.k==="short"){txt=r.t+(f.left?". Finish the number or clear it to save.":"");cls=f.left?"err":""}
+      else if(r.k==="warn"||f.typed){txt=r.t;cls=r.k} // "Saved as" only right after typing, not every time the form opens
+      if(f.note&&r.k!=="ok")txt=f.note+(txt?" "+txt:"");
+      msg.className="fmsg"+(cls?" "+cls:"");msg.textContent="";var sp=document.createElement("span");sp.textContent=txt;msg.append(sp);
+      msg.hidden=!txt;box.classList.toggle("bad",cls==="err");
+    }
+    inp.addEventListener("input",function(){
+      if(!inp.value&&f.iso==="XX")f.iso=HOME; // an emptied field goes back to this phone's country
+      var pos=inp.selectionStart,atEnd=pos===inp.value.length,before=inp.value.slice(0,pos).replace(/\D/g,"").length;
+      var p=readPhone(f.iso==="XX"&&inp.value&&inp.value.charAt(0)!=="+"?"+"+inp.value:inp.value,f.iso);
+      f.iso=p.iso;f.nat=p.nat;f.note=p.note;f.typed=true;
+      var v=fmtNat(p);inp.value=v;
+      if(!atEnd&&!p.note){var i=0,n=0;while(i<v.length&&n<before){if(/\d/.test(v.charAt(i)))n++;i++}inp.setSelectionRange(i,i)}
+      paint();onChange(e164(f));
+    });
+    inp.addEventListener("focus",paint);
+    inp.addEventListener("blur",function(){f.left=!!f.nat;f.note="";paint()});
+    chip.addEventListener("click",function(){openCountries(f.iso,function(i){
+      var p=readPhone(i==="XX"?e164(f):f.nat,i);f.iso=i;f.nat=p.nat;f.note="";inp.value=fmtNat(f);paint();onChange(e164(f));inp.focus();
+    })});
+    f.load=function(v){var p=readPhone(v,HOME);f.iso=p.iso;f.nat=p.nat;f.note="";f.left=false;f.typed=false;inp.value=fmtNat(p);paint()};
+    f.problem=function(){var r=phoneCheck(f,forWhatsApp);if(r.k!=="short")return "";f.left=true;paint();return r.t};
+    f.focus=function(){inp.focus()};
+    return f;
+  }
+  // The country list: search by name or code; the phone's own country first.
+  var ccDone=null;
+  function openCountries(current,done){
+    ccDone=done;$("cc-search").value="";drawCountries(current);
+    var d=$("ccp");if(d.showModal)d.showModal();else d.setAttribute("open","");
+  }
+  function closeCountries(){var d=$("ccp");if(d.close)d.close();else d.removeAttribute("open")}
+  function drawCountries(current){
+    var q=$("cc-search").value.trim().toLowerCase().replace(/^\+/,""),box=$("cc-list");box.textContent="";
+    var list=CC.slice().sort(function(a,b){return (b.i===HOME)-(a.i===HOME)||cname(a.i).localeCompare(cname(b.i))}).concat([OTHER]);
+    list.filter(function(c){return !q||cname(c.i).toLowerCase().indexOf(q)>=0||(c.d&&c.d.indexOf(q)===0)||c.i.toLowerCase()===q}).forEach(function(c){
+      var b=document.createElement("button");b.type="button";b.setAttribute("aria-selected",String(c.i===current));
+      var sm=document.createElement("small");sm.textContent=c===OTHER?"":c.i;
+      var sp=document.createElement("span");sp.textContent=cname(c.i);
+      if(c.i===HOME){var em=document.createElement("em");em.textContent="From this phone\u2019s settings";sp.append(em)}
+      var code=document.createElement("b");code.textContent=c===OTHER?"Type +code":"+"+c.d;
+      b.append(sm,sp,code);b.addEventListener("click",function(){closeCountries();if(ccDone)ccDone(c.i)});box.append(b);
+    });
+  }
+
+  // Email: an @ and a finished domain are needed to save; a likely typo in a big provider's name is offered as a fix.
+  var TYPO={"gmial.com":"gmail.com","gmai.com":"gmail.com","gamil.com":"gmail.com","gnail.com":"gmail.com","gmail.co":"gmail.com","gmail.con":"gmail.com",
+    "hotmial.com":"hotmail.com","hotmai.com":"hotmail.com","hotmail.co":"hotmail.com","outlok.com":"outlook.com","outlook.co":"outlook.com",
+    "yaho.com":"yahoo.com","yahooo.com":"yahoo.com","yahoo.co":"yahoo.com","iclod.com":"icloud.com","icloud.co":"icloud.com"};
+  function tidyEmail(v){v=String(v||"").replace(/\s+/g,"");var i=v.lastIndexOf("@");return i<0?v:v.slice(0,i+1)+v.slice(i+1).toLowerCase()}
+  function emailCheck(v){
+    v=tidyEmail(v);if(!v)return {k:"none"};
+    if(v.indexOf("@")<0)return {k:"err",t:"Add an @, like name@example.com"};
+    if(!/^[^@]+@[^@.]+(\.[^@.]+)*\.[a-z]{2,}$/i.test(v))return {k:"err",t:"Finish the part after @, like example.com"};
+    var at=v.lastIndexOf("@"),dom=v.slice(at+1);
+    if(TYPO[dom])return {k:"warn",t:"Did you mean "+TYPO[dom]+"?",fix:v.slice(0,at+1)+TYPO[dom],fixLabel:"Use "+TYPO[dom]};
+    return {k:"ok"};
+  }
+  function paintEmail(show){
+    var inp=$("f-email"),msg=$("f-email-msg"),r=emailCheck(inp.value);
+    msg.textContent="";msg.className="fmsg";
+    var visible=show&&(r.k==="err"||r.k==="warn");msg.hidden=!visible;$("f-email-field").classList.toggle("bad",visible&&r.k==="err");
+    if(!visible)return r;
+    msg.classList.add(r.k);var sp=document.createElement("span");sp.textContent=r.t;msg.append(sp);
+    if(r.fix){var b=document.createElement("button");b.type="button";b.textContent=r.fixLabel;
+      b.addEventListener("click",function(){inp.value=r.fix;draft.cards[editKind].email=r.fix;paintEmail(true);updateMeter()});msg.append(b)}
+    return r;
+  }
+
+  // QR size. A QR can hold more, but past these sizes a code shown on a phone screen gets hard to scan.
+  var QR_DENSE=300,QR_MAX=600;
+  function bytes(t){try{return new TextEncoder().encode(t).length}catch(e){return unescape(encodeURIComponent(t)).length}}
+  var FLABEL={name:"name",title:"title",org:"company",email:"email",web:"website"};
+  // The card's longest parts, biggest first: what to shorten when the QR is too big.
+  function heavy(c,web){
+    var parts=["name","title","org","email"].map(function(k){return {k:k,n:(c[k]||"").length}});
+    if(web)parts.push({k:"web",n:web.length});
+    return parts.filter(function(x){return x.n}).sort(function(a,b){return b.n-a.n});
+  }
+  function cardWeb(d){return d.webCard===false?"":d.web}
+
   // Every link that is filled in, as something a QR can hold: id, name, chip letters, address, and the text shown under the QR.
   function linkItems(){
     var L=data.links,items=[],web=safeUrl(data.web);
     if(web)items.push({id:"web",n:"Website",m:"www",url:web,show:host(web)});
-    var wa=L.whatsapp.replace(/\D/g,"");
-    if(wa)items.push({id:"whatsapp",n:"WhatsApp",m:"WA",url:"https://wa.me/"+wa,show:L.whatsapp});
+    var wp=readPhone(L.whatsapp,HOME),wa=e164(wp).slice(1);
+    if(wa)items.push({id:"whatsapp",n:"WhatsApp",m:"WA",url:"https://wa.me/"+wa,show:pretty(wp)});
     SOC.forEach(function(s){var h=handle(L[s.k]);if(h)items.push({id:s.k,n:s.n,m:s.m,url:s.u+encodeURIComponent(h),show:"@"+h})});
     var sp=safeUrl(L.spotify);if(sp&&/(^|\.)spotify\.com$/.test(new URL(sp).hostname))items.push({id:"spotify",n:"Spotify",m:"SP",url:sp,show:"Spotify"});
     var cu=safeUrl(L.customUrl);if(cu)items.push({id:"custom",n:L.customLabel||host(cu),m:"\u2197",url:cu,show:host(cu)});
@@ -406,7 +627,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     select("sk-",["personal","work","links"],shareKind);
     $("qrbox").classList.remove("empty");$("qr").hidden=false;$("empty-msg").hidden=true;$("empty-btn").hidden=true;
     var isLinks=shareKind==="links",items=isLinks?linkItems():[];
-    $("amount-row").hidden=true;
+    $("amount-row").hidden=true;$("toobig").hidden=true;$("qrbox").hidden=false;
     $("sk-links").textContent="Links";
     if(isLinks){
       $("qr-title").textContent="Links";
@@ -428,18 +649,49 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     var c=data.cards[shareKind];
     $("qr-title").textContent=LABEL[shareKind];
     if(!c.name){empty("No "+shareKind+" card yet","Add "+shareKind+" card");return}
-    drawQR(vcard(c,data.web));
-    $("w-name").textContent=c.name;$("w-tel").textContent=c.tel||c.email;$("w-title").textContent=[c.title,c.org].filter(Boolean).join(" · ");
+    var vc=vcard(c,cardWeb(data));
+    if(bytes(vc)>QR_MAX){tooBig(c);return}
+    drawQR(vc);
+    $("w-name").textContent=c.name;$("w-tel").textContent=prettyPhone(c.tel)||c.email;$("w-title").textContent=[c.title,c.org].filter(Boolean).join(" · ");
     $("share-help").textContent="Works with no signal. Their camera offers to add you as a contact.";
+  }
+  // In place of a QR nobody could scan: what is taking the space, and a way to trim each.
+  function tooBig(c){
+    $("qrbox").hidden=true;$("toobig").hidden=false;
+    $("w-name").textContent=$("w-tel").textContent=$("w-title").textContent="";$("share-help").textContent="Your Links QRs still work while you fix this.";
+    var parts=heavy(c,cardWeb(data)).slice(0,3),total=parts.reduce(function(a,x){return a+x.n},0),box=$("tb-rows");box.textContent="";
+    parts.forEach(function(x){
+      var row=document.createElement("div");row.className="tb-row";
+      var d=document.createElement("div"),line=document.createElement("span"),em=document.createElement("em"),bar=document.createElement("b");
+      line.textContent=FLABEL[x.k].charAt(0).toUpperCase()+FLABEL[x.k].slice(1);em.textContent=x.n+" characters";line.append(em);
+      bar.style.width=Math.max(4,Math.round(x.n/total*100))+"%";d.append(line,bar);
+      var b=document.createElement("button");b.type="button";b.className="btn small";
+      b.textContent=x.k==="web"?"Leave off":"Shorten";
+      b.addEventListener("click",x.k==="web"?function(){data.webCard=false;draft.webCard=false;store();renderShare()}:function(){openEdit(shareKind,"f-"+x.k)});
+      row.append(d,b);box.append(row);
+    });
+  }
+  // Under the card form once the card gets dense: where it sits, and what would help most.
+  function updateMeter(){
+    var m=$("qrmeter");
+    if(editKind==="links"){m.hidden=true;return 0}
+    var c=draft.cards[editKind],n=c.name.trim()?bytes(vcard(c,cardWeb(draft))):0;
+    m.hidden=n<=QR_DENSE;if(m.hidden)return n;
+    var big=n>QR_MAX,top=heavy(c,cardWeb(draft))[0];
+    $("qm-state").textContent=big?"Too big":"Getting dense";$("qm-state").style.color=big?"var(--err)":"var(--warn)";
+    $("qm-mark").style.left=Math.min(100,n/(QR_MAX*1.25)*100)+"%";
+    $("qm-text").textContent=(big?"Too big to scan reliably. Shorten your ":"Older phones may need a steady hand. A shorter ")+FLABEL[top.k]+(big?" to save.":" would help most.");
+    return n;
   }
   function loadForm(){
     var onLinks=editKind==="links";
     select("ek-",["personal","work","links"],editKind);
     $("card-form").hidden=onLinks;$("link-form").hidden=!onLinks;$("links-lead").hidden=!onLinks;
     $("edit-eyebrow").textContent=onLinks?"Add your links":"Create your card";
-    if(!onLinks)F.forEach(function(k){$("f-"+k).value=draft.cards[editKind][k]||""});
-    $("f-web").value=draft.web||"";
-    LK.forEach(function(k){$("l-"+k).value=draft.links[k]||""});
+    if(!onLinks){F.forEach(function(k){if(k!=="tel")$("f-"+k).value=draft.cards[editKind][k]||""});telField.load(draft.cards[editKind].tel);paintEmail(false)}
+    $("f-web").value=draft.web||"";$("f-webcard").checked=draft.webCard!==false;
+    LK.forEach(function(k){if(k!=="whatsapp")$("l-"+k).value=draft.links[k]||""});waField.load(draft.links.whatsapp);
+    updateMeter();
     $("save-card").textContent=onLinks?"Save and show QR":"Save and show my QR";
     $("edit-note").textContent=onLinks?"Usernames only, except Spotify, Stripe and your own link, which take a pasted link. UPI takes your UPI ID."
       :isNew?"Fill in only what you want to share. You can change it any time.":"";
@@ -517,24 +769,53 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("picker").addEventListener("click",function(e){if(e.target===$("picker"))closePicker()});
   $("picker-edit").addEventListener("click",function(){closePicker();openLinks()});
   ["personal","work","links"].forEach(function(k){$("ek-"+k).addEventListener("click",function(){editKind=k;loadForm()})});
-  F.forEach(function(k){$("f-"+k).addEventListener("input",function(){draft.cards[editKind][k]=$("f-"+k).value})});
+  var telField=PhoneField("f-tel",false,function(v){draft.cards[editKind].tel=v;updateMeter()});
+  var waField=PhoneField("l-whatsapp",true,function(v){draft.links.whatsapp=v});
+  F.forEach(function(k){if(k!=="tel")$("f-"+k).addEventListener("input",function(){draft.cards[editKind][k]=$("f-"+k).value;updateMeter()})});
+  // Email: tidied and checked when they leave the field; once a message shows, it updates as they fix it.
+  $("f-email").addEventListener("blur",function(){var v=tidyEmail($("f-email").value);$("f-email").value=v;draft.cards[editKind].email=v;paintEmail(true)});
+  $("f-email").addEventListener("input",function(){if(!$("f-email-msg").hidden)paintEmail(true)});
   $("f-web").addEventListener("input",function(){draft.web=$("f-web").value});
-  LK.forEach(function(k){$("l-"+k).addEventListener("input",function(){draft.links[k]=$("l-"+k).value})});
+  $("f-webcard").addEventListener("change",function(){draft.webCard=$("f-webcard").checked});
+  LK.forEach(function(k){if(k!=="whatsapp")$("l-"+k).addEventListener("input",function(){draft.links[k]=$("l-"+k).value})});
+  $("cc-search").addEventListener("input",function(){drawCountries("")});
+  $("ccp").addEventListener("click",function(e){if(e.target===$("ccp"))closeCountries()});
+  $("tb-edit").addEventListener("click",function(){openEdit(shareKind)});
   $("card-form").addEventListener("submit",function(e){e.preventDefault()});
   $("amount").addEventListener("input",function(){if(linkSel in amt){amt[linkSel]=$("amount").value;renderShare()}});
   $("empty-btn").addEventListener("click",function(){shareKind==="links"?openLinks("f-web"):openEdit(shareKind)});
   $("save-card").addEventListener("click",function(){
     if(editKind==="links"){saveLinks();return}
     if(!draft.cards[editKind].name.trim()){$("edit-note").textContent="Add a name to your "+editKind+" card first, or switch to the other card.";$("f-name").focus();return}
-    ["personal","work"].forEach(function(kd){F.forEach(function(k){draft.cards[kd][k]=(draft.cards[kd][k]||"").trim()})});
+    ["personal","work"].forEach(function(kd){F.forEach(function(k){draft.cards[kd][k]=(draft.cards[kd][k]||"").trim()});draft.cards[kd].email=tidyEmail(draft.cards[kd].email)});
+    if(cardProblems())return;
     cleanLinks();data=copy(draft);isNew=false;shareKind=editKind;
     store();renderShare();loadForm();show("share");
     showTip("Saved.",true);
   });
+  // What would stop this card working: a number cut short, an email with no @ or no domain, a QR too big to scan.
+  // Shown under each field; the note by Save counts them and the first one gets the focus. The other card is checked too.
+  function cardProblems(){
+    var kinds=[editKind,editKind==="personal"?"work":"personal"];
+    for(var n=0;n<2;n++){
+      var kd=kinds[n],c=draft.cards[kd];if(n&&!c.name.trim()&&!c.tel&&!c.email)continue;
+      var tel=phoneCheck(readPhone(c.tel,HOME)).k==="short",mail=emailCheck(c.email).k==="err",big=c.name.trim()&&bytes(vcard(c,cardWeb(draft)))>QR_MAX;
+      if(!tel&&!mail&&!big)continue;
+      if(kd!==editKind){editKind=kd;loadForm()}
+      var list=[],first=null;
+      if(tel){list.push("finish the mobile number");telField.problem();first=first||telField}
+      if(mail){list.push("fix the email address");paintEmail(true);first=first||{focus:function(){$("f-email").focus()}}}
+      if(big){var top=heavy(c,cardWeb(draft))[0];list.push("shorten your "+FLABEL[top.k]+", the QR is too big");if(!first){first={focus:function(){top.k==="web"?openLinks("f-web"):$("f-"+top.k).focus()}}}}
+      $("edit-note").textContent=(list.length===1?"1 thing to fix":list.length+" things to fix")+(kd!==kinds[0]?" on your "+kd+" card":"")+": "+list.join("; ")+".";
+      first.focus();return true;
+    }
+    return false;
+  }
   // Links save on their own, so they can be changed without touching a card.
   function saveLinks(){
+    var wr=waField.problem();if(wr){$("edit-note").textContent="1 thing to fix: finish the WhatsApp number ("+wr+").";waField.focus();return}
     if((draft.links.upi||"").trim()&&!upiId(draft.links.upi)){$("edit-note").textContent="That UPI ID doesn't look right. It looks like name@bank, for example ada@okaxis.";$("l-upi").focus();return}
-    cleanLinks();data.web=draft.web;data.links=copy(draft.links);isNew=false;shareKind="links";
+    cleanLinks();data.web=draft.web;data.webCard=draft.webCard!==false;data.links=copy(draft.links);isNew=false;shareKind="links";
     store();renderShare();loadForm();show("share");
     showTip("Saved.",true);
   }
