@@ -30,9 +30,9 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 |---|---|
 | `index.html` | The whole app: markup, styles and script |
 | `qrcode.js` | QR generator (Kazuhiko Arase, MIT licence) |
-| (in `index.html`) | Link icons: brand marks from [Simple Icons](https://simpleicons.org) 9.21.0 (CC0) |
+| `icons.js` | Link and payment icons, shared by the app and the About page. Brand marks from [Simple Icons](https://simpleicons.org) 9.21.0 (CC0) |
 | `sw.js` | Keeps the app working with no signal |
-| `about/index.html` | The product and how-to page, at `/about` |
+| `about/index.html` | The product page and tour, at `/about`: privacy, every feature, comparison, questions. The app links to its sections (`about/#pay` and so on) |
 | `manifest.webmanifest`, `icons/` | Home-screen name and icons |
 | `fonts/` | Inter and Poppins (logo), Latin subset, served with the site so pages load with no outside requests (SIL Open Font License, texts alongside) |
 

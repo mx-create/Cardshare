@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Cardshare is a free contact card that lives on your phone. Show a QR, and any phone camera saves your details. No sign-up, no app, nothing leaves your phone.">
+<meta name="description" content="Cardshare is a free contact card that lives on your phone. Show a QR to share your details, your links or a way to pay you. No sign-up, no app, and your data never leaves your phone.">
 <meta name="theme-color" content="#1b1d25">
 <title>About Cardshare</title>
 <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
@@ -16,7 +16,8 @@
 @font-face{font-family:"Poppins";font-style:normal;font-weight:800;font-display:swap;src:url(../fonts/poppins-800-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 [hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-/* Layout: one narrow column, the pitch and a live demo QR first, then three steps. Same tokens and themes as the app. */
+/* Layout: one column. The pitch and a live demo QR, then a tour (a row of section links that stays in view):
+   privacy first, then each feature beside a small piece of the app. Same tokens and themes as the app. */
 :root{
   color-scheme:dark;
   --ground:#1b1d25; --panel:#2a2c38; --panel-hi:#343644; --line:#3d4050;
@@ -24,6 +25,7 @@
   --violet:#7461f2; --violet-hi:#8d7cff; --lime:#c8e62b; --lime-hi:#bfff6b;
   --paper:#ffffff; --paper-ink:#15161c;
   --hair:rgba(255,255,255,.06); --sheen:rgba(255,255,255,.08); --glow:rgba(116,97,242,.22); --on-accent:#fff; --lift:rgba(116,97,242,.8); --focus:var(--lime-hi); --num:var(--lime-hi);
+  --ok:#a6e86b; --warn:#f2b84b;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --brand:"Poppins","Arial Black",system-ui,sans-serif;
   --r:22px;
@@ -33,7 +35,7 @@
   --ground:#f4f3f8; --panel:#ffffff; --panel-hi:#eceaf4; --line:#d3d0df;
   --ink:#1b1c24; --ink-soft:#5a596a; --ink-dim:#878697;
   --violet:#6654e8; --violet-hi:#5b48e0;
-  --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0; --num:#5b48e0;
+  --hair:rgba(20,18,40,.08); --sheen:rgba(255,255,255,.7); --glow:rgba(116,97,242,.14); --lift:rgba(102,84,232,.45); --focus:#5b48e0; --num:#5b48e0; --ok:#2f7d1f; --warn:#9a5b00;
 }
 :root[data-theme="ocean"]{
   --ground:#0f1c22; --panel:#182a32; --panel-hi:#223944; --line:#2f4a57;
@@ -139,7 +141,76 @@ td.m{color:var(--ink-soft)}
 .faq summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
 .faq p{margin:0 0 16px;color:var(--ink-soft);font-size:14.5px;max-width:62ch}
 
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px}
+.textlink{font-weight:600;text-decoration:none}
+.textlink:hover{text-decoration:underline}
+
+/* the tour: section links that stay in view while reading; the one on screen is filled */
+.tournav{position:sticky;top:0;z-index:5;margin:-28px -22px;padding:12px 22px;background:var(--ground);
+  background:color-mix(in srgb,var(--ground) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.tournav ul{list-style:none;margin:0;padding:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tournav ul::-webkit-scrollbar{display:none}
+.tournav a{display:block;white-space:nowrap;padding:8px 15px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);font-size:14px;font-weight:500;text-decoration:none}
+.tournav a:hover{color:var(--ink)}
+.tournav a[aria-current="true"]{background:var(--violet);border-color:var(--violet);color:var(--on-accent)}
+section[id]{scroll-margin-top:84px}
+.head{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.head .kicker{margin:0}
+.head h2{font:600 clamp(26px,5vw,36px)/1.1 var(--body);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.head p{margin:0;color:var(--ink-soft);font-size:17px;max-width:54ch}
+
+/* privacy: the mantra, six facts, and where things do go */
+.mantra{font:800 clamp(40px,9vw,72px)/.98 var(--brand);letter-spacing:-.045em;margin:0 0 18px}
+.mantra span{display:block}
+.mantra span:last-child{color:var(--num)}
+.proof{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:28px}
+.proof article{background:var(--panel);border-radius:var(--r);padding:20px 22px;box-shadow:inset 0 1px 0 var(--sheen);min-width:0}
+.proof svg{width:24px;height:24px;color:var(--num);margin-bottom:10px}
+.proof h3{font:600 16.5px/1.25 var(--body);margin:0 0 6px}
+.proof p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.goes{margin-top:16px;border:1px dashed var(--line);border-radius:var(--r);padding:18px 22px}
+.goes h3{font:600 15px var(--body);margin:0 0 10px}
+.goes ul{margin:0;padding:0 0 0 18px;display:flex;flex-direction:column;gap:8px;color:var(--ink-soft);font-size:14.5px}
+.goes b{color:var(--ink);font-weight:600}
+
+/* a feature: what it does, beside a small piece of the app */
+.feature{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,330px);gap:36px;align-items:center}
+.points{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.points li{position:relative;padding-left:22px;color:var(--ink-soft);font-size:15px}
+.points li::before{content:"";position:absolute;left:2px;top:.5em;width:9px;height:9px;border-radius:2px;background:var(--num);transform:skewX(-20deg)}
+.points b{color:var(--ink);font-weight:600}
+.mock{background:var(--panel);border-radius:var(--r);box-shadow:inset 0 1px 0 var(--sheen),0 24px 50px -30px rgba(0,0,0,.6);padding:6px 0;font-size:15px}
+.mrow{display:flex;align-items:center;gap:10px;padding:13px 16px;font-weight:500;font-variant-numeric:tabular-nums}
+.mfield + .mfield{border-top:1px solid var(--hair)}
+.mrow small{margin-left:auto;color:var(--ink-dim);font-size:12.5px;font-weight:400}
+.mcc{display:flex;align-items:center;gap:5px;border-radius:10px;background:var(--panel-hi);font-weight:600;font-size:13.5px;padding:6px 9px}
+.mcc em{font-style:normal;color:var(--ink-soft);font-size:10.5px;letter-spacing:.06em}
+.mmsg{display:flex;align-items:center;gap:10px;margin:-6px 16px 0;padding-bottom:12px;font-size:12.5px}
+.mmsg.ok{color:var(--ok)}.mmsg.warn{color:var(--warn)}
+.mmsg span{flex:1}
+.mmsg i{font-style:normal;flex:none;border-radius:999px;padding:5px 10px;background:var(--panel-hi);color:var(--ink);font-weight:600;font-size:12px}
+
+/* links: the same chips as the app */
+.linkchips{display:flex;flex-wrap:wrap;gap:16px 6px}
+.linkchips span{display:flex;flex-direction:column;align-items:center;gap:6px;width:62px;font-size:11.5px;color:var(--ink-soft);text-align:center}
+.linkchips i{width:48px;height:48px;border-radius:50%;background:var(--panel-hi);color:var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 var(--sheen)}
+.linkchips span.app i{background:var(--violet);color:var(--on-accent)}
+.linkchips svg{width:22px;height:22px}
+
+/* payments */
+.pay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pay article{display:flex;gap:16px;align-items:flex-start;background:var(--panel);border-radius:var(--r);padding:20px;box-shadow:inset 0 1px 0 var(--sheen);min-width:0}
+.pay article > i{flex:none;width:44px;height:44px;border-radius:50%;background:var(--panel-hi);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.pay svg{width:21px;height:21px}
+.pay h3{font:600 16.5px var(--body);margin:2px 0 6px}
+.pay p{margin:0;color:var(--ink-soft);font-size:14.5px}
+.swatches{display:flex;gap:8px;margin-top:12px}
+.swatches i{width:28px;height:28px;border-radius:50%;border:2px solid var(--line)}
+
 @media (max-width:700px){
+  .proof,.pay{grid-template-columns:minmax(0,1fr)}
+  .feature{grid-template-columns:minmax(0,1fr);gap:24px}
+  .mantra{margin-bottom:14px}
   .why{grid-template-columns:minmax(0,1fr)}
   .page{gap:44px}
   .hero{grid-template-columns:minmax(0,1fr);gap:30px}
@@ -160,10 +231,13 @@ td.m{color:var(--ink-soft)}
   <section class="hero">
     <div class="hero-text">
       <h1>Your contact card, <em>as a QR.</em></h1>
-      <p class="lede">Make it once. Show it to any phone. Your details never leave yours.</p>
+      <p class="lede">Make it once. Show it to any phone, share any link, even get paid. Your details never leave your phone.</p>
       <div class="cta">
-        <a class="btn" href="../">Open Cardshare</a>
-        <p class="facts">Free · No sign-up · Nothing to install · Just your card</p>
+        <div class="cta-row">
+          <a class="btn" href="../">Open Cardshare</a>
+          <a class="textlink" href="#tour">See everything it does &darr;</a>
+        </div>
+        <p class="facts">Free · No sign-up · Nothing to install · Your data stays on your phone</p>
       </div>
     </div>
     <div class="visual">
@@ -187,13 +261,129 @@ td.m{color:var(--ink-soft)}
     </div>
   </section>
 
-  <section>
-    <p class="kicker">How it works</p>
+  <nav class="tournav" id="tour" aria-label="Tour of Cardshare">
+    <ul>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#cards">Your cards</a></li>
+      <li><a href="#share">Sharing</a></li>
+      <li><a href="#links">Links</a></li>
+      <li><a href="#pay">Get paid</a></li>
+      <li><a href="#yours">Make it yours</a></li>
+      <li><a href="#faq">Questions</a></li>
+    </ul>
+  </nav>
+
+  <section id="privacy">
+    <p class="kicker">Privacy</p>
+    <p class="mantra"><span>Your card.</span><span>Your phone.</span><span>Nowhere else.</span></p>
+    <p class="lede" style="max-width:56ch">Cardshare has no accounts and no database. What you type is saved in your phone's browser, and it reaches other people only when they scan your screen. It's your data, on your device.</p>
+    <div class="proof">
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5M4 4l16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <h3>No account</h3><p>There is nothing to sign up for, so there is no profile, no password and nothing to leak.</p>
+      </article>
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <h3>Kept on your phone</h3><p>Your cards and links are saved in your phone's browser. No copy exists anywhere else.</p>
+      </article>
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4M8 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Phone to phone</h3><p>The QR carries your details from your screen to their camera. Nothing passes through Cardshare.</p>
+      </article>
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <h3>No trackers</h3><p>No analytics, no ads, no tracking cookies. Even the fonts come from Cardshare itself, not from another company.</p>
+      </article>
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5l7-2.5 3.5-8h2l-1 7.5 6-2 1.5 1.5-7 4.5L11 21H9l.5-5.5-5 1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <h3>Works in flight mode</h3><p>Once it's on your phone, Cardshare works with no signal. Switch to flight mode and your QR still shows.</p>
+      </article>
+      <article>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Yours to delete</h3><p>Clear this site's data in your browser settings and your cards are gone. There is no copy for anyone to delete.</p>
+      </article>
+    </div>
+    <div class="goes">
+      <h3>Where things do go</h3>
+      <ul>
+        <li><b>Link and payment QRs</b> open that service on the other person's phone (Instagram, Monzo, a UPI app and so on), which sees the visit as it would any other.</li>
+        <li><b>Opening Cardshare</b> loads its files from the web host, like any website. Your card is never sent with them.</li>
+        <li><b>Feedback</b> from this page opens GitHub, where what you post is public.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="cards">
+    <div class="feature">
+      <div>
+        <div class="head">
+          <p class="kicker">Your cards</p>
+          <h2>Two cards, checked as you type</h2>
+          <p>A Personal card and a Work card, each with your name, title, company, mobile and email. Mistakes are caught before they reach anyone's contacts.</p>
+        </div>
+        <ul class="points">
+          <li><b>Any country.</b> The country code comes from your phone's settings. Tap it to change, or type + and a code.</li>
+          <li><b>Numbers formatted as you type,</b> held to the right length, with a stray leading 0 removed.</li>
+          <li><b>Email checked.</b> A missing @ is caught, and a typo like gmial.com comes with a one-tap fix.</li>
+          <li><b>A QR that scans.</b> If your card gets too long for an easy scan, Cardshare shows what to shorten.</li>
+        </ul>
+      </div>
+      <div class="mock" aria-hidden="true">
+        <div class="mfield"><div class="mrow">Ada Lovelace<small>Name</small></div></div>
+        <div class="mfield"><div class="mrow"><span class="mcc"><em>GB</em>+44</span>7700 900123<small>Mobile</small></div><div class="mmsg ok"><span>&#10003; Saved as +44 7700 900123</span></div></div>
+        <div class="mfield"><div class="mrow">ada@gmial.com<small>Email</small></div><div class="mmsg warn"><span>Did you mean gmail.com?</span><i>Use gmail.com</i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="share">
+    <div class="head">
+      <p class="kicker">Sharing</p>
+      <h2>Saved to their phone in one scan</h2>
+    </div>
     <ol class="steps">
       <li><b aria-hidden="true">1</b><h3>Add your details</h3><p>Name, number, email. One card for personal, one for work.</p></li>
       <li><b aria-hidden="true">2</b><h3>Show your QR</h3><p>Tap Share and hold up your phone. It works with no signal.</p></li>
       <li><b aria-hidden="true">3</b><h3>They point their camera</h3><p>Their phone offers to save you. They need no app, on iPhone or Android.</p></li>
     </ol>
+  </section>
+
+  <section id="links">
+    <div class="head">
+      <p class="kicker">Links</p>
+      <h2>A QR for every link</h2>
+      <p>Add your website, your socials and a link of your own. Each gets its own QR, so you show exactly the one that fits the moment.</p>
+    </div>
+    <div class="linkchips" id="linkchips"></div>
+    <p class="fine">The Cardshare QR is always there too, for anyone who asks how you did it.</p>
+  </section>
+
+  <section id="pay">
+    <div class="head">
+      <p class="kicker">Get paid</p>
+      <h2>Take payments with a scan</h2>
+      <p>Add your payment links once. When someone owes you, show the QR and they pay on their own phone.</p>
+    </div>
+    <div class="pay">
+      <article><i data-icon="monzo"></i><div><h3>Monzo</h3><p>Your monzo.me page. Type an amount on the Share screen and the QR updates as you type.</p></div></article>
+      <article><i data-icon="upi"></i><div><h3>UPI</h3><p>Read by Google Pay, PhonePe, Paytm and any UPI app. Add an amount in rupees, or let them enter it.</p></div></article>
+      <article><i data-icon="revolut"></i><div><h3>Revolut</h3><p>Your revolut.me page. They choose the amount when it opens.</p></div></article>
+      <article><i data-icon="stripe"></i><div><h3>Stripe</h3><p>Paste a Stripe payment link and they pay at its checkout, at the price you set in Stripe.</p></div></article>
+    </div>
+    <p class="fine">The payment happens on that service, between them and you. Cardshare never touches the money and never sees the payment.</p>
+  </section>
+
+  <section id="yours">
+    <div class="head">
+      <p class="kicker">Make it yours</p>
+      <h2>Feels like an app. Isn't one.</h2>
+    </div>
+    <div class="why">
+      <article><h3>Four themes</h3><p>Midnight, Daylight, Ocean and Ember, from the round button beside the logo.</p>
+        <div class="swatches" aria-hidden="true"><i style="background:linear-gradient(135deg,#1b1d25 50%,#7461f2 50%)"></i><i style="background:linear-gradient(135deg,#f4f3f8 50%,#6654e8 50%)"></i><i style="background:linear-gradient(135deg,#0f1c22 50%,#2fb3c6 50%)"></i><i style="background:linear-gradient(135deg,#211815 50%,#f0764a 50%)"></i></div></article>
+      <article><h3>On your home screen</h3><p>iPhone: tap Share, then Add to Home Screen. Android: open the browser menu, then Install app. It opens like any other app.</p></article>
+      <article><h3>No signal needed</h3><p>Your QRs come from the phone itself, so they show in a basement, on a plane or abroad.</p></article>
+    </div>
   </section>
 
   <section>
@@ -208,6 +398,7 @@ td.m{color:var(--ink-soft)}
           <tr><th scope="row">No account needed</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
           <tr><th scope="row">Works with no signal</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="m">Varies</td></tr>
           <tr><th scope="row">Saves a full contact</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">Chat only</td><td class="y">Yes</td></tr>
+          <tr><th scope="row">Take payments by QR</th><td class="us y">Yes</td><td class="n">No</td><td class="m">Some countries</td><td class="m">Varies</td></tr>
           <tr><th scope="row">Your details stay on your phone</th><td class="us y">Yes</td><td class="y">Yes</td><td class="n">No</td><td class="n">No</td></tr>
         </tbody>
       </table>
@@ -215,13 +406,16 @@ td.m{color:var(--ink-soft)}
     <p class="fine">“Card apps” means app-based digital business cards in general. Details differ by app and plan.</p>
   </section>
 
-  <section>
+  <section id="faq">
     <p class="kicker">Questions</p>
     <div class="faq">
       <details><summary>Is it free?</summary><p>Yes. There is no paid plan and no trial. If it helps you, you can buy me a beer.</p></details>
       <details><summary>Does the other person need anything?</summary><p>No. Their phone camera reads the QR and offers to save you, on iPhone or Android.</p></details>
-      <details><summary>Where are my details kept?</summary><p>In your own browser, on your phone. There is no account and no server, so they go nowhere else.</p></details>
-      <details><summary>Can I share more than my number?</summary><p>Yes. Add your WhatsApp, LinkedIn, Instagram, website and other links, then tap Links to show a QR for any one of them.</p></details>
+      <details><summary>Can Cardshare see my details?</summary><p>No. There is no server that receives them and no account to attach them to. They are saved in your phone's browser and travel only inside the QR you show.</p></details>
+      <details><summary>Can I share more than my number?</summary><p>Yes. Add your website, WhatsApp, LinkedIn, Instagram, X, YouTube, TikTok, Facebook, Telegram, Spotify and a link of your own, then tap Links to show a QR for any one of them.</p></details>
+      <details><summary>Can people pay me with it?</summary><p>Yes. Add Monzo, Revolut, a Stripe payment link or a UPI ID under My card, then Links. For Monzo and UPI you can type an amount just before you show the QR.</p></details>
+      <details><summary>Why does the number field show a country code?</summary><p>So your number works when someone in another country saves it. Cardshare picks your country from your phone's settings. Tap the code to change it, or type + and a code.</p></details>
+      <details><summary>How do I delete everything?</summary><p>In your browser's settings, clear the website data for Cardshare. Your cards and links are gone, and there is no copy anywhere else.</p></details>
       <details><summary>How do I keep it on my phone?</summary><p>iPhone: tap Share, then Add to Home Screen. Android: open the browser menu, then Install app. It opens like any other app, even with no signal.</p></details>
       <details><summary>What if I change phones?</summary><p>Your cards live only on the phone you made them on, so you would type them in again on the new one. It takes about a minute.</p></details>
     </div>
@@ -244,11 +438,12 @@ td.m{color:var(--ink-soft)}
 
   <footer class="foot">
     <span>Cardshare is free to use.</span>
-    <span><a href="../">Open the app</a> · <a href="https://buy.stripe.com/fZu14mbnDgVS5qx26cawo00" target="_blank" rel="noopener">Buy me a beer</a></span>
+    <span><a href="../">Open the app</a> · <a href="#privacy">Privacy</a> · <a href="https://buy.stripe.com/fZu14mbnDgVS5qx26cawo00" target="_blank" rel="noopener">Buy me a beer</a></span>
   </footer>
 </main>
 
 <script src="../qrcode.js"></script>
+<script src="../icons.js"></script>
 <script>
 (function(){
   // Match the theme picked in the app, when this page sits beside it on the same site.
@@ -266,6 +461,28 @@ td.m{color:var(--ink-soft)}
     picks.forEach(function(x){x.setAttribute("aria-checked",String(x===b))});link();
   })});
   text.addEventListener("input",link);link();
+  // The same icons the app shows, for the Links chips and the payment cards.
+  function icon(id){
+    var NS="http://www.w3.org/2000/svg",svg=document.createElementNS(NS,"svg"),parts=((window.CS_ICONS||{})[id]||"").split("|");
+    svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("aria-hidden","true");
+    parts.forEach(function(d,n){var p=document.createElementNS(NS,"path");p.setAttribute("d",d);
+      if((window.CS_STROKED||{})[id]){p.setAttribute("fill","none");p.setAttribute("stroke","currentColor");p.setAttribute("stroke-width","2");p.setAttribute("stroke-linecap","round")}
+      else p.setAttribute("fill","currentColor");
+      if(n<parts.length-1)p.setAttribute("opacity",".5");svg.append(p)});
+    return svg;
+  }
+  var LINKS=[["web","Website"],["whatsapp","WhatsApp"],["linkedin","LinkedIn"],["instagram","Instagram"],["x","X"],["youtube","YouTube"],["tiktok","TikTok"],
+    ["facebook","Facebook"],["telegram","Telegram"],["spotify","Spotify"],["custom","Your link"],["cardshare","Cardshare"]];
+  var box=document.getElementById("linkchips");
+  LINKS.forEach(function(l){var s=document.createElement("span"),i=document.createElement("i");if(l[0]==="cardshare")s.className="app";i.append(icon(l[0]));s.append(i,l[1]);box.append(s)});
+  document.querySelectorAll("[data-icon]").forEach(function(i){i.append(icon(i.dataset.icon))});
+  // The tour: fill the link for the section being read.
+  var tabs=document.querySelectorAll(".tournav a");
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;
+      tabs.forEach(function(a){var on=a.getAttribute("href")==="#"+e.target.id;a.setAttribute("aria-current",String(on));if(on&&a.scrollIntoView)a.parentNode.parentNode.scrollLeft=a.offsetLeft-22})})},{rootMargin:"-40% 0px -55% 0px"});
+    tabs.forEach(function(a){var t=document.querySelector(a.getAttribute("href"));if(t)io.observe(t)});
+  }
   if(typeof qrcode!=="function")return;
   var q=qrcode(0,"M");q.addData(card,"Byte");q.make();
   var n=q.getModuleCount(),d="";
