@@ -207,6 +207,27 @@ section[id]{scroll-margin-top:84px}
 .swatches{display:flex;gap:8px;margin-top:12px}
 .swatches i{width:28px;height:28px;border-radius:50%;border:2px solid var(--line)}
 
+/* for teams: what's planned, beside the waitlist */
+.teams{align-items:start}
+.soon{display:inline-block;margin-left:8px;padding:3px 9px;border-radius:999px;background:var(--violet);color:var(--on-accent);font-size:11px;letter-spacing:.06em;vertical-align:1px}
+.price{margin:18px 0 0;color:var(--ink-soft);font-size:15px}
+.price b{color:var(--ink);font-weight:600}
+.waitlist{gap:8px;align-items:stretch}
+.waitlist h3{font:600 18px var(--body);margin:0}
+.waitlist > .fine:first-of-type{margin:0 0 8px}
+.waitlist label{font-size:13.5px;font-weight:600;margin-top:6px}
+.waitlist label span{font-weight:400;color:var(--ink-dim)}
+.waitlist input:not(.vh),.waitlist select{width:100%;background:var(--ground);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:400 15px var(--body)}
+.waitlist select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);background-position:calc(100% - 20px) 52%,calc(100% - 15px) 52%;background-size:5px 5px;background-repeat:no-repeat}
+.waitlist input:focus-visible,.waitlist select:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.waitlist [aria-invalid="true"]{border-color:#ff8a7a}
+.waitlist .btn{margin-top:10px;border:0;cursor:pointer;align-self:flex-start}
+.waitlist .btn[disabled]{opacity:.6;cursor:default}
+.wl-msg{margin:6px 0 0;font-size:14px;line-height:1.45}
+.wl-msg.bad{color:#ff8a7a}
+.wl-msg.good{color:var(--ok)}
+.waitlist.done label,.waitlist.done input,.waitlist.done select,.waitlist.done textarea,.waitlist.done .btn{display:none}
+
 @media (max-width:700px){
   .proof,.pay{grid-template-columns:minmax(0,1fr)}
   .feature{grid-template-columns:minmax(0,1fr);gap:24px}
@@ -269,6 +290,7 @@ section[id]{scroll-margin-top:84px}
       <li><a href="#links">Links</a></li>
       <li><a href="#pay">Get paid</a></li>
       <li><a href="#yours">Make it yours</a></li>
+      <li><a href="#teams">For teams</a></li>
       <li><a href="#faq">Questions</a></li>
     </ul>
   </nav>
@@ -309,6 +331,7 @@ section[id]{scroll-margin-top:84px}
         <li><b>Link and payment QRs</b> open that service on the other person's phone (Instagram, Monzo, a UPI app and so on), which sees the visit as it would any other.</li>
         <li><b>Opening Cardshare</b> loads its files from the web host, like any website. Your card is never sent with them.</li>
         <li><b>Feedback</b> from this page opens GitHub, where what you post is public.</li>
+        <li><b>The teams waitlist</b> sends what you type in it to Cardshare by email, through Web3Forms, a form service.</li>
       </ul>
     </div>
   </section>
@@ -386,6 +409,47 @@ section[id]{scroll-margin-top:84px}
     </div>
   </section>
 
+  <section id="teams">
+    <div class="feature teams">
+      <div>
+        <div class="head">
+          <p class="kicker">For teams <span class="soon">Coming soon</span></p>
+          <h2>Work cards your organisation manages</h2>
+          <p>Give everyone a Work card that is always right, without anyone typing it in.</p>
+        </div>
+        <ul class="points">
+          <li><b>Filled in for them.</b> Add your people from a spreadsheet, and their Work card appears when they sign in.</li>
+          <li><b>Your logo on Share.</b> The Work card shows your organisation's logo and colour when it's shown.</li>
+          <li><b>Always up to date.</b> New title, new number, new office: change it once and every card follows.</li>
+          <li><b>Leavers removed.</b> When someone leaves, their Work card goes with them.</li>
+          <li><b>Personal stays personal.</b> Everyone's Personal card stays on their own phone, never with us or their employer.</li>
+        </ul>
+        <p class="price">Planned from <b>£1 per person a month</b>.</p>
+      </div>
+      <form class="fb waitlist" id="waitlist" novalidate>
+        <h3>Join the waitlist</h3>
+        <p class="fine">Tell us about your team and you'll be first to try it. Your answers help decide what's built first.</p>
+        <label for="wl-name">Your name</label>
+        <input id="wl-name" name="name" autocomplete="name" required>
+        <label for="wl-email">Work email</label>
+        <input id="wl-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+        <label for="wl-org">Organisation</label>
+        <input id="wl-org" name="organisation" autocomplete="organization" required>
+        <label for="wl-size">Team size</label>
+        <select id="wl-size" name="team_size" required>
+          <option value="">Choose one</option>
+          <option>1 to 10</option><option>11 to 50</option><option>51 to 250</option><option>251 to 1,000</option><option>More than 1,000</option>
+        </select>
+        <label for="wl-need">What would you need from it? <span>(optional)</span></label>
+        <textarea id="wl-need" name="needs" rows="3" placeholder="For example: sign in with Microsoft, our office address on every card"></textarea>
+        <input type="checkbox" name="botcheck" class="vh" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="wl-msg" id="wl-msg" role="status" hidden></p>
+        <button class="btn" id="wl-send" type="submit">Join the waitlist</button>
+        <p class="fine">We'll only use this to contact you about Cardshare for teams. It reaches us by email through Web3Forms.</p>
+      </form>
+    </div>
+  </section>
+
   <section>
     <p class="kicker">How it compares</p>
     <div class="tablewrap">
@@ -438,7 +502,7 @@ section[id]{scroll-margin-top:84px}
 
   <footer class="foot">
     <span>Cardshare is free to use.</span>
-    <span><a href="../">Open the app</a> · <a href="#privacy">Privacy</a> · <a href="https://buy.stripe.com/fZu14mbnDgVS5qx26cawo00" target="_blank" rel="noopener">Buy me a beer</a></span>
+    <span><a href="../">Open the app</a> · <a href="#privacy">Privacy</a> · <a href="#teams">For teams</a> · <a href="https://buy.stripe.com/fZu14mbnDgVS5qx26cawo00" target="_blank" rel="noopener">Buy me a beer</a></span>
   </footer>
 </main>
 
@@ -476,6 +540,27 @@ section[id]{scroll-margin-top:84px}
   var box=document.getElementById("linkchips");
   LINKS.forEach(function(l){var s=document.createElement("span"),i=document.createElement("i");if(l[0]==="cardshare")s.className="app";i.append(icon(l[0]));s.append(i,l[1]);box.append(s)});
   document.querySelectorAll("[data-icon]").forEach(function(i){i.append(icon(i.dataset.icon))});
+  // Teams waitlist. Sent by Web3Forms, a form-to-email service: the key below only lets this form send to the
+  // inbox set up for it, and that address is never in this page. Paste the key from web3forms.com here.
+  var WAITLIST_KEY="";
+  var wl=document.getElementById("waitlist"),wlMsg=document.getElementById("wl-msg"),wlSend=document.getElementById("wl-send");
+  function say(t,cls){wlMsg.textContent=t;wlMsg.className="wl-msg "+cls;wlMsg.hidden=false}
+  wl.addEventListener("submit",function(e){
+    e.preventDefault();
+    var need=["wl-name","wl-email","wl-org","wl-size"],first=null;
+    need.forEach(function(id){var el=document.getElementById(id),v=el.value.trim(),bad=!v||(id==="wl-email"&&!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v));
+      el.setAttribute("aria-invalid",String(bad));if(bad&&!first)first=el});
+    if(first){say(first.id==="wl-email"&&first.value.trim()?"That email doesn't look right. It needs an @ and a domain, like name@company.com.":"Fill in the highlighted fields, then send.","bad");first.focus();return}
+    if(!WAITLIST_KEY){say("The waitlist isn't switched on yet. Please try again soon.","bad");return}
+    var data=new FormData(wl);data.append("access_key",WAITLIST_KEY);data.append("subject","Cardshare for teams: "+document.getElementById("wl-org").value.trim());data.append("from_name","Cardshare waitlist");
+    wlSend.disabled=true;wlSend.textContent="Sending\u2026";
+    fetch("https://api.web3forms.com/submit",{method:"POST",body:data}).then(function(r){return r.json()}).then(function(j){
+      if(!j||!j.success)throw new Error();
+      wl.classList.add("done");say("You're on the list. We'll be in touch at "+document.getElementById("wl-email").value.trim()+".","good");
+    }).catch(function(){
+      wlSend.disabled=false;wlSend.textContent="Join the waitlist";say("That didn't send. Check your connection and try again.","bad");
+    });
+  });
   // The tour: fill the link for the section being read.
   var tabs=document.querySelectorAll(".tournav a");
   if("IntersectionObserver" in window){
