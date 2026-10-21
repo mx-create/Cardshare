@@ -30,6 +30,7 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 |---|---|
 | `index.html` | The whole app: markup, styles and script |
 | `qrcode.js` | QR generator (Kazuhiko Arase, MIT licence) |
+| `demo/index.html` | A working demo of the planned team plan, at `/demo`: admin console beside an employee's phone, made-up data, nothing saved or sent. Not linked from the site and hidden from search engines |
 | `icons.js` | Link and payment icons, shared by the app and the About page. Brand marks from [Simple Icons](https://simpleicons.org) 9.21.0 (CC0) |
 | `sw.js` | Keeps the app working with no signal |
 | `about/index.html` | The product page and tour, at `/about`: privacy, every feature, comparison, questions. The app links to its sections (`about/#pay` and so on) |

@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- A demo of the planned team plan, shown by link only: not listed in search engines and not linked from the site. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1b1d25">
+<title>Cardshare for Teams Demo</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32.png">
+<link rel="preload" href="../fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../fonts/poppins-800-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Inter";font-style:normal;font-weight:400 600;font-display:swap;src:url(../fonts/inter-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:"Poppins";font-style:normal;font-weight:800;font-display:swap;src:url(../fonts/poppins-800-latin.woff2) format("woff2");unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+[hidden]{display:none!important}
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* Layout: a guided strip of six steps, then the organisation's admin console beside one employee's phone.
+   On a narrow screen the two sides become tabs. Cardshare's own Midnight look, single dark theme by choice;
+   the organisation's colour (--brand) only ever tints the phone once its Work card is managed. */
+:root{
+  color-scheme:dark;
+  --ground:#1b1d25; --panel:#2a2c38; --panel-hi:#343644; --line:#3d4050;
+  --ink:#f3f2f8; --ink-soft:#a9a8b8; --ink-dim:#7c7b90;
+  --violet:#7461f2; --violet-hi:#8d7cff; --lime:#c8e62b; --lime-hi:#bfff6b;
+  --ok:#a6e86b; --warn:#f2b84b; --bad:#ff8a7a;
+  --paper:#ffffff; --paper-ink:#15161c;
+  --brand:#e0663f;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Poppins","Arial Black",system-ui,sans-serif;
+  --r:20px;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{color:var(--ink);font:400 15px/1.45 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;
+  background-image:radial-gradient(50% 30% at 80% 0%,rgba(116,97,242,.18),transparent 70%);background-repeat:no-repeat}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--lime-hi);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+/* top bar */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.logo{position:relative;font:800 24px/1 var(--display);letter-spacing:-.05em;color:var(--violet-hi);padding:10px 4px;display:flex;gap:.28em}
+.logo span{position:relative;z-index:1}
+.logo::before,.logo::after{content:"";position:absolute;transform:skewX(-20deg)}
+.logo::before{background:var(--lime);left:28%;right:38%;top:22%;bottom:0}
+.logo::after{background:var(--lime-hi);left:45%;right:20%;top:0;bottom:16%}
+.bar h1{margin:0;font:600 20px var(--body);letter-spacing:-.01em}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--panel-hi);color:var(--ink-soft)}
+.pill.demo{background:var(--warn);color:#2a1d00}
+.bar .grow{flex:1}
+.ghost{border:1px solid var(--line);background:none;border-radius:999px;padding:8px 14px;color:var(--ink-soft);font-size:13.5px;font-weight:500}
+.ghost:hover{color:var(--ink)}
+.disclaimer{margin:-8px 0 0;color:var(--ink-dim);font-size:13px}
+
+/* guide */
+.guide{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.guide li{display:flex;flex-direction:column;gap:4px;padding:12px 12px 13px;border-radius:14px;background:var(--panel);border:1px solid transparent;min-width:0}
+.guide li b{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600}
+.guide li b i{flex:none;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;background:var(--panel-hi);color:var(--ink-soft)}
+.guide li span{font-size:12.5px;color:var(--ink-soft);line-height:1.35}
+.guide li.now{border-color:var(--violet-hi)}
+.guide li.now b i{background:var(--violet);color:#fff}
+.guide li.done b i{background:var(--ok);color:#14210a}
+.guide li.done span{color:var(--ink-dim)}
+.guide li .go{align-self:flex-start;margin-top:4px;border:0;background:none;padding:0;color:var(--violet-hi);font-size:12.5px;font-weight:600}
+
+/* the two sides */
+.sides{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:start}
+.seg.switch{display:none}
+.side-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 10px}
+.side-h h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+.side-h small{color:var(--ink-dim);font-size:12.5px}
+.console{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border-radius:var(--r);padding:18px 20px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);min-width:0}
+.card h3{margin:0 0 12px;font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card h3 .grow{flex:1}
+.muted{color:var(--ink-soft);font-size:13.5px;margin:0}
+
+.org{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.orglogo{width:64px;height:64px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;overflow:hidden;color:#fff;font:800 22px var(--display);letter-spacing:-.04em}
+.orglogo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.orgf{display:flex;flex-direction:column;gap:10px;min-width:0}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.inp{background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0}
+.swatches{display:flex;gap:8px}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid transparent;box-shadow:0 0 0 2px var(--panel)}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.btn{border:0;border-radius:999px;padding:9px 16px;font-weight:600;font-size:13.5px;background:var(--panel-hi);color:var(--ink)}
+.btn.primary{background:var(--violet);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+.import{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.import textarea{width:100%;min-height:150px;background:var(--ground);border:1px solid var(--line);border-radius:12px;padding:12px;font:400 12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+.tablewrap{overflow-x:auto;margin:0 -6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:620px}
+th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;padding:8px 6px}
+td{padding:10px 6px;border-top:1px solid rgba(255,255,255,.06);vertical-align:middle}
+td .n{font-weight:600}
+td .t{color:var(--ink-soft);font-size:12.5px}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td .inp{width:100%;padding:6px 9px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--panel-hi);color:var(--ink-soft)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.invited{color:var(--warn)}
+.chip.on{color:var(--ok)}
+.acts{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
+.acts button{border:0;background:none;padding:4px 6px;border-radius:8px;color:var(--violet-hi);font-size:13px;font-weight:600}
+.acts button.rm{color:var(--bad)}
+.flash td{animation:flash 1.4s ease-out}
+@keyframes flash{from{background:rgba(141,124,255,.22)}}
+.empty{padding:22px 4px 8px;color:var(--ink-soft);font-size:14px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px}
+.check input{width:18px;height:18px;accent-color:var(--violet)}
+.plan{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.plan .big{font:600 26px var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--ink-soft);max-height:150px;overflow-y:auto}
+.log time{color:var(--ink-dim);font-variant-numeric:tabular-nums;margin-right:8px}
+
+/* the phone */
+.phonecol{position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+.who{display:flex;align-items:center;gap:10px;margin:0 2px 10px;font-size:13.5px;color:var(--ink-soft)}
+.who select{flex:1;min-width:0}
+.phone{position:relative;background:#0d0e13;border-radius:44px;padding:12px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8),inset 0 0 0 1px rgba(255,255,255,.06)}
+.phone::before{content:"";display:block;width:80px;height:7px;border-radius:999px;background:#2a2c38;margin:6px auto 10px}
+.screen{position:relative;background:var(--ground);border-radius:32px;height:690px;overflow-y:auto;overflow-x:hidden;padding:16px 16px 22px;display:flex;flex-direction:column;gap:14px;
+  background-image:radial-gradient(60% 40% at 80% 20%,rgba(116,97,242,.18),transparent 70%)}
+.screen.branded{background-image:radial-gradient(60% 40% at 80% 20%,color-mix(in srgb,var(--brand) 26%,transparent),transparent 70%)}
+.ptop{min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px}
+.ptop .logo{font-size:22px}
+.brandmark{display:flex;align-items:center;gap:10px}
+.brandmark .orglogo{width:38px;height:38px;border-radius:11px;font-size:14px}
+.brandmark b{font-size:16px;font-weight:600}
+.brandmark small{display:block;font-size:11px;color:var(--ink-dim);font-weight:400}
+.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--panel);border-radius:999px;padding:4px;gap:4px}
+.seg button{border:0;background:none;border-radius:999px;padding:9px 6px;color:var(--ink-soft);font-size:13.5px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--panel-hi);color:var(--ink)}
+.seg.kind button[aria-pressed="true"]{background:var(--violet);color:#fff}
+.branded .seg.kind button[aria-pressed="true"]{background:var(--brand)}
+.qrcard{background:var(--panel);border-radius:22px;padding:14px 14px 16px;text-align:center}
+.qrcard h4{margin:2px 0 10px;font-size:15px;font-weight:600}
+.qrbox{background:var(--paper);border-radius:14px;padding:12px;aspect-ratio:1;max-width:100%}
+.qrbox svg{display:block;width:100%;height:100%}
+.qrcard .nm{margin-top:10px;font-size:13px;color:var(--ink-soft)}
+.qrcard .tel{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.qrcard .tt{font-size:13.5px;color:var(--ink-dim)}
+.managed{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;font-size:12px;color:var(--ink-soft)}
+.managed svg{width:13px;height:13px;flex:none}
+.note{margin:0;text-align:center;font-size:12.5px;color:var(--ink-soft);text-wrap:balance}
+.box{background:var(--panel);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.box h4{margin:0;font-size:15.5px;font-weight:600}
+.box p{margin:0;font-size:13.5px;color:var(--ink-soft)}
+.box .inp{width:100%}
+.box .btn{align-self:stretch;padding:12px}
+.linkish{border:0;background:none;padding:0;color:var(--violet-hi);font-size:12.5px;font-weight:600;align-self:flex-start}
+.fields{background:var(--panel);border-radius:20px;padding:4px 0}
+.f{display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:14.5px}
+.f + .f{border-top:1px solid rgba(255,255,255,.06)}
+.f span{flex:1;min-width:0;overflow-wrap:anywhere}
+.f label{color:var(--ink-dim);font-size:12px}
+.f svg{width:13px;height:13px;color:var(--ink-dim);flex:none}
+.f input{flex:1;min-width:0;background:none;border:0;padding:0;font-variant-numeric:tabular-nums}
+.f.edit{box-shadow:inset 0 0 0 1.5px var(--violet-hi);border-radius:12px}
+.removed{border:1px dashed var(--bad);background:none}
+.removed h4{color:var(--bad)}
+.toast{position:sticky;top:0;z-index:3;margin:-4px 0 0;padding:10px 12px;border-radius:14px;background:var(--panel-hi);border:1px solid var(--brand);font-size:13px;display:flex;gap:8px;align-items:center;animation:pop .3s ease-out}
+.toast::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand);flex:none}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.toast,.flash td{animation:none}}
+.phonefoot{margin:12px 2px 0;font-size:12.5px;color:var(--ink-dim);text-align:center}
+
+@media (max-width:1000px){
+  .guide{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sides{grid-template-columns:minmax(0,1fr)}
+  .seg.switch{display:grid;position:sticky;top:max(8px,env(safe-area-inset-top,0px));z-index:5}
+  .sides[data-show="phone"] .console{display:none}
+  .sides[data-show="admin"] .phonecol{display:none}
+  .phonecol{position:static;max-width:400px;width:100%;margin:0 auto}
+}
+@media (max-width:560px){
+  .guide{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .screen{height:640px}
+  .org{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="bar">
+    <div class="logo" aria-label="Cardshare"><span>card</span><span>share</span></div>
+    <h1>for Teams</h1>
+    <span class="pill demo">Demo</span>
+    <span class="grow"></span>
+    <button class="ghost" id="reset" type="button">Start again</button>
+  </header>
+  <p class="disclaimer">A working preview of the planned team plan. Harbour &amp; Co and everyone in it are made up, and nothing here is saved, sent or charged.</p>
+
+  <ol class="guide" id="guide" aria-label="Demo steps"></ol>
+
+  <div class="seg switch" id="switch" role="group" aria-label="Show">
+    <button type="button" data-show="admin" aria-pressed="true">Admin console</button>
+    <button type="button" data-show="phone" aria-pressed="false">Employee's phone</button>
+  </div>
+
+  <div class="sides" id="sides" data-show="admin">
+    <section class="console" id="console" aria-label="Admin console"></section>
+    <section class="phonecol" aria-label="Employee's phone">
+      <div class="side-h"><h2>Employee's phone</h2><small>Cardshare app</small></div>
+      <div class="who"><label for="whose">Phone of</label><select class="inp" id="whose"></select></div>
+      <div class="phone"><div class="screen" id="screen"></div></div>
+      <p class="phonefoot">In the real app, changes reach the phone at its next check-in. Here they arrive at once.</p>
+    </section>
+  </div>
+</div>
+
+<script src="../qrcode.js"></script>
+<script>
+(function(){
+  var SAMPLE="name,title,mobile,email,office\n"+
+    "Maya Patel,Head of Design,+44 7700 900101,maya.patel@harbour.example,London\n"+
+    "Tom Okafor,Account Director,+44 7700 900102,tom.okafor@harbour.example,Manchester\n"+
+    "Priya Shah,Senior Engineer,+44 7700 900103,priya.shah@harbour.example,London\n"+
+    "Liam Byrne,Sales Manager,+44 7700 900104,liam.byrne@harbour.example,Bristol\n"+
+    "Sofia Rossi,Office Manager,+44 7700 900105,sofia.rossi@harbour.example,London\n"+
+    "James Wright,Finance Lead,+44 7700 900106,james.wright@harbour.example,Leeds";
+  var COLOURS=[["Coral","#e0663f"],["Teal","#2f8f83"],["Blue","#3b6fd8"],["Gold","#c8a02b"],["Violet","#8d7cff"]];
+  var STEPS=[
+    {id:"brand",t:"Brand it",d:"Pick a colour or upload your logo.",side:"admin",at:"org"},
+    {id:"import",t:"Add people",d:"Import the sample spreadsheet.",side:"admin",at:"people"},
+    {id:"invite",t:"Invite them",d:"Send everyone a sign-in link.",side:"admin",at:"people"},
+    {id:"signin",t:"Sign in",d:"On the phone, sign in as Maya.",side:"phone"},
+    {id:"update",t:"Change a title",d:"Edit Maya's title in the console.",side:"admin",at:"people"},
+    {id:"leave",t:"Remove a leaver",d:"Remove Maya and watch her phone.",side:"admin",at:"people"}];
+  var S;
+  function fresh(){
+    return {org:{name:"Harbour & Co",colour:"#e0663f",logo:null},people:[],selfMobile:true,whose:null,signed:{},sent:{},tried:{},
+      removed:{},done:{},phone:{tab:"share",kind:"work"},importOpen:false,csv:SAMPLE,editing:null,flash:null,toast:null,log:[]};
+  }
+  S=fresh();
+  var $=function(id){return document.getElementById(id)};
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function initials(n){var w=n.replace(/&/g," ").split(/\s+/).filter(Boolean);return ((w[0]||"")[0]||"")+((w[1]||"")[0]||"")}
+  function now(){var d=new Date();return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+  function log(t){S.log.unshift({t:t,at:now()})}
+  function tel(v){var d=String(v||"").replace(/[^\d+]/g,"");return d}
+  function pretty(v){var d=tel(v);return /^\+44\d{10}$/.test(d)?"+44 "+d.slice(3,7)+" "+d.slice(7):v}
+  function person(id){return S.people.filter(function(p){return p.id===id})[0]}
+  function status(p){return S.signed[p.id]?"on":p.invited?"invited":"none"}
+  function done(id){if(!S.done[id]){S.done[id]=true}}
+  function logoHTML(cls){return '<div class="orglogo'+(cls?" "+cls:"")+'" aria-hidden="true">'+(S.org.logo?'<img src="'+S.org.logo+'" alt="">':esc(initials(S.org.name)))+'</div>'}
+  var LOCK='<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+
+  function vcard(p){
+    var parts=p.name.split(/\s+/),last=parts.length>1?parts.pop():"";
+    return ["BEGIN:VCARD","VERSION:3.0","N:"+last+";"+parts.join(" ")+";;;","FN:"+p.name,"ORG:"+S.org.name,"TITLE:"+p.title,"TEL;TYPE=CELL:"+tel(p.mobile),"EMAIL:"+p.email,"ADR;TYPE=WORK:;;;"+p.office+";;;","END:VCARD"].join("\r\n");
+  }
+  function qrSVG(text){
+    if(typeof qrcode!=="function")return '<p class="muted" style="color:var(--paper-ink)">QR could not load.</p>';
+    var q=qrcode(0,"M");q.addData(unescape(encodeURIComponent(text)));q.make();
+    var n=q.getModuleCount(),d="";for(var r=0;r<n;r++)for(var c=0;c<n;c++)if(q.isDark(r,c))d+="M"+c+" "+r+"h1v1h-1z";
+    return '<svg viewBox="0 0 '+n+' '+n+'" shape-rendering="crispEdges" role="img" aria-label="QR code"><path fill="#15161c" d="'+d+'"/></svg>';
+  }
+
+  // ---------- guide
+  function renderGuide(){
+    var cur=STEPS.filter(function(s){return !S.done[s.id]})[0];
+    $("guide").innerHTML=STEPS.map(function(s,i){
+      var st=S.done[s.id]?"done":(cur&&cur.id===s.id?"now":"");
+      return '<li class="'+st+'"><b><i>'+(S.done[s.id]?"&#10003;":i+1)+'</i>'+esc(s.t)+'</b><span>'+esc(s.d)+'</span>'+(st==="now"?'<button class="go" type="button" data-go="'+s.id+'">Show me</button>':"")+'</li>';
+    }).join("");
+  }
+
+  // ---------- console
+  function renderConsole(){
+    var n=S.people.length,html="";
+    html+='<div class="side-h"><h2>Admin console</h2><small>'+esc(S.org.name)+' · '+n+(n===1?" person":" people")+'</small></div>';
+    html+='<div class="card" id="org"><h3>Organisation</h3><div class="org">'+logoHTML()+
+      '<div class="orgf"><div class="row"><label class="muted" for="orgname">Name</label><input class="inp" id="orgname" value="'+esc(S.org.name)+'" style="flex:1"></div>'+
+      '<div class="row"><span class="muted">Colour</span><div class="swatches">'+COLOURS.map(function(c){return '<button type="button" class="sw" data-colour="'+c[1]+'" aria-label="'+c[0]+'" aria-pressed="'+(S.org.colour===c[1])+'" style="background:'+c[1]+'"></button>'}).join("")+'</div>'+
+      '<label class="btn file">'+(S.org.logo?"Change logo":"Upload logo")+'<input type="file" id="logo" accept="image/*"></label>'+(S.org.logo?'<button class="ghost" type="button" data-act="nologo">Remove logo</button>':"")+'</div>'+
+      '<p class="muted">Shown on everyone\'s Work card when they share it. Personal cards keep the Cardshare look.</p></div></div></div>';
+    html+='<div class="card" id="people"><h3>People <span class="grow"></span>'+
+      '<button class="btn" type="button" data-act="toggleimport">'+(S.importOpen?"Close":"Add from a spreadsheet")+'</button>'+
+      '<button class="btn primary" type="button" data-act="invite"'+(S.people.some(function(p){return !p.invited})?"":" disabled")+'>Send sign-in links</button></h3>';
+    if(S.importOpen)html+='<div class="import"><p class="muted">Paste rows from your spreadsheet: name, title, mobile, email, office. The sample below is ready to import.</p>'+
+      '<label class="muted" for="csv" hidden>Spreadsheet rows</label><textarea id="csv" spellcheck="false">'+esc(S.csv)+'</textarea>'+
+      '<div class="row"><button class="btn primary" type="button" data-act="import">Import people</button><span class="muted" id="csvmsg"></span></div></div>';
+    if(!n)html+='<p class="empty">No one yet. Add your people from a spreadsheet, or connect Microsoft 365 or Google Workspace in the full version.</p>';
+    else{
+      html+='<div class="tablewrap"><table><thead><tr><th>Person</th><th>Mobile</th><th>Email</th><th>Status</th><th><span hidden>Actions</span></th></tr></thead><tbody>';
+      S.people.forEach(function(p){
+        var st=status(p),chip=st==="on"?'<span class="chip on">Signed in</span>':st==="invited"?'<span class="chip invited">Invited</span>':'<span class="chip">Not invited</span>';
+        var fl=S.flash===p.id?' class="flash"':"";
+        if(S.editing===p.id){
+          html+='<tr'+fl+'><td><div class="n">'+esc(p.name)+'</div><input class="inp" id="ed-title" value="'+esc(p.title)+'" aria-label="Title"></td>'+
+            '<td class="num"><input class="inp" id="ed-mobile" value="'+esc(pretty(p.mobile))+'" aria-label="Mobile"></td><td>'+esc(p.email)+'</td><td>'+chip+'</td>'+
+            '<td><div class="acts"><button type="button" data-act="save" data-id="'+p.id+'">Save</button><button type="button" data-act="cancel">Cancel</button></div></td></tr>';
+        }else{
+          html+='<tr'+fl+'><td><div class="n">'+esc(p.name)+'</div><div class="t">'+esc(p.title)+' · '+esc(p.office)+'</div></td><td class="num">'+esc(pretty(p.mobile))+(p.selfEdited?'<div class="t">changed by them</div>':"")+'</td>'+
+            '<td>'+esc(p.email)+'</td><td>'+chip+'</td><td><div class="acts"><button type="button" data-act="edit" data-id="'+p.id+'">Edit</button><button type="button" class="rm" data-act="remove" data-id="'+p.id+'">Remove</button></div></td></tr>';
+        }
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='</div>';
+    html+='<div class="card"><h3>What staff can change</h3><label class="check"><input type="checkbox" id="selfmobile"'+(S.selfMobile?" checked":"")+'> Their own mobile number</label>'+
+      '<p class="muted" style="margin-top:8px">Name, title, email and office always come from here. Everyone\'s Personal card stays on their own phone, out of your reach.</p></div>';
+    html+='<div class="card"><h3>Plan</h3><div class="plan"><span class="big">£'+n+' a month</span><span class="muted">'+n+(n===1?" person":" people")+' × £1</span></div>'+
+      '<p class="muted" style="margin-top:6px">Planned pricing. Nothing is charged in this demo.</p></div>';
+    if(S.log.length)html+='<div class="card"><h3>Activity</h3><ul class="log">'+S.log.map(function(l){return '<li><time>'+l.at+'</time>'+esc(l.t)+'</li>'}).join("")+'</ul></div>';
+    $("console").innerHTML=html;
+  }
+
+  // ---------- phone
+  function renderWhose(){
+    var sel=$("whose");
+    if(!S.people.length&&!Object.keys(S.removed).length){sel.innerHTML='<option>Maya Patel (not added yet)</option>';sel.disabled=true;return}
+    sel.disabled=false;
+    var all=S.people.slice();Object.keys(S.removed).forEach(function(id){if(!person(id))all.push(S.removed[id].p)});
+    if(!S.whose)S.whose=all[0].id;
+    sel.innerHTML=all.map(function(p){return '<option value="'+p.id+'"'+(p.id===S.whose?" selected":"")+'>'+esc(p.name)+(S.removed[p.id]?" (removed)":"")+'</option>'}).join("");
+  }
+  function phoneOwner(){
+    var p=S.whose&&person(S.whose);if(p)return {p:p,state:S.signed[p.id]?"on":"out"};
+    if(S.whose&&S.removed[S.whose])return {p:S.removed[S.whose].p,state:S.removed[S.whose].wasOn?"removed":"out"};
+    return {p:{id:"maya",name:"Maya Patel",email:"maya.patel@harbour.example"},state:"out"};
+  }
+  function renderPhone(){
+    var o=phoneOwner(),p=o.p,on=o.state==="on",ph=S.phone,html="";
+    var scr=$("screen");scr.classList.toggle("branded",on);
+    if(S.toast&&S.toast.id===p.id)html+='<div class="toast" role="status">'+esc(S.toast.t)+'</div>';
+    html+='<div class="ptop">'+(on?'<div class="brandmark">'+logoHTML()+'<div><b>'+esc(S.org.name)+'</b><small>on Cardshare</small></div></div>':'<div class="logo" aria-label="Cardshare"><span>card</span><span>share</span></div>')+'</div>';
+    html+='<div class="seg" role="group" aria-label="Screen"><button type="button" data-tab="edit" aria-pressed="'+(ph.tab==="edit")+'">My card</button><button type="button" data-tab="share" aria-pressed="'+(ph.tab==="share")+'">Share</button></div>';
+    html+='<div class="seg kind" role="group" aria-label="Card"><button type="button" data-kind="personal" aria-pressed="'+(ph.kind==="personal")+'">Personal</button><button type="button" data-kind="work" aria-pressed="'+(ph.kind==="work")+'">Work</button></div>';
+    if(ph.kind==="personal"){
+      if(ph.tab==="share")html+='<div class="qrcard"><h4>Personal</h4><div class="qrbox">'+qrSVG(["BEGIN:VCARD","VERSION:3.0","FN:"+p.name,"TEL;TYPE=CELL:+447700900201","END:VCARD"].join("\r\n"))+'</div><div class="nm">'+esc(p.name)+'</div><div class="tel">+44 7700 900201</div></div>';
+      else html+='<div class="fields"><div class="f"><span>'+esc(p.name)+'</span><label>Name</label></div><div class="f"><span>+44 7700 900201</span><label>Mobile</label></div></div>';
+      html+='<p class="note">Your Personal card stays on this phone. '+esc(S.org.name)+' can\'t see it or change it.</p>';
+    }else if(o.state==="removed"){
+      html+='<div class="box removed"><h4>Work card removed</h4><p>'+esc(S.org.name)+' removed your Work card at '+S.removed[p.id].at+'. It no longer shows on this phone.</p><p>Your Personal card is untouched. If this is a mistake, ask your admin.</p></div>';
+    }else if(!on){
+      var sent=S.sent[p.id],tried=S.tried[p.id];
+      html+='<div class="box"><h4>Work card from your organisation</h4><p>Does your organisation use Cardshare? Sign in with your work email and your Work card fills itself in.</p>';
+      if(sent){html+='<p><b>Check your email.</b> We sent a sign-in link to '+esc(sent)+'.</p><button class="btn primary" type="button" data-act="openlink">Open the link (demo)</button><button class="linkish" type="button" data-act="nolink">Use a different email</button>';}
+      else{
+        html+='<label class="muted" for="signin-email">Work email</label><input class="inp" id="signin-email" type="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@company.com" value="'+esc(tried?tried.email:"")+'">'+
+          (tried&&tried.msg?'<p style="color:var(--warn)">'+esc(tried.msg)+'</p>':"")+
+          '<button class="btn primary" type="button" data-act="signin">Send sign-in link</button><button class="linkish" type="button" data-act="fillemail">Fill in '+esc(p.email)+'</button>';
+      }
+      html+='</div><p class="note">Just want your own card? Use Personal. No sign-in needed.</p>';
+    }else if(ph.tab==="share"){
+      html+='<div class="qrcard"><h4>Work · '+esc(S.org.name)+'</h4><div class="qrbox">'+qrSVG(vcard(p))+'</div><div class="nm">'+esc(p.name)+'</div><div class="tel">'+esc(pretty(p.mobile))+'</div><div class="tt">'+esc(p.title)+' · '+esc(S.org.name)+'</div>'+
+        '<div class="managed">'+LOCK+'Managed by '+esc(S.org.name)+'</div></div><p class="note">Works with no signal. Their camera offers to add you as a contact.</p>';
+    }else{
+      var canMob=S.selfMobile;
+      html+='<div class="fields">'+
+        '<div class="f">'+LOCK+'<span>'+esc(p.name)+'</span><label>Name</label></div>'+
+        '<div class="f">'+LOCK+'<span>'+esc(p.title)+'</span><label>Title</label></div>'+
+        '<div class="f">'+LOCK+'<span>'+esc(S.org.name)+'</span><label>Company</label></div>'+
+        (canMob?'<div class="f edit"><input id="selfmob" value="'+esc(pretty(p.mobile))+'" aria-label="Mobile" inputmode="tel"><label for="selfmob">Mobile</label></div>':'<div class="f">'+LOCK+'<span>'+esc(pretty(p.mobile))+'</span><label>Mobile</label></div>')+
+        '<div class="f">'+LOCK+'<span>'+esc(p.email)+'</span><label>Email</label></div>'+
+        '<div class="f">'+LOCK+'<span>'+esc(p.office)+'</span><label>Office</label></div></div>'+
+        (canMob?'<button class="btn primary" type="button" data-act="savemob" style="padding:12px">Save mobile</button>':"")+
+        '<p class="note">Fields with a lock come from '+esc(S.org.name)+'.'+(canMob?" You can change your mobile.":"")+'</p>';
+    }
+    scr.innerHTML=html;
+  }
+  function render(){
+    document.documentElement.style.setProperty("--brand",S.org.colour);
+    renderGuide();renderConsole();renderWhose();renderPhone();
+  }
+  function notifyPhone(id,t){if(S.signed[id]){S.toast={id:id,t:t};clearTimeout(notifyPhone.tm);notifyPhone.tm=setTimeout(function(){S.toast=null;renderPhone()},4000)}}
+
+  // ---------- actions
+  function parseCSV(text){
+    var rows=text.split(/\r?\n/).map(function(l){return l.split(",").map(function(c){return c.trim()})}).filter(function(r){return r.join("")});
+    if(rows.length&&/name/i.test(rows[0][0]))rows.shift();
+    return rows.filter(function(r){return r[0]&&r[3]&&r[3].indexOf("@")>0}).map(function(r){return {name:r[0],title:r[1]||"",mobile:tel(r[2]||""),email:r[3].toLowerCase(),office:r[4]||""}});
+  }
+  function show(side){$("sides").dataset.show=side;document.querySelectorAll("#switch button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.show===side))})}
+  document.addEventListener("click",function(e){
+    var t=e.target.closest("button");if(!t)return;
+    if(t.id==="reset"){S=fresh();render();show("admin");return}
+    if(t.dataset.show){show(t.dataset.show);return}
+    if(t.dataset.go){var st=STEPS.filter(function(s){return s.id===t.dataset.go})[0];show(st.side);
+      if(st.id==="import"&&!S.importOpen){S.importOpen=true;renderConsole()}
+      if(st.id==="signin"){S.phone.kind="work";renderPhone()}
+      var el=st.side==="phone"?$("screen"):$(st.at);if(el&&el.scrollIntoView)el.scrollIntoView({block:"center",behavior:"smooth"});return}
+    if(t.dataset.colour){S.org.colour=t.dataset.colour;done("brand");log("Brand colour changed");S.signed&&Object.keys(S.signed).forEach(function(id){notifyPhone(id,S.org.name+" updated its brand")});render();return}
+    if(t.dataset.tab){S.phone.tab=t.dataset.tab;renderPhone();return}
+    if(t.dataset.kind){S.phone.kind=t.dataset.kind;renderPhone();return}
+    var a=t.dataset.act,id=t.dataset.id;
+    if(a==="toggleimport"){S.importOpen=!S.importOpen;renderConsole();return}
+    if(a==="import"){
+      S.csv=$("csv").value;var add=parseCSV(S.csv),added=0;
+      add.forEach(function(r){if(S.people.some(function(p){return p.email===r.email}))return;r.id=r.email.split("@")[0].replace(/\W/g,"");delete S.removed[r.id];S.people.push(r);added++});
+      if(!added){$("csvmsg").textContent="No new people found. Each row needs a name and an email.";return}
+      S.importOpen=false;done("import");log("Imported "+added+(added===1?" person":" people")+" from a spreadsheet");S.whose=S.whose&&person(S.whose)?S.whose:S.people[0].id;render();return}
+    if(a==="invite"){var c=0;S.people.forEach(function(p){if(!p.invited){p.invited=true;c++}});done("invite");log("Sent sign-in links to "+c+(c===1?" person":" people"));render();return}
+    if(a==="edit"){S.editing=id;renderConsole();var f=$("ed-title");if(f)f.focus();return}
+    if(a==="cancel"){S.editing=null;renderConsole();return}
+    if(a==="save"){var p=person(id),nt=$("ed-title").value.trim(),nm=tel($("ed-mobile").value);
+      var ch=[];if(nt&&nt!==p.title){p.title=nt;ch.push("title")}if(nm&&nm!==p.mobile){p.mobile=nm;p.selfEdited=false;ch.push("mobile")}
+      S.editing=null;S.flash=id;
+      if(ch.length){log("Changed "+p.name+"'s "+ch.join(" and "));if(S.signed[id]){done("update");notifyPhone(id,S.org.name+" updated your "+ch.join(" and "))}}
+      render();setTimeout(function(){S.flash=null},1500);return}
+    if(a==="remove"){var p2=person(id);S.people=S.people.filter(function(x){return x.id!==id});
+      S.removed[id]={p:p2,at:now(),wasOn:!!S.signed[id]};if(S.signed[id])done("leave");delete S.signed[id];
+      log("Removed "+p2.name+(S.removed[id].wasOn?". Their Work card was taken off their phone":""));S.toast=null;render();return}
+    if(a==="nologo"){S.org.logo=null;render();return}
+    var o=phoneOwner();
+    if(a==="fillemail"){var inp=$("signin-email");if(inp)inp.value=o.p.email;return}
+    if(a==="signin"){var em=($("signin-email").value||"").trim().toLowerCase(),who=S.people.filter(function(x){return x.email===em})[0],msg="";
+      if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(em))msg="Enter your work email, like name@company.com.";
+      else if(!who)msg=/@harbour\.example$/.test(em)?S.org.name+" hasn't added you yet. Ask your admin.":"No organisation on Cardshare uses that email yet.";
+      else if(!who.invited)msg=S.org.name+" hasn't sent your invite yet. Ask your admin.";
+      if(msg){S.tried[o.p.id]={email:em,msg:msg};renderPhone();return}
+      S.tried[o.p.id]=null;S.sent[o.p.id]=em;renderPhone();return}
+    if(a==="nolink"){S.sent[o.p.id]=null;renderPhone();return}
+    if(a==="openlink"){var who2=S.people.filter(function(x){return x.email===S.sent[o.p.id]})[0];if(!who2)return;
+      S.signed[who2.id]=true;S.whose=who2.id;S.phone={tab:"share",kind:"work"};S.sent[o.p.id]=null;done("signin");log(who2.name+" signed in on their phone");render();return}
+    if(a==="savemob"){var v=tel($("selfmob").value);if(v&&v!==o.p.mobile){o.p.mobile=v;o.p.selfEdited=true;log(o.p.name+" changed their own mobile");S.flash=o.p.id;render();setTimeout(function(){S.flash=null},1500)}return}
+  });
+  document.addEventListener("input",function(e){
+    if(e.target.id==="orgname"){S.org.name=e.target.value||"Your organisation";done("brand");renderGuide();renderPhone();var l=document.querySelector("#org .orglogo");if(l&&!S.org.logo)l.textContent=initials(S.org.name)}
+    if(e.target.id==="csv")S.csv=e.target.value;
+  });
+  document.addEventListener("change",function(e){
+    if(e.target.id==="whose"){S.whose=e.target.value;S.phone={tab:"share",kind:"work"};renderPhone()}
+    if(e.target.id==="selfmobile"){S.selfMobile=e.target.checked;log(S.selfMobile?"Staff can change their mobile":"Staff can no longer change their mobile");render()}
+    if(e.target.id==="logo"&&e.target.files&&e.target.files[0]){var r=new FileReader();r.onload=function(){S.org.logo=r.result;done("brand");log("Logo uploaded");Object.keys(S.signed).forEach(function(id){notifyPhone(id,S.org.name+" updated its logo")});render()};r.readAsDataURL(e.target.files[0])}
+  });
+  render();
+})();
+</script>
+</body>
+</html>
