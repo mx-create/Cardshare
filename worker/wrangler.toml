@@ -1,0 +1,22 @@
+# Cardshare v2 (Teams) API. Skeleton only: not deployed, no secrets in this file.
+# Before a first deploy: create the D1 database and R2 bucket, put their ids below, apply schema.sql,
+# and set secrets with `wrangler secret put` (see README.md).
+name = "cardshare-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+APP_ORIGIN = "https://cardshare.io"          # where sign-in links point (<APP_ORIGIN>/?signin=<token>) and CORS allows
+MAIL_FROM = "sign-in@cardshare.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cardshare"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "LOGOS"
+bucket_name = "cardshare-logos"
+
+# Secrets (never committed):
+#   MAIL_API_KEY   key for the email provider that sends sign-in links
