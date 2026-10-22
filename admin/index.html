@@ -331,8 +331,9 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
         <button class="btn teams" id="ph-check" type="button">Check in now</button>
         <button class="btn" id="ph-reload" type="button">Reopen app</button>
         <label class="btn check" style="gap:6px"><input type="checkbox" id="ph-off"> Offline</label>
+        <button class="btn" id="ph-15" type="button" title="Prototype: as if this phone's last successful check-in was 15 days ago, and it is offline">Simulate 15 days offline</button>
       </div>
-      <p class="phonefoot">Phones check in when the app opens and once a day. "Check in now" asks straight away, so you can watch an edit or a removal arrive.</p>
+      <p class="phonefoot">Phones check in when the app opens and once a day. A work card that can't check in for 14 days is paused until it can. "Check in now" asks straight away, so you can watch an edit or a removal arrive.</p>
     </section>
   </div>
 </div>
@@ -600,13 +601,23 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     paintOutbox();
     return A.activity().then(function(r){$("log").innerHTML=r.activity.map(function(l){return '<li><time>'+hm(l.at)+'</time>'+esc(l.t)+'</li>'}).join("")||'<li>Nothing yet.</li>'});
   }
-  function refreshAll(){return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual"})]).then(function(){if(!S.editing){paintPeople();paintSource()}refreshLog()})}
+  function refreshAll(){return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual"})]).then(function(){if(!S.editing){paintPeople();paintSource()}refreshLog()}).catch(function(){})}
 
   // ---------------------------------------------------------------- phone frame
   function phoneWin(){try{return $("phone").contentWindow}catch(e){return null}}
   $("ph-check").addEventListener("click",function(){var w=phoneWin();if(w)w.postMessage("cardshare-checkin",location.origin);setTimeout(refreshAll,1500)});
   $("ph-reload").addEventListener("click",function(){$("phone").src="../";setTimeout(refreshAll,2000)});
   $("ph-off").checked=localStorage.getItem("cardshare-mock-offline")==="1";
+  // Moves the phone's last successful check-in 15 days back and turns the network off. The work card is past the
+  // Sync.OFFLINE_LIMIT_DAYS limit and is hidden; untick Offline and tap "Try again" on the phone to bring it back.
+  $("ph-15").addEventListener("click",function(){
+    var s=null;try{s=JSON.parse(localStorage.getItem("cardshare-work-v2")||"null")}catch(e){}
+    if(!s||!s.card){toast("Sign in on the phone first, then try this.");return}
+    s.syncedAt=s.checkedAt=Date.now()-15*Sync.DAY;
+    try{localStorage.setItem("cardshare-work-v2",JSON.stringify(s));localStorage.setItem("cardshare-mock-offline","1")}catch(e){}
+    $("ph-off").checked=true;$("phone").src="../";
+    toast("Phone: last check-in 15 days ago, and offline. Its work card is paused (limit "+Sync.OFFLINE_LIMIT_DAYS+" days).");
+  });
   $("ph-off").addEventListener("change",function(){try{localStorage.setItem("cardshare-mock-offline",$("ph-off").checked?"1":"0")}catch(e){}toast($("ph-off").checked?"The phone is offline: check-ins fail, the work card still shows.":"Back online.")});
   addEventListener("storage",function(e){if(e.key===(Sync.mockServer&&Sync.mockServer.KEY)||e.key==="cardshare-mock-entra-v1")refreshAll()});
   function show(side){$("sides").dataset.show=side;document.querySelectorAll("#switch button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.show===side))})}

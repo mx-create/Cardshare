@@ -82,15 +82,23 @@ overrides the admin types to fill blanks. No Graph tokens are stored; they're fe
   locked; the mobile is the employee's own and is never sent.
 - **Check-in.** On open and once a day the phone asks "anything changed?" (ETag). Changes arrive at the next check-in; a
   leaver's phone wipes the card and goes back to manual. "Sign out" does the same locally.
+- **Offline limit.** A managed work card that hasn't had a successful check-in for 14 days is paused: Work and Share
+  say "Your work card needs to check in with <Org>. Connect to the internet to refresh it." with a Try again button,
+  and the card comes back at the next successful check-in. Personal and Links are unaffected. The limit is one constant,
+  `OFFLINE_LIMIT_DAYS` in `sync.js`; it could become a per-organisation setting later.
 - **Company logo** in the header on Work (My card and Share), never inside the QR (`logo.js`,
   `docs/v2-design/LogoRules.dc.html`).
 
 **Admin console** (`/admin/`)
 - Choose where work cards come from: Microsoft 365 / by hand / Google (coming soon). Each has its own privacy line.
 - Microsoft: connect through a simulated admin-consent screen; connected state (tenant, last sync, people found); field
-  mapping; per-person overrides for blanks or wrong values; "Simulate: disable" to show a leaver; Disconnect.
+  mapping; per-person overrides; "Simulate: disable" to show a leaver; Disconnect. Admins have full override access:
+  any mapped field (name, title, company, office phone, work email, department, location) for any one person.
+- Switching from by hand to Microsoft 365 deletes the hand-typed records. Phones already signed in are carried over:
+  a phone whose work email matches a directory user stays signed in and gets the Microsoft data at its next check-in;
+  a phone with no match is signed out and wipes its work card.
 - Logo: upload, or "Use our Microsoft 365 sign-in logo" (banner, square, square dark), all through the same fit rules.
-- The real app runs in a phone frame, with "Check in now" and an Offline switch.
+- The real app runs in a phone frame, with "Check in now", an Offline switch and "Simulate 15 days offline".
 
 | File | What it is |
 |---|---|

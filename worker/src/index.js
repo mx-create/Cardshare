@@ -173,16 +173,30 @@ async function route(req, env) {
     const taken = await env.DB.prepare("SELECT org_id FROM ms_tenants WHERE tenant_id = ? AND org_id != ?").bind(cb.tenantId, adm.org_id).first();
     if (taken) return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=tenant_in_use`, 302);
     // Switching to Microsoft deletes everything typed by hand. Microsoft's verified domains replace the org's domains.
-    // TODO: move signed-in phones whose email matches a directory user over to ms_user_id instead of signing them out.
+    // Signed-in phones are carried over: each hand-typed person's work email is looked up in the directory. A match moves
+    // the device row to that Entra user (same token, so the phone stays signed in and gets the directory card at its next
+    // check-in); no match deletes the device, so that phone's next check-in answers 401 and it wipes the work card.
+    const { results: phones } = await env.DB.prepare(
+      "SELECT d.token_hash, e.email FROM devices d JOIN employees e ON e.id = d.employee_id WHERE e.org_id = ?").bind(adm.org_id).all();
+    const found = new Map();
+    for (const em of new Set(phones.map(d => d.email))) {
+      const u = await MS.findUserByEmail(env, cb.tenantId, em).catch(() => null);
+      if (u && !MS.isLeaver(u)) found.set(em, u.id);
+    }
+    const moves = phones.map(d => found.has(d.email)
+      ? env.DB.prepare("UPDATE devices SET employee_id = NULL, org_id = ?, ms_user_id = ? WHERE token_hash = ?").bind(adm.org_id, found.get(d.email), d.token_hash)
+      : env.DB.prepare("DELETE FROM devices WHERE token_hash = ?").bind(d.token_hash));
+    const kept = phones.filter(d => found.has(d.email)).length;
     await env.DB.batch([
       env.DB.prepare("INSERT OR REPLACE INTO ms_tenants (org_id, tenant_id, tenant_name, consented_by, consented_at, last_sync) VALUES (?, ?, ?, ?, ?, ?)")
         .bind(adm.org_id, cb.tenantId, info.displayName, adm.email, now, now),
       env.DB.prepare("UPDATE orgs SET source = 'microsoft', brand_version = brand_version + 1 WHERE id = ?").bind(adm.org_id),
-      env.DB.prepare("DELETE FROM devices WHERE employee_id IN (SELECT id FROM employees WHERE org_id = ?)").bind(adm.org_id),
+      ...moves,                                                     // before the employees are deleted
+      env.DB.prepare("DELETE FROM links WHERE employee_id IN (SELECT id FROM employees WHERE org_id = ?)").bind(adm.org_id),
       env.DB.prepare("DELETE FROM employees WHERE org_id = ?").bind(adm.org_id),
       env.DB.prepare("DELETE FROM domains WHERE org_id = ?").bind(adm.org_id),
       ...info.verifiedDomains.map(d => env.DB.prepare("INSERT OR IGNORE INTO domains (domain, org_id, verified) VALUES (?, ?, 1)").bind(d, adm.org_id)),
-      logStmt(env, adm.org_id, `Connected Microsoft 365 (${info.displayName})`)
+      logStmt(env, adm.org_id, `Connected Microsoft 365 (${info.displayName}). Hand-typed records deleted; ${kept} of ${phones.length} signed-in phones kept`)
     ]);
     return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=connected`, 302);
   }

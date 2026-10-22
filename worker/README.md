@@ -15,7 +15,9 @@ match that mock exactly, so switching over is one line in the page:
 | Where staff details live | In the organisation's own directory. **Cardshare doesn't store them.** | In Cardshare's D1, as the admin typed them |
 | A phone's check-in | Reads that one user from Graph (`GET /users/{id}?$select=…`), maps it, returns it, keeps nothing | Reads the row from D1 |
 | Joiners | Appear automatically; they sign in with Microsoft or an email link | Admin adds them |
+| Overrides | Full access: the admin can override any mapped field, name and work email included, for one person. Stored in `ms_overrides` | n/a (the admin edits the record) |
 | Leavers | Disabled or deleted in Microsoft 365 → next check-in answers `410` → phone wipes the card | Admin removes them → row deleted → `410` |
+| Offline | A phone hides its work card after 14 days without a successful check-in (`OFFLINE_LIMIT_DAYS` in `sync.js`, on the phone; could become an org setting) | Same |
 | What Cardshare stores | Org record, verified domains, tenant ID and consent state, device rows (tenant + user object ID + hashed token), admin overrides | The above (minus Microsoft) plus each person's name, title, company, office phone, work email |
 
 The employee's mobile, Personal card and Links never reach the server in either mode.
@@ -60,6 +62,11 @@ One app registration in Cardshare's own Entra tenant, used by every customer.
 5. Publisher verification (a Microsoft Partner Network ID) before real customers: without it, customers' admins see
    "unverified", and many tenants block consent to unverified multi-tenant apps.
 
+**Switching an existing org from by hand to Microsoft 365** (the consent callback): every hand-typed person's work
+email is looked up in the directory. Signed-in phones whose person matches are moved to that Entra user (same device
+token, so they stay signed in and get the directory card at their next check-in). Phones with no match are deleted and
+wipe their work card at the next check-in. Then the hand-typed records are deleted.
+
 A customer's IT admin connects from the admin console. That opens `login.microsoftonline.com/organizations/v2.0/adminconsent`,
 which grants the application permissions for their tenant. They can revoke it any time under Enterprise applications in
 their own Entra admin centre. "Disconnect" in Cardshare deletes our side, but it can't revoke their consent for them.
@@ -85,4 +92,10 @@ phone gets `503`, keeps its cached card and tries again at its next check-in.
 4. Pick an email provider, implement `sendMail()`, `wrangler secret put MAIL_API_KEY`.
 5. Still to build: ID-token signature checks (JWKS) in `redeemSignIn`, rate limits on `/discover` and `/auth/link`,
    DNS TXT verification for manual-mode domains, server-side SVG sanitising, the admin sign-in screen in `/admin/`,
-   moving already-signed-in phones over when an org connects Microsoft 365, billing, data export and delete-my-data.
+   billing, data export and delete-my-data.
+6. Before real customers: a Microsoft Partner Network (MPN) ID and **verified publisher** status for the Entra app.
+   Without it the consent screen says "unverified", and many tenants block consent to unverified multi-tenant apps.
+7. Consent wording: Microsoft shows `User.Read.All` to the IT admin as **"Read all users' full profiles"**. That is
+   Microsoft's fixed text and can't be narrowed on the consent screen, even though Cardshare reads only the listed fields
+   with `$select`. Say so plainly on the Connect screen and in the privacy policy and sales material, so IT admins aren't
+   put off by it.

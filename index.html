@@ -238,6 +238,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .teams.removed{border-style:dashed;border-color:var(--err);background:none}
 .teams.removed b{color:var(--err)}
 .teams.removed span{font-size:13.5px;color:var(--ink-soft)}
+.teams.expired{border-color:var(--warn)}
+.teams.expired b{color:var(--warn)}
 .sent{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:4px 6px}
 .sent-ico{width:88px;height:88px;border-radius:28px;background:var(--teams-bg);border:1px solid var(--teams-line);display:flex;align-items:center;justify-content:center}
 .sent-ico svg{width:40px;height:40px}
@@ -311,6 +313,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     </div>
     <!-- v2: a way into a managed Work card, at the top of Work while it is filled in by hand -->
     <button class="signline" id="w-signline" type="button" hidden>Work card from your organisation? <b>Sign in with work email</b></button>
+    <!-- v2: a managed Work card that hasn't checked in for Sync.OFFLINE_LIMIT_DAYS is hidden until it does -->
+    <div class="teams removed expired" id="w-expired" role="status" hidden><b>Work card paused</b><span id="we-text"></span><button class="btn teams-btn" id="we-retry" type="button">Try again</button><span class="fmsg" id="we-msg" hidden></span></div>
     <div class="teams removed" id="w-removed" role="status" hidden><b>Work card removed</b><span id="wr-text"></span><button class="textbtn soft" id="wr-ok" type="button">OK</button></div>
     <p class="note privacy" id="privacy"><span id="privacy-text">Your details stay in this browser. No account, nothing sent to a server.</span> <a href="about/#privacy">How</a></p>
     <p class="note lead" id="links-lead" hidden>Each link gets its own QR on the Share tab.</p>
@@ -748,6 +752,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     }
     var c=cardFor(shareKind),mg=shareKind==="work"&&!!ws;
     $("qr-title").textContent=mg?"Work \u00b7 "+ws.org.name:LABEL[shareKind];
+    if(mg&&workExpired()){empty(expiredText(),syncBusy?"Checking\u2026":"Try again");$("share-help").textContent="Your Personal card and Links still work.";return}
     if(!c.name){empty("No "+shareKind+" card yet","Add "+shareKind+" card");return}
     var vc=vcard(c,mg?"":cardWeb(data));
     if(bytes(vc)>QR_MAX){tooBig(c);return}
@@ -890,7 +895,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("tb-edit").addEventListener("click",function(){openEdit(shareKind)});
   $("card-form").addEventListener("submit",function(e){e.preventDefault()});
   $("amount").addEventListener("input",function(){if(linkSel in amt){amt[linkSel]=$("amount").value;renderShare()}});
-  $("empty-btn").addEventListener("click",function(){shareKind==="links"?openLinks("f-web"):openEdit(shareKind)});
+  $("empty-btn").addEventListener("click",function(){if(shareKind==="work"&&workExpired()){checkIn(true);return}shareKind==="links"?openLinks("f-web"):openEdit(shareKind)});
   $("save-card").addEventListener("click",function(){
     if(editKind==="links"){saveLinks();return}
     if(managedEdit()){saveOwn();return}
@@ -952,7 +957,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   // which sends only the part after @ (and is skipped entirely if sync.js is missing).
   var LOCKSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Managed"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   var DKEY="cardshare-teams-dismissed",RKEY="cardshare-work-removed",RESEND=60;
-  function managedEdit(){return editKind==="work"&&!!ws}
+  function managedEdit(){return editKind==="work"&&!!ws&&!workExpired()}
+  // No successful check-in for Sync.OFFLINE_LIMIT_DAYS: the work card is kept on the phone but not shown or shared.
+  function workExpired(){return !!ws&&!!Sync&&Sync.expired(ws)}
+  function expiredText(){return "Your work card needs to check in with "+ws.org.name+". Connect to the internet to refresh it."}
   // The card a QR is built from: a managed Work card is the organisation's fields plus the employee's own mobile.
   function cardFor(kind){
     if(kind!=="work"||!ws)return data.cards[kind];
@@ -969,7 +977,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   // The header: the company logo on a managed Work card (My card → Work, Share → Work), the Cardshare logo everywhere else.
   var brandKey="";
   function updateBrand(force){
-    var on=!!ws&&window.CardshareLogo&&((curView==="edit"&&editKind==="work"&&!wflow)||(curView==="share"&&shareKind==="work"));
+    var on=!!ws&&!workExpired()&&window.CardshareLogo&&((curView==="edit"&&editKind==="work"&&!wflow)||(curView==="share"&&shareKind==="work"));
     $("logo").hidden=!!on;$("cologo").hidden=!on;
     if(!on){brandKey="";return}
     var key=JSON.stringify([ws.etag,document.documentElement.getAttribute("data-theme")]);
@@ -995,7 +1003,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   }
   // Everything on the Work tab that v2 adds, for the state it is in: manual, a nudge or sign-in form, link sent, or managed.
   function paintWork(){
-    var onWork=editKind==="work",mg=onWork&&!!ws,stage=onWork&&!ws&&wflow?wflow.stage:"",sent=stage==="sent";
+    var onWork=editKind==="work",exp=onWork&&workExpired(),mg=onWork&&!!ws&&!exp,stage=onWork&&!ws&&wflow?wflow.stage:"",sent=stage==="sent";
+    $("w-expired").hidden=!exp;
+    if(exp){$("we-text").textContent=expiredText()+" Your Personal card and Links are unaffected.";$("we-retry").disabled=syncBusy;$("we-retry").textContent=syncBusy?"Checking\u2026":"Try again"}
     var removed=null;try{removed=JSON.parse(localStorage.getItem(RKEY)||"null")}catch(e){}
     $("w-removed").hidden=!(onWork&&!ws&&removed&&!wflow);
     if(removed)$("wr-text").textContent=removed.why==="removed"?removed.org+" removed your work card, so it is no longer on this phone. Your Personal card and Links are untouched. If this is a mistake, ask your admin."
@@ -1006,10 +1016,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     $("w-synced").hidden=!mg;$("lockrows").hidden=!mg;$("lock-note").hidden=!mg;$("w-signout").hidden=!mg;
     ["f-name","f-title","f-org"].forEach(function(id){$(id).parentNode.hidden=mg});$("f-email-field").hidden=mg;
     $("f-tel-field").classList.toggle("mine",mg);$("f-tel-label").textContent=mg?"Mobile · yours":"Mobile";
-    $("card-form").hidden=editKind==="links"||sent;
-    $("save-card").hidden=sent||stage==="nudge"||stage==="ask";
+    $("card-form").hidden=editKind==="links"||sent||exp;
+    $("save-card").hidden=sent||exp||stage==="nudge"||stage==="ask";
+    $("w-signline").hidden=$("w-signline").hidden||exp;
     $("privacy").hidden=sent;
-    $("privacy-text").textContent=onWork&&(mg||stage)?"Personal and Links stay on this phone. Work cards come from your organisation.":"Your details stay in this browser. No account, nothing sent to a server.";
+    $("privacy-text").textContent=onWork&&(mg||exp||stage)?"Personal and Links stay on this phone. Work cards come from your organisation.":"Your details stay in this browser. No account, nothing sent to a server.";
     if(sent){$("qrmeter").hidden=true;$("edit-note").textContent=""}
     if(stage==="nudge"){
       $("wt-title").textContent=wflow.org.name+" manages work cards";
@@ -1097,13 +1108,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   function checkIn(force){
     if(!Sync||!ws||syncBusy)return;
     syncBusy=true;paintSynced();
+    if(workExpired()){paintWork();if(curView==="share")renderShare()}
     Sync.checkIn(force).then(function(r){
       syncBusy=false;
       if(r.status==="removed"||r.status==="signedout"){dropWork(r.status,r.was);return}
       if(r.state)ws=r.state;
       syncNote=r.status==="offline"?"offline, synced "+when(ws.syncedAt):r.status==="updated"?"updated "+when(ws.syncedAt):"";
       if(curView==="share")renderShare();
-      if(editKind==="work"&&curView==="edit")paintWork();else paintSynced();
+      if(editKind==="work"&&curView==="edit"){paintWork();if(r.status==="offline"&&workExpired()){$("we-msg").hidden=false;$("we-msg").className="fmsg err";$("we-msg").textContent="Still no connection. Try again when you have signal."}}else paintSynced();
+      if(r.status!=="offline")$("we-msg").hidden=true;
+      if(r.status!=="offline"&&!workExpired()&&wasExpired){wasExpired=false;loadForm()}
       updateBrand();
     });
   }
@@ -1124,6 +1138,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     clearTimeout(signoutT);Sync.signOut().then(function(){dropWork("local")});
   });
   $("w-synced").addEventListener("click",function(){checkIn(true)});
+  var wasExpired=workExpired();
+  $("we-retry").addEventListener("click",function(){wasExpired=true;$("we-msg").hidden=true;checkIn(true)});
   $("w-signline").addEventListener("click",function(){wflow={stage:"ask",email:"",org:null};paintWork();$("wt-email").value=tidyEmail(draft.cards.work.email||"");$("wt-email").focus()});
   $("wt-send").addEventListener("click",function(){sendLink(wflow&&wflow.stage==="ask"?$("wt-email").value:wflow.email)});
   $("wt-email").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendLink($("wt-email").value)}});

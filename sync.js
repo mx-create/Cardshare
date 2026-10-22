@@ -12,6 +12,9 @@
   var API = window.CARDSHARE_API || "";            // "" = mock backend in this browser
   var LOCAL = "cardshare-work-v2";                 // this phone: device token and the cached, synced work card
   var DAY = 24 * 60 * 60 * 1000;
+  // A managed work card is hidden on the phone after this many days without a successful check-in, so a leaver can't keep
+  // using one offline indefinitely. One constant for now; it could become a per-organisation setting later.
+  var OFFLINE_LIMIT_DAYS = 14;
 
   // ---------------------------------------------------------------- transport
   function request(method, path, opts) {
@@ -65,6 +68,9 @@
   var Sync = {
     mock: !API,
     DAY: DAY,
+    OFFLINE_LIMIT_DAYS: OFFLINE_LIMIT_DAYS,
+    // syncedAt is set only by a successful check-in or download, never by a failed one.
+    expired: function (s) { s = s || load(); return !!(s && s.card) && (!s.syncedAt || Date.now() - s.syncedAt > OFFLINE_LIMIT_DAYS * DAY); },
     state: load,
 
     // Does this work email's domain belong to an organisation that lets staff find it? {org:{name}} or {org:null}.
@@ -474,7 +480,9 @@
       handle: function (req) {
         return new Promise(function (ok, fail) {
           setTimeout(function () {
-            if (navigator.onLine === false || localStorage.getItem("cardshare-mock-offline") === "1") { fail(new TypeError("Failed to fetch")); return; }
+            // The console's "Offline" switch simulates the phone losing signal, so it leaves the admin console's own calls alone.
+            var phoneOff = localStorage.getItem("cardshare-mock-offline") === "1" && req.path.indexOf("/v1/admin/") !== 0;
+            if (navigator.onLine === false || phoneOff) { fail(new TypeError("Failed to fetch")); return; }
             try { ok(route(req)); } catch (e) { fail(e); }
           }, 220 + Math.random() * 380);
         });
