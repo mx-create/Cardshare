@@ -1,0 +1,28 @@
+# Cardshare v2 (Teams) API. Skeleton only: not deployed, no secrets in this file.
+# Before a first deploy: create the D1 database and R2 bucket, put their ids below, apply schema.sql,
+# and set secrets with `wrangler secret put` (see README.md).
+name = "cardshare-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[vars]
+APP_ORIGIN = "https://cardshare.io"          # where sign-in links point (<APP_ORIGIN>/?signin=<token>) and CORS allows
+API_ORIGIN = "https://api.cardshare.io"      # this Worker; Microsoft redirect URIs are registered under it
+MS_CLIENT_ID = "REPLACE_WITH_ENTRA_APP_CLIENT_ID"
+# Comma-separated emails allowed into /admin/platform/. Deliberately empty in the repo: Manu fills it in at deploy time
+# (in the Cloudflare dashboard or a local, uncommitted override). Empty means nobody can sign in to the platform console.
+PLATFORM_OWNERS = ""   # multi-tenant app registration (public, not a secret)
+MAIL_FROM = "sign-in@cardshare.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cardshare"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "LOGOS"
+bucket_name = "cardshare-logos"
+
+# Secrets (never committed):
+#   MAIL_API_KEY       key for the email provider that sends sign-in links
+#   MS_CLIENT_SECRET   Entra app client secret (prefer a certificate credential in production; see README)
