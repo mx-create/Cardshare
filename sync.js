@@ -154,7 +154,9 @@
     signup: {
       start: function (email) { return post("/v1/signup/start", { email: email }); },
       verify: function (token) { return post("/v1/signup/verify", { token: token }); },
-      createOrg: function (signupToken, name) { return post("/v1/signup/org", { signupToken: signupToken, name: name }); }
+      createOrg: function (signupToken, name) { return post("/v1/signup/org", { signupToken: signupToken, name: name }); },
+      // The domain already belongs to an organisation: ask its owners to add this person as an admin.
+      requestAccess: function (signupToken) { return post("/v1/signup/request", { signupToken: signupToken }); }
     },
     confirmDomain: function (token) { return post("/v1/domains/confirm", { token: token }); },
 
@@ -168,7 +170,9 @@
         org: function () { return call("GET", "/v1/admin/org"); },
         updateOrg: function (patch) { return call("PATCH", "/v1/admin/org", patch); },
         putBranding: function (b) { return call("PUT", "/v1/admin/branding", b); },
-        verifyDomain: function (domain, method) { return call("POST", "/v1/admin/domains/verify", { domain: domain, method: method }); },
+        // method "dns", or "email" with to: "admin" | "postmaster" | "webmaster" (the address at the domain to send the link to)
+        verifyDomain: function (domain, method, to) { return call("POST", "/v1/admin/domains/verify", { domain: domain, method: method, to: to }); },
+        decideRequest: function (id, approve) { return call("POST", "/v1/admin/requests/" + id + "/" + (approve ? "approve" : "decline")); },
         admins: function () { return call("GET", "/v1/admin/admins"); },
         addAdmin: function (email, role) { return call("POST", "/v1/admin/admins", { email: email, role: role }); },
         removeAdmin: function (id) { return call("DELETE", "/v1/admin/admins/" + id); },
@@ -284,7 +288,7 @@
     function seed() {
       var t = Date.now();
       var db = { v: 3, seq: 100, orgs: {}, domains: {}, employees: {}, links: {}, devices: {}, outbox: [], activity: [],
-        admins: {}, members: [], sessions: {}, signups: {}, platform: {} };
+        admins: {}, members: [], sessions: {}, signups: {}, platform: {}, requests: {} };
       // Harbour Studio: Microsoft 365, coral and navy, serif, wide wordmark from its Microsoft sign-in page.
       var h = db.orgs.org_harbour = newOrg("org_harbour", "Harbour Studio", "Harbour Studio Ltd", t);
       h.source = "microsoft";
@@ -321,7 +325,7 @@
       ["org_harbour", "org_nordlys", "org_pine"].forEach(function (o) { db.activity.push({ at: t, orgId: o, t: db.orgs[o].name + " set up (sample data)" }); });
       return db;
     }
-    function read() { try { var d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.v === 3) return d; } catch (e) {} var s = seed(); write(s); return s; }
+    function read() { try { var d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.v === 3) { d.requests = d.requests || {}; return d; } } catch (e) {} var s = seed(); write(s); return s; }
     function write(db) { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
     function rid(p) { var a = new Uint8Array(16); (crypto.getRandomValues ? crypto.getRandomValues(a) : a.forEach(function (_, i) { a[i] = Math.random() * 256; })); return p + Array.prototype.map.call(a, function (b) { return ("0" + b.toString(16)).slice(-2); }).join(""); }
     function res(status, body, headers) { return { status: status, headers: headers || {}, body: body === undefined ? null : body }; }
@@ -434,6 +438,7 @@
       Object.keys(db.employees).forEach(function (k) { if (db.employees[k].orgId === id) delete db.employees[k]; });
       Object.keys(db.links).forEach(function (k) { if (db.links[k].orgId === id) delete db.links[k]; });
       db.members = db.members.filter(function (m) { return m.orgId !== id; });
+      Object.keys(db.requests || {}).forEach(function (k) { if (db.requests[k].orgId === id) delete db.requests[k]; });
       db.activity = db.activity.filter(function (a) { return a.orgId !== id; });
       delete db.orgs[id];
       // Phones keep their device rows; their next check-in finds no organisation and answers 410, so they wipe the card.
@@ -551,6 +556,22 @@
         var s2 = newSession(db, adm.id, oid);
         write(db); return res(201, Object.assign({ sessionToken: s2 }, me(db, s2)));
       }
+      // Someone whose domain is already taken asks to join. The organisation's owners see it in the console (and, for real,
+      // get an email); approving adds them as an Admin. The answer doesn't change with whether a request already exists.
+      if (m === "POST" && p === "/v1/signup/request") {
+        var sq = db.signups[b.signupToken];
+        if (!sq || sq.exp < t) return res(400, { error: "Your sign-up has expired. Start again." });
+        var ro = orgOfDomain(db, domainOf(sq.email));
+        if (!ro) return res(404, { error: "No organisation uses that domain." });
+        var dup = Object.keys(db.requests).some(function (k) { var r = db.requests[k]; return r.orgId === ro.id && r.email === sq.email && r.status === "pending"; });
+        var already = db.members.some(function (mm) { var a = db.admins[mm.adminId]; return mm.orgId === ro.id && a && a.email === sq.email; });
+        if (!dup && !already) {
+          var rq = "req_" + rid("").slice(0, 10);
+          db.requests[rq] = { id: rq, orgId: ro.id, email: sq.email, at: t, status: "pending" };
+          log(db, ro.id, sq.email + " asked to join as an admin (waiting for an owner)");
+        }
+        write(db); return res(202, { org: ro.name });
+      }
       // Confirms a domain from the email sent to admin@<domain> (the fallback to a DNS record).
       if (m === "POST" && p === "/v1/domains/confirm") {
         L = db.links[b.token];
@@ -631,7 +652,8 @@
             write(db); return res(200, orgView(db, orgId));
           }
           if (b.method === "email") {
-            var to = "admin@" + b.domain;
+            if (["admin", "postmaster", "webmaster"].indexOf(b.to || "admin") < 0) return res(400, { error: "Choose admin@, postmaster@ or webmaster@." });
+            var to = (b.to || "admin") + "@" + b.domain;
             issueLink(db, { kind: "domain", orgId: orgId, domain: b.domain }, to, DAY, "domain"); write(db);
             return res(202, { sent: to });
           }
@@ -641,7 +663,21 @@
         if (m === "GET" && p === "/v1/admin/admins") {
           return res(200, { admins: db.members.filter(function (mm) { return mm.orgId === orgId; }).map(function (mm) {
             var a = db.admins[mm.adminId]; return { id: a.id, name: a.name, email: a.email, role: mm.role, you: a.id === info2.admin.id };
-          }) });
+          }), requests: Object.keys(db.requests).map(function (k) { return db.requests[k]; }).filter(function (r) { return r.orgId === orgId && r.status === "pending"; }) });
+        }
+        if ((x = /^\/v1\/admin\/requests\/([\w-]+)\/(approve|decline)$/.exec(p)) && m === "POST") {
+          if (!owner) return OWNER;
+          var rr = db.requests[x[1]];
+          if (!rr || rr.orgId !== orgId || rr.status !== "pending") return res(404, { error: "not_found" });
+          rr.status = x[2] === "approve" ? "approved" : "declined"; rr.decidedBy = info2.admin.email; rr.decidedAt = t;
+          if (x[2] === "approve") {
+            var ra = adminByEmail(db, rr.email);
+            if (!ra) { ra = { id: "adm_" + rid("").slice(0, 10), name: rr.email.split("@")[0], email: rr.email, createdAt: t }; db.admins[ra.id] = ra; }
+            if (!db.members.some(function (mm) { return mm.adminId === ra.id && mm.orgId === orgId; })) db.members.push({ adminId: ra.id, orgId: orgId, role: "admin" });
+            issueLink(db, { kind: "admin", adminId: ra.id }, ra.email, 7 * DAY, "admin");
+            log(db, orgId, rr.email + "'s request approved by " + info2.admin.email + ": added as Admin");
+          } else log(db, orgId, rr.email + "'s request declined by " + info2.admin.email);
+          write(db); return res(200, { status: rr.status });
         }
         if (m === "POST" && p === "/v1/admin/admins") {
           if (!owner) return OWNER;

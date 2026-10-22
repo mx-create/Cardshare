@@ -74,6 +74,18 @@ CREATE TABLE IF NOT EXISTS memberships (
   PRIMARY KEY (admin_id, org_id)
 );
 
+-- "Request access": someone whose domain already belongs to an organisation asks its owners to add them as an Admin.
+CREATE TABLE IF NOT EXISTS access_requests (
+  id         TEXT PRIMARY KEY,
+  org_id     TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  email      TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  status     TEXT NOT NULL CHECK (status IN ('pending','approved','declined')),
+  decided_by TEXT,
+  decided_at INTEGER
+);
+CREATE UNIQUE INDEX IF NOT EXISTS access_requests_pending ON access_requests(org_id, email) WHERE status = 'pending';
+
 -- Sign-up in progress, after the email is confirmed and before the organisation is named.
 CREATE TABLE IF NOT EXISTS signups (
   token_hash TEXT PRIMARY KEY,

@@ -49,12 +49,16 @@ The employee's mobile, Personal card and Links never reach the server in either 
   `/v1/signup/org` (creates the organisation, its domain unverified, the owner, and a session).
 - **Domain ownership:** connecting Microsoft 365 verifies the tenant's domains. Otherwise, `POST /v1/admin/domains/verify`
   with `dns` looks up the TXT record at `_cardshare.<domain>` over DNS-over-HTTPS, or with `email` sends a link to
-  `admin@<domain>` (`/v1/domains/confirm`). Only verified domains of active organisations are used for discovery.
+  the address the admin picks: `admin@`, `postmaster@` or `webmaster@<domain>` (`/v1/domains/confirm`). Only verified domains of active organisations are used for discovery.
+- **Domain already taken:** sign-up offers "Request access" (`/v1/signup/request`), which records an `access_requests`
+  row, logs it in the organisation's activity and emails its owners. Owners approve (adds the person as Admin and emails
+  them) or decline at `/v1/admin/requests/<id>/approve|decline`.
 - **Branding:** `PUT /v1/admin/branding` stores `orgs.branding_json` (validated by `cleanBranding`) and bumps
   `brand_version`, which is part of every card's ETag, so phones download it at their next check-in. It is returned in
   the card response as `org.branding`. Phones apply their own contrast safety net. `GET /v1/admin/microsoft/branding`
   also returns the sign-in page's `backgroundColor` (`OrganizationalBranding.Read.All`).
-- **Platform console:** sign-in by emailed link, only for addresses in `PLATFORM_OWNERS`. `GET /v1/platform/orgs` returns
+- **Platform console:** sign-in by emailed link, only for addresses in `PLATFORM_OWNERS`. It's empty in the repo on
+  purpose; it's set at deploy time. `GET /v1/platform/orgs` returns
   counts only (phones; hand-typed records for manual organisations; nothing for Microsoft organisations, whose people
   aren't stored). Suspend sets `orgs.status = 'suspended'`: phones get `423` and hide the work card until restored,
   and admin calls get `423`. Delete removes the organisation (cascades); its phones get `410` and wipe the card.

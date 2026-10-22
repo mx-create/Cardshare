@@ -41,7 +41,7 @@
   });
   $("as-back").addEventListener("click", function () { panel("au-signin"); });
   document.querySelectorAll("[data-demo]").forEach(function (b) { b.addEventListener("click", function () { $("au-email").value = b.dataset.demo; msg("au-msg", ""); }); });
-  $("au-new").addEventListener("click", function () { SU = {}; $("su-email").value = ""; msg("su1-msg", ""); step(1); });
+  $("au-new").addEventListener("click", function () { SU = {}; $("su-email").value = ""; $("su-name").disabled = false; $("su-create").hidden = false; $("su-request").hidden = true; msg("su1-msg", ""); step(1); });
   $("su-cancel").addEventListener("click", function () { panel("au-signin"); });
 
   // ------------------------------------------------------------ sign up
@@ -64,11 +64,22 @@
     if (!tk) { msg("su2-msg", "No link found. Send it again.", "err"); return; }
     Sync.signup.verify(tk).then(function (r) {
       SU.signupToken = r.signupToken; SU.domain = r.domain; SU.microsoft = r.microsoft;
-      if (r.taken) { msg("su3-msg", r.domain + " already uses Cardshare (" + r.taken + "). Ask its owner to add you as an admin, then sign in.", "err"); $("su-create").disabled = true; }
-      else { msg("su3-msg", ""); $("su-create").disabled = false; }
+      taken(r);
       var base = r.domain.split(".")[0]; $("su-name").value = base.charAt(0).toUpperCase() + base.slice(1);
       $("su-dom").textContent = r.domain; step(3);
     }).catch(function (e) { msg("su2-msg", e.message, "err"); });
+  });
+  // The domain already belongs to an organisation: no new one can be made for it, but its owners can be asked.
+  function taken(r) {
+    var t = !!r.taken; SU.takenBy = r.taken;
+    $("su-create").hidden = t; $("su-request").hidden = !t; $("su-request").disabled = false; $("su-name").disabled = t;
+    msg("su3-msg", t ? r.domain + " already uses Cardshare (" + r.taken + "). Ask to join as an admin: its owners get your request." : "", t ? "warn" : "");
+  }
+  $("su-request").addEventListener("click", function () {
+    var b = this; busy(b, true);
+    Sync.signup.requestAccess(SU.signupToken).then(function (r) {
+      msg("su3-msg", "Request sent to " + r.org + "'s owners. If they approve, you'll get a sign-in email.", "ok");
+    }).catch(function (e) { busy(b, false); msg("su3-msg", e.message, "err"); });
   });
   $("su-create").addEventListener("click", function () {
     var b = this; busy(b, true);
@@ -140,7 +151,7 @@
       Sync.signup.verify(q[2]).then(function (r) {
         SU = { email: r.email, signupToken: r.signupToken, domain: r.domain };
         var base = r.domain.split(".")[0]; $("su-name").value = base.charAt(0).toUpperCase() + base.slice(1); $("su-dom").textContent = r.domain;
-        msg("su3-msg", r.taken ? r.domain + " already uses Cardshare (" + r.taken + "). Ask its owner to add you as an admin." : "", r.taken ? "err" : ""); $("su-create").disabled = !!r.taken; step(3);
+        taken(r); step(3);
       }).catch(function (e) { panel("au-signin"); msg("au-msg", e.message, "err"); });
       return;
     }

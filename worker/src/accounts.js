@@ -77,7 +77,23 @@ export async function route(req, env, ctx, h) {
     ]);
     return json(201, { sessionToken, ...(await me(env, { admin_id: adminId, org_id: orgId })) });
   }
-  // The emailed fallback for domain ownership: a link sent to admin@<domain>.
+  // Sign-up for a domain that's already taken: ask the organisation's owners to add this person as an Admin.
+  // Owners get an email and see it under Admins in the console. Same answer whether or not a request already exists.
+  if (m === "POST" && p === "/v1/signup/request") {
+    const sg = await env.DB.prepare("SELECT email FROM signups WHERE token_hash = ? AND expires_at > ?").bind(await sha256(body.signupToken), now).first();
+    if (!sg) return json(400, { error: "Your sign-up has expired. Start again." });
+    const org = await env.DB.prepare("SELECT o.id, o.name FROM domains d JOIN orgs o ON o.id = d.org_id WHERE d.domain = ?").bind(sg.email.split("@")[1]).first();
+    if (!org) return json(404, { error: "No organisation uses that domain." });
+    const ins = await env.DB.prepare("INSERT OR IGNORE INTO access_requests (id, org_id, email, created_at, status) VALUES (?, ?, ?, ?, 'pending')")
+      .bind("req_" + randomToken("").slice(0, 16), org.id, sg.email, now).run();
+    if (ins.meta && ins.meta.changes) {
+      await logStmt(env, org.id, `${sg.email} asked to join as an admin (waiting for an owner)`).run();
+      const { results: owners } = await env.DB.prepare("SELECT a.email FROM memberships m JOIN admins a ON a.id = m.admin_id WHERE m.org_id = ? AND m.role = 'owner'").bind(org.id).all();
+      for (const o of owners) await sendMail(env, o.email, `${sg.email} asked to join ${org.name} on Cardshare`, `Approve or decline in the admin console: ${env.APP_ORIGIN}/admin/`);
+    }
+    return json(202, { org: org.name });
+  }
+  // The emailed fallback for domain ownership: a link sent to admin@, postmaster@ or webmaster@<domain> (the admin picks).
   if (m === "POST" && p === "/v1/domains/confirm") {
     const link = await takeLink(env, body.token, now);
     if (!link || link.kind !== "domain") return json(400, { error: "That link has expired or was already used." });
@@ -173,7 +189,9 @@ export async function route(req, env, ctx, h) {
       return json(200, await orgView(env, url, orgId));
     }
     if (body.method === "email") {
-      const to = "admin@" + d.domain, token = randomToken("dom_");
+      const box = body.to || "admin";
+      if (!["admin", "postmaster", "webmaster"].includes(box)) return json(400, { error: "Choose admin@, postmaster@ or webmaster@." });
+      const to = `${box}@${d.domain}`, token = randomToken("dom_");
       await env.DB.prepare("INSERT INTO links (token_hash, kind, org_id, domain, expires_at) VALUES (?, 'domain', ?, ?, ?)").bind(await sha256(token), orgId, d.domain, now + DAY).run();
       await sendMail(env, to, `Confirm ${d.domain} for Cardshare`, `Someone set up Cardshare for ${d.domain}. If that's your organisation, confirm: ${env.APP_ORIGIN}/admin/?domain=${token}`);
       return json(202, { sent: to });
@@ -182,7 +200,25 @@ export async function route(req, env, ctx, h) {
   }
   if (m === "GET" && p === "/v1/admin/admins") {
     const { results } = await env.DB.prepare("SELECT a.id, a.name, a.email, m.role FROM memberships m JOIN admins a ON a.id = m.admin_id WHERE m.org_id = ? ORDER BY a.email").bind(orgId).all();
-    return json(200, { admins: results.map(a => ({ ...a, you: a.id === ses.admin_id })) });
+    const { results: requests } = await env.DB.prepare("SELECT id, email, created_at AS at FROM access_requests WHERE org_id = ? AND status = 'pending' ORDER BY created_at").bind(orgId).all();
+    return json(200, { admins: results.map(a => ({ ...a, you: a.id === ses.admin_id })), requests });
+  }
+  if ((x = /^\/v1\/admin\/requests\/([\w-]+)\/(approve|decline)$/.exec(p)) && m === "POST") {
+    if (!owner) return json(403, { error: "Only an owner can do that." });
+    const rq = await env.DB.prepare("SELECT * FROM access_requests WHERE id = ? AND org_id = ? AND status = 'pending'").bind(x[1], orgId).first();
+    if (!rq) return json(404, { error: "not_found" });
+    const approve = x[2] === "approve", stmts = [
+      env.DB.prepare("UPDATE access_requests SET status = ?, decided_by = ?, decided_at = ? WHERE id = ?").bind(approve ? "approved" : "declined", ses.admin_id, now, rq.id),
+      logStmt(env, orgId, approve ? `${rq.email}'s request approved: added as Admin` : `${rq.email}'s request declined`)];
+    if (approve) {
+      const a = await env.DB.prepare("SELECT id FROM admins WHERE email = ?").bind(rq.email).first();
+      const id = a ? a.id : "adm_" + randomToken("").slice(0, 16);
+      if (!a) stmts.push(env.DB.prepare("INSERT INTO admins (id, email, name, created_at) VALUES (?, ?, ?, ?)").bind(id, rq.email, rq.email.split("@")[0], now));
+      stmts.push(env.DB.prepare("INSERT OR IGNORE INTO memberships (admin_id, org_id, role) VALUES (?, ?, 'admin')").bind(id, orgId));
+    }
+    await env.DB.batch(stmts);
+    if (approve) await sendMail(env, rq.email, "You're an admin on Cardshare", `Your request was approved. Sign in: ${env.APP_ORIGIN}/admin/`);
+    return json(200, { status: approve ? "approved" : "declined" });
   }
   if (m === "POST" && p === "/v1/admin/admins") {
     if (!owner) return json(403, { error: "Only an owner can do that." });

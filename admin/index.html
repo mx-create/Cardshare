@@ -367,6 +367,7 @@ td .inp{padding:6px 9px;margin:2px 0}
         <input class="inp" id="su-name" autocomplete="organization">
         <p class="muted small">Domain: <b id="su-dom"></b>. Shown on everyone's work card; you can change it later.</p>
         <button class="btn primary" id="su-create" type="button">Create organisation</button>
+        <button class="btn" id="su-request" type="button" hidden>Request access</button>
         <p class="msg" id="su3-msg" role="status"></p>
       </div>
       <div class="card" id="su-4" hidden>
@@ -500,6 +501,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
 
       <div class="card" id="admins">
         <h3>Admins</h3>
+        <div id="ad-req"></div>
         <ul class="admins" id="ad-list"></ul>
         <form class="row" id="ad-add" style="margin-top:10px" autocomplete="off">
           <input class="inp" id="ad-email" type="email" placeholder="Work email" aria-label="New admin's work email" style="flex:1;min-width:200px">
@@ -840,7 +842,9 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     el.innerHTML=head()+
       (opts.microsoft?'<div class="dom-o"><b>Connect Microsoft 365</b><span>Verifies the domain and sets up your directory in one go.</span><div class="row"><button class="btn ms" type="button" data-dv="ms">'+'<svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Connect Microsoft 365</button></div></div>':"")+
       '<div class="dom-o"><b>Add a DNS record</b><span>At your DNS provider, add a TXT record named <b>'+esc(d.record)+'</b> with this value:</span><code>'+esc(d.txt)+'</code><div class="row"><button class="btn" type="button" data-dv="dns">Check DNS</button></div></div>'+
-      '<div class="dom-o"><b>Or confirm by email</b><span>We email a link to admin@'+esc(d.name)+'. Whoever opens it confirms the domain.</span><div class="row"><button class="btn" type="button" data-dv="email">Send the email</button><button class="btn" type="button" data-dv="open" hidden>Open the link (prototype)</button></div></div>'+
+      '<div class="dom-o"><b>Or confirm by email</b><span>We email a link to one of the domain\'s standard addresses. Whoever opens it confirms the domain.</span>'+
+        '<div class="row"><select class="inp" data-dv-to aria-label="Send to" style="width:auto">'+["admin","postmaster","webmaster"].map(function(a){return '<option value="'+a+'">'+a+'@'+esc(d.name)+'</option>'}).join("")+'</select>'+
+        '<button class="btn" type="button" data-dv="email">Send the email</button><button class="btn" type="button" data-dv="open" hidden>Open the link (prototype)</button></div></div>'+
       '<p class="msg" data-dv-msg></p>';
     var m=el.querySelector("[data-dv-msg]");
     function done(o,how){d.verified=true;d.method=how;el.innerHTML=head();if(opts.onVerified)opts.onVerified(o,how)}
@@ -848,8 +852,9 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
       var b=e.target.closest("[data-dv]");if(!b)return;
       if(b.dataset.dv==="dns"){m.className="msg";m.textContent="Looking up "+d.record+"…";
         api.verifyDomain(d.name,"dns").then(function(o){done(o,"dns")}).catch(function(err){m.className="msg err";m.textContent=err.message})}
-      if(b.dataset.dv==="email")api.verifyDomain(d.name,"email").then(function(r){m.className="msg ok";m.textContent="Sent to "+r.sent+".";el.querySelector('[data-dv="open"]').hidden=!Sync.mock}).catch(function(err){m.className="msg err";m.textContent=err.message});
-      if(b.dataset.dv==="open"){var tk=Sync.mockServer.peekOutbox("admin@"+d.name,"domain");if(!tk)return;
+      var to=el.querySelector("[data-dv-to]");
+      if(b.dataset.dv==="email")api.verifyDomain(d.name,"email",to.value).then(function(r){m.className="msg ok";m.textContent="Sent to "+r.sent+".";el.querySelector('[data-dv="open"]').hidden=!Sync.mock}).catch(function(err){m.className="msg err";m.textContent=err.message});
+      if(b.dataset.dv==="open"){var tk=Sync.mockServer.peekOutbox(to.value+"@"+d.name,"domain");if(!tk){m.className="msg warn";m.textContent="Prototype: nothing was sent to "+to.value+"@"+d.name+" yet. Press Send first.";return}
         Sync.confirmDomain(tk).then(function(){return api.org()}).then(function(o){done(o,"email")}).catch(function(err){m.className="msg err";m.textContent=err.message})}
       if(b.dataset.dv==="ms")consent(ME?ME.admin.email:"").then(function(ok){if(!ok)return;
         return api.connectMicrosoft({consent:true}).then(function(o){done(o,"microsoft")})}).catch(function(err){m.className="msg err";m.textContent=err.message});
@@ -865,6 +870,9 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   function paintAdmins(){
     var owner=ME.role==="owner";$("ad-add").hidden=!owner;
     A.admins().then(function(r){
+      var reqs=r.requests||[];
+      $("ad-req").innerHTML=reqs.length?'<h4 style="margin-top:0">Asked to join</h4><ul class="admins">'+reqs.map(function(q){return '<li><span><b>'+esc(q.email)+'</b> <small>asked '+ago(q.at)+'</small></span>'+
+        (owner?'<button class="btn" type="button" data-req="'+esc(q.id)+'" data-ok="1">Approve as Admin</button><button class="ghost" type="button" data-req="'+esc(q.id)+'">Decline</button>':'<small>Waiting for an owner</small>')+'</li>'}).join("")+'</ul><h4>Admins</h4>':"";
       $("ad-list").innerHTML=r.admins.map(function(a){return '<li><span><b>'+esc(a.name)+'</b> <small>'+esc(a.email)+'</small></span><span class="pill'+(a.role==="owner"?" role":"")+'">'+(a.role==="owner"?"Owner":"Admin")+'</span>'+(a.you?'<small>you</small>':"")+
         (owner&&!a.you?'<button class="ghost" type="button" data-rmadmin="'+esc(a.id)+'">Remove</button>':"")+'</li>'}).join("");
     }).catch(fail);
@@ -872,6 +880,8 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   $("ad-add").addEventListener("submit",function(e){e.preventDefault();
     A.addAdmin($("ad-email").value,$("ad-role").value).then(function(){$("ad-email").value="";$("ad-msg").className="msg ok";$("ad-msg").textContent="Added. They get a sign-in link by email.";paintAdmins();refreshLog()})
       .catch(function(err){$("ad-msg").className="msg err";$("ad-msg").textContent=err.message})});
+  document.addEventListener("click",function(e){var b=e.target.closest("[data-req]");if(!b)return;
+    A.decideRequest(b.dataset.req,!!b.dataset.ok).then(function(){toast(b.dataset.ok?"Added as Admin. They get a sign-in link by email.":"Request declined.");paintAdmins();refreshLog()}).catch(fail)});
   document.addEventListener("click",function(e){var b=e.target.closest("[data-rmadmin]");if(!b)return;
     if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Click again to remove";return}
     A.removeAdmin(b.dataset.rmadmin).then(function(){paintAdmins();refreshLog()}).catch(fail)});

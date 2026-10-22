@@ -38,7 +38,7 @@ that any phone camera can read. No sign-up, no app, no server: everything stays 
 | `sw.js` | Keeps the app working with no signal |
 | `about/index.html` | The product page and tour, at `/about`: privacy, every feature, comparison, questions. The app links to its sections (`about/#pay` and so on) |
 | `manifest.webmanifest`, `icons/` | Home-screen name and icons |
-| `fonts/` | Inter and Poppins (logo), Latin subset, served with the site so pages load with no outside requests (SIL Open Font License, texts alongside) |
+| `fonts/` | Inter and Poppins (logo), plus Fraunces and Outfit (v2 brand fonts), Latin subset, served with the site so pages load with no outside requests (SIL Open Font License, texts alongside) |
 
 ## Putting it online
 
@@ -92,11 +92,13 @@ overrides the admin types to fill blanks. No Graph tokens are stored; they're fe
   Work pill, main button and "Managed by" banner, in My card and in Share when it shows Work. Personal and Links keep the
   Cardshare theme. The QR always stays plain (dark on white, no logo, no brand colour), and "work card · via cardshare"
   stays. Branding comes with the card at check-in (the ETag covers it) and is cached for offline use. Brand fonts load
-  from Google Fonts when online and fall back to system fonts offline.
+  from the site's own `fonts/` folder (Fraunces and Outfit, Latin subset, 400/600/700, SIL OFL licences alongside),
+  are cached by the service worker, and fall back to system fonts. The app makes no outside requests.
 - **Never unreadable.** Text on the card and button text on the primary colour must reach WCAG 4.5:1. If an admin saves
   a pair that doesn't, the phone uses the nearest passing shade of the same hue.
 - **Suspended organisations.** While Cardshare has an organisation suspended, its phones keep the work card but don't
-  show it, and say so. It comes back when the organisation is restored.
+  show it (it is paused, not wiped), and say so. It comes back at the next check-in after the organisation is restored.
+  Only deleting an organisation, removing a person or a leaver in Microsoft 365 wipes a work card.
 
 **Admin console** (`/admin/`)
 - Choose where work cards come from: Microsoft 365 / by hand / Google (coming soon). Each has its own privacy line.
@@ -119,9 +121,11 @@ overrides the admin types to fill blanks. No Graph tokens are stored; they're fe
   (brand colour / light / dark), header logo (centre / left), and font (Inter, a serif, a geometric sans, or system).
   A live preview runs the real app in two phone frames (My card and Share), in light or dark theme.
 - **Set up Cardshare for your organisation.** Work email → confirm by link → name the organisation → prove the domain
-  (connecting Microsoft 365 counts; otherwise a DNS TXT record at `_cardshare.<domain>`, or an email to
-  `admin@<domain>`) → choose where cards come from → pick a starting look. Personal addresses (gmail.com and so on) can't
-  own an organisation. Staff only find an organisation by typing their email once its domain is verified.
+  (connecting Microsoft 365 counts; otherwise a DNS TXT record at `_cardshare.<domain>`, or an email to the admin's pick
+  of `admin@`, `postmaster@` or `webmaster@<domain>`) → choose where cards come from → pick a starting look. Personal
+  addresses (gmail.com and so on) can't own an organisation. If the domain already uses Cardshare, sign-up offers
+  **Request access** instead: the organisation's owners see the request under Admins (and in Activity) and can approve
+  it, which adds the person as an Admin, or decline it. Staff only find an organisation by typing their email once its domain is verified.
 
 **Platform console** (`/admin/platform/`, for Cardshare staff) lists every organisation: source, domains and whether
 they're verified, phones signed in, records held (hand-typed organisations only), and a plan placeholder. It can

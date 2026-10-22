@@ -1,9 +1,12 @@
 // Keeps Cardshare working offline once installed. The page is fetched fresh when there is
 // signal and falls back to the cached copy without; everything else comes from cache first.
 // v2 branch: its own cache name, so a v2 preview never shares or evicts the production cache.
-var CACHE = "cardshare-v2-dev-3";
+var CACHE = "cardshare-v2-dev-4";
 var CORE = ["./", "qrcode.js", "icons.js", "sync.js", "logo.js", "brand.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png",
-  "fonts/inter-latin.woff2", "fonts/poppins-800-latin.woff2"];
+  "fonts/inter-latin.woff2", "fonts/poppins-800-latin.woff2",
+  // v2 brand fonts, so a managed Work card keeps its typeface offline
+  "fonts/fraunces-400-latin.woff2", "fonts/fraunces-600-latin.woff2", "fonts/fraunces-700-latin.woff2",
+  "fonts/outfit-400-latin.woff2", "fonts/outfit-600-latin.woff2", "fonts/outfit-700-latin.woff2"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(CORE); }).then(function () { return self.skipWaiting(); }));

@@ -18,7 +18,8 @@
 //         GET  /v1/admin/auth/microsoft/start           -> admin "Sign in with Microsoft" (same OIDC callback)
 //         GET /v1/admin/me, POST /v1/admin/session/org, POST /v1/admin/auth/signout, PUT /v1/admin/branding,
 //         POST /v1/admin/domains/verify, GET|POST /v1/admin/admins, DELETE /v1/admin/admins/<id>       (accounts.js)
-// Sign-up: POST /v1/signup/start | verify | org, POST /v1/domains/confirm                             (accounts.js)
+// Sign-up: POST /v1/signup/start | verify | org | request, POST /v1/domains/confirm                   (accounts.js)
+//         POST /v1/admin/requests/<id>/approve|decline (owners)
 // Platform: POST /v1/platform/auth/link | verify, GET /v1/platform/orgs, POST …/<id>/suspend|restore, DELETE …/<id>
 //         GET|PATCH /v1/admin/org, PUT|DELETE /v1/admin/logos/<variant>,
 //         GET|POST /v1/admin/employees, PATCH|DELETE /v1/admin/employees/<id>,

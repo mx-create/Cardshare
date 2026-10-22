@@ -9,7 +9,9 @@ compatibility_date = "2026-10-01"
 APP_ORIGIN = "https://cardshare.io"          # where sign-in links point (<APP_ORIGIN>/?signin=<token>) and CORS allows
 API_ORIGIN = "https://api.cardshare.io"      # this Worker; Microsoft redirect URIs are registered under it
 MS_CLIENT_ID = "REPLACE_WITH_ENTRA_APP_CLIENT_ID"
-PLATFORM_OWNERS = ""                         # comma-separated emails allowed into /admin/platform/ (Manu)   # multi-tenant app registration (public, not a secret)
+# Comma-separated emails allowed into /admin/platform/. Deliberately empty in the repo: Manu fills it in at deploy time
+# (in the Cloudflare dashboard or a local, uncommitted override). Empty means nobody can sign in to the platform console.
+PLATFORM_OWNERS = ""   # multi-tenant app registration (public, not a secret)
 MAIL_FROM = "sign-in@cardshare.io"
 
 [[d1_databases]]

@@ -74,9 +74,10 @@
 
   var KEYS = ["primary", "accent", "card", "text", "buttonText"];
   var FONTS = {
-    inter: { n: "Inter", stack: '"Inter",system-ui,-apple-system,"Segoe UI",sans-serif', url: "" }, // served with the site
-    serif: { n: "Serif (Fraunces)", stack: '"Fraunces",Georgia,"Times New Roman",serif', url: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" },
-    geometric: { n: "Geometric sans (Outfit)", stack: '"Outfit","Century Gothic",Futura,system-ui,sans-serif', url: "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" },
+    // All served with the site from fonts/ (SIL OFL, licences alongside): no outside requests.
+    inter: { n: "Inter", stack: '"Inter",system-ui,-apple-system,"Segoe UI",sans-serif', url: "" },
+    serif: { n: "Serif (Fraunces)", stack: '"Fraunces",Georgia,"Times New Roman",serif', url: "" },
+    geometric: { n: "Geometric sans (Outfit)", stack: '"Outfit","Century Gothic",Futura,system-ui,sans-serif', url: "" },
     system: { n: "System", stack: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif', url: "" }
   };
   var RADII = { sharp: { card: 4, button: 4 }, soft: { card: 16, button: 12 }, round: { card: 28, button: 999 } };
