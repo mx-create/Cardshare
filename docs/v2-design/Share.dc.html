@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Share synced work card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#F08A62}a:hover{color:#F5A585}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #201917; font-family: Inter, system-ui, sans-serif; color: #F3ECE8; padding: 24px 20px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; height: 56px">
+<div role="img" aria-label="MDA Space UK logo" style="width: 200px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 10px">
+<svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="7" fill="#F3ECE8"></circle><ellipse cx="17" cy="17" rx="15" ry="6" stroke="#F3ECE8" stroke-width="2" transform="rotate(-25 17 17)"></ellipse></svg>
+<span style="font-size: 22px; font-weight: 700; letter-spacing: 3px; color: #F3ECE8">MDA SPACE</span>
+</div>
+<span style="font-size: 11px; color: #A99C95; letter-spacing: 0.3px">work card · via <span style="color: #A79DF5; font-weight: 600">cardshare</span></span>
+</div>
+<div style="display: flex; background: #2D2420; border-radius: 999px; padding: 4px">
+<button style="flex: 1; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #B8ABA4; font: 500 16px Inter, sans-serif">My card</button>
+<button style="flex: 1; height: 44px; border: 0; border-radius: 999px; background: #3A2E28; color: #F3ECE8; font: 600 16px Inter, sans-serif">Share</button>
+</div>
+<div style="display: flex; background: #2D2420; border-radius: 999px; padding: 4px">
+<button style="flex: 1; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #B8ABA4; font: 500 15px Inter, sans-serif">Personal</button>
+<button style="flex: 1; height: 44px; border: 0; border-radius: 999px; background: #E07B54; color: #201917; font: 600 15px Inter, sans-serif">Work</button>
+<button style="flex: 1; height: 44px; border: 0; border-radius: 999px; background: transparent; color: #B8ABA4; font: 500 15px Inter, sans-serif">Link</button>
+</div>
+<div style="background: #F7F1EC; border-radius: 26px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<div style="position: relative; width: 252px; height: 252px">
+<div style="width: 252px; height: 252px; display: grid; grid-template-columns: repeat(21, minmax(0, 1fr)); gap: 0">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="441">
+<div style="{{c.style}}"></div>
+</sc-for>
+</div></div>
+<div style="text-align: center; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 19px; font-weight: 700; color: #201917">Manu Ravindran</span>
+<span style="font-size: 14px; color: #5E514A">Sr Electronics Engineer · MDA Space UK</span>
+</div>
+</div>
+<div style="display: flex; align-items: center; justify-content: center; gap: 8px">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CFFB7A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+<span style="font-size: 13px; color: #C9BDB6">Up to date with MDA Space · works offline</span>
+</div>
+<p style="margin: 0; text-align: center; font-size: 13px; line-height: 1.5; color: #A99C95">The QR is built on this phone from your synced card. Nothing is sent when someone scans it.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+var n = 21, cells = [], seed = 7;
+function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+function finder(r, c) {
+var spots = [[0, 0], [0, n - 7], [n - 7, 0]];
+for (var i = 0; i < 3; i++) {
+var dr = r - spots[i][0], dc = c - spots[i][1];
+if (dr >= -1 && dr <= 7 && dc >= -1 && dc <= 7) {
+if (dr < 0 || dr > 6 || dc < 0 || dc > 6) return 0;
+if (dr === 0 || dr === 6 || dc === 0 || dc === 6) return 1;
+if (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4) return 1;
+return 0;
+}
+}
+return -1;
+}
+for (var r = 0; r < n; r++) {
+for (var c = 0; c < n; c++) {
+var f = finder(r, c);
+var on = f === -1 ? rnd() > 0.52 : f === 1;
+cells.push({ style: on ? 'background:#201917;aspect-ratio:1' : 'background:transparent;aspect-ratio:1' });
+}
+}
+return { cells: cells };
+}
+}
+</script>
+</body>
+</html>
