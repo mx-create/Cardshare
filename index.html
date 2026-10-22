@@ -229,6 +229,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .teams-h span{font-size:13px;line-height:1.4;color:var(--teams-ink)}
 .btn.teams-btn{background:var(--teams);color:#fff;box-shadow:0 10px 26px -10px var(--teams)}
 .btn.teams-btn:disabled{opacity:.6;cursor:default}
+.btn.msbtn{gap:10px;background:#fff;color:#1b1b1b;box-shadow:none;border:1px solid #8c8c8c}
+.btn.msbtn svg{width:18px;height:18px;flex:none}
+.btn.msbtn:disabled{opacity:.6;cursor:default}
+.btn.msbtn + .btn.teams-btn{background:none;border:1px solid var(--teams-line);color:var(--ink);box-shadow:none}
 .textbtn.soft{color:var(--ink-soft);text-decoration:none;font-weight:500;font-size:14px}
 .teams .fmsg{margin:0}
 .teams.removed{border-style:dashed;border-color:var(--err);background:none}
@@ -333,6 +337,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       <div class="teams-h"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg></i><div><b id="wt-title"></b><span id="wt-text"></span></div></div>
       <div id="wt-ask" hidden><input class="ccsearch" id="wt-email" type="email" inputmode="email" placeholder="you@company.com" autocomplete="email" autocapitalize="off" spellcheck="false" aria-label="Work email"></div>
       <p class="fmsg err" id="wt-msg" hidden></p>
+      <!-- v2: organisations connected to Microsoft 365 also offer their own sign-in -->
+      <button class="btn msbtn" id="wt-ms" type="button" hidden><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg><span>Sign in with Microsoft</span></button>
       <button class="btn teams-btn" id="wt-send" type="button">Send sign-in link</button>
       <button class="textbtn soft" id="wt-no" type="button">No thanks, I'll fill it in myself</button>
     </div>
@@ -488,7 +494,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   function vcard(c,web){
     var parts=c.name.trim().split(/\s+/),last=parts.length>1?parts.pop():"",first=parts.join(" ");
     var L=["BEGIN:VCARD","VERSION:3.0","N:"+esc(last)+";"+esc(first)+";;;","FN:"+esc(c.name)];
-    if(c.org)L.push("ORG:"+esc(c.org));
+    if(c.org)L.push("ORG:"+esc(c.org)+(c.department?";"+esc(c.department):""));
     if(c.title)L.push("TITLE:"+esc(c.title));
     var tel=e164(readPhone(c.tel,HOME));if(tel)L.push("TEL;TYPE=CELL:"+tel);
     if(c.office){var ot=e164(readPhone(c.office,HOME))||c.office.replace(/[^\d+]/g,"");if(ot)L.push("TEL;TYPE=WORK,VOICE:"+ot)} // v2: managed Work cards only
@@ -950,7 +956,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   // The card a QR is built from: a managed Work card is the organisation's fields plus the employee's own mobile.
   function cardFor(kind){
     if(kind!=="work"||!ws)return data.cards[kind];
-    var c=ws.card;return {name:c.name||"",title:c.title||"",org:c.org||"",email:c.email||"",office:c.office||"",tel:(ws.own&&ws.own.tel)||""};
+    var c=ws.card;return {name:c.name||"",title:c.title||"",org:c.org||"",department:c.department||"",email:c.email||"",office:c.office||"",tel:(ws.own&&ws.own.tel)||""};
   }
   function orgName(){return ws?ws.org.name:wflow&&wflow.org?wflow.org.name:"your organisation"}
   function when(t){
@@ -1015,6 +1021,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       $("wt-ask").hidden=false;
     }
     if(stage!=="nudge"&&stage!=="ask")$("wt-msg").hidden=true;
+    $("wt-ms").hidden=!((stage==="nudge"||stage==="ask")&&wflow.org&&wflow.org.microsoft);
     if(sent){
       $("ws-line").innerHTML="";
       $("ws-line").append("If "+(wflow.org?wflow.org.name:"your organisation")+" uses Cardshare, a sign-in link is on its way to ");
@@ -1023,7 +1030,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       paintResend();
     }
     if(mg){
-      var c=ws.card,rows=[["Name",c.name],["Title",c.title],["Company",c.org],["Office",c.office],["Email",c.email]],box=$("lockrows");box.textContent="";
+      var c=ws.card,rows=[["Name",c.name],["Title",c.title],["Company",c.org],["Department",c.department],["Office",c.office],["Location",c.location],["Email",c.email]],box=$("lockrows");box.textContent="";
       rows.forEach(function(r){if(!r[1])return;
         var f=document.createElement("div");f.className="field locked";
         var v=document.createElement("span");v.className="v";v.textContent=r[1];
@@ -1075,12 +1082,16 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     Sync.verify(token).then(function(r){
       if(r.status!=="signedin"){wflow=wflow&&wflow.stage==="sent"?wflow:null;
         editKind="work";loadForm();show("edit");$("edit-note").textContent="That sign-in link has expired or was already used. Send a new one.";return}
-      ws=r.state;
-      if(!ws.own||!ws.own.tel){var t=data.cards.work.tel||"";if(t){Sync.setOwn("tel",t);ws=Sync.state()}}
-      ownTel=(ws.own&&ws.own.tel)||"";wflow=null;syncNote="";isNew=false;
-      try{localStorage.removeItem(RKEY)}catch(e){}
-      editKind="work";loadForm();show("edit");scrollTo(0,0);
+      gotCard(r.state);
     }).catch(function(){editKind="work";loadForm();show("edit");$("edit-note").textContent="No connection. Open the link again when you have signal."});
+  }
+  // Signed in, by an emailed link or by Microsoft: the card is on this phone. A mobile already typed on the manual Work card comes along.
+  function gotCard(state){
+    ws=state;
+    if(!ws.own||!ws.own.tel){var t=data.cards.work.tel||"";if(t){Sync.setOwn("tel",t);ws=Sync.state()}}
+    ownTel=(ws.own&&ws.own.tel)||"";wflow=null;syncNote="";isNew=false;
+    try{localStorage.removeItem(RKEY)}catch(e){}
+    editKind="work";loadForm();show("edit");scrollTo(0,0);
   }
   // Check-in: "anything changed?" On app open, when it comes back to the front after a day, and on a tap of the banner.
   function checkIn(force){
@@ -1116,6 +1127,27 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("w-signline").addEventListener("click",function(){wflow={stage:"ask",email:"",org:null};paintWork();$("wt-email").value=tidyEmail(draft.cards.work.email||"");$("wt-email").focus()});
   $("wt-send").addEventListener("click",function(){sendLink(wflow&&wflow.stage==="ask"?$("wt-email").value:wflow.email)});
   $("wt-email").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendLink($("wt-email").value)}});
+  // While typing in the sign-in form: if the domain's organisation uses Microsoft 365, offer "Sign in with Microsoft" too.
+  var askT=0;
+  $("wt-email").addEventListener("input",function(){
+    clearTimeout(askT);var v=$("wt-email").value;$("wt-msg").hidden=true;
+    askT=setTimeout(function(){
+      if(!wflow||wflow.stage!=="ask")return;
+      if(emailCheck(v).k!=="ok"){wflow.org=null;paintWork();return}
+      Sync.discover(tidyEmail(v)).then(function(org){if(wflow&&wflow.stage==="ask"&&$("wt-email").value===v){wflow.org=org;wflow.email=tidyEmail(v);$("wt-ms").hidden=!(org&&org.microsoft)}});
+    },400);
+  });
+  // Sign in with Microsoft (mocked: in the real app this goes through Microsoft's own sign-in page and back).
+  $("wt-ms").addEventListener("click",function(){
+    var em=wflow&&wflow.stage==="ask"?tidyEmail($("wt-email").value):wflow.email;
+    $("wt-ms").disabled=true;
+    Sync.signInMicrosoft(em).then(function(r){
+      $("wt-ms").disabled=false;
+      if(r.status==="signedin"){gotCard(r.state);return}
+      $("wt-msg").hidden=false;
+      $("wt-msg").textContent=r.status==="disabled"?"Microsoft says this account is turned off. Ask your IT team.":r.status==="not_in_directory"?"Microsoft didn't find that account in your organisation's directory.":"Couldn't sign in with Microsoft. Try the email link instead.";
+    }).catch(function(){$("wt-ms").disabled=false;$("wt-msg").hidden=false;$("wt-msg").textContent="No connection. Signing in needs signal; your cards still work without it."});
+  });
   $("wt-no").addEventListener("click",function(){
     if(wflow&&wflow.stage==="nudge"){var d=dismissed(),dom=domainOf(wflow.email);if(d.indexOf(dom)<0)d.push(dom);try{localStorage.setItem(DKEY,JSON.stringify(d))}catch(e){}}
     wflow=null;paintWork();$("f-title").focus();

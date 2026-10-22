@@ -80,8 +80,53 @@ button{cursor:pointer}
 .msg{font-size:13px;color:var(--ink-soft)}
 .msg.err{color:var(--bad)}.msg.warn{color:var(--warn)}.msg.ok{color:var(--ok)}
 
-/* logo: four upload slots, then the live preview of the phone's 200 x 40 header slot */
-.slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+/* how work cards are managed: Microsoft 365, by hand, Google (later) */
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mode{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:14px;border:1px solid var(--line);background:none;text-align:left;color:var(--ink);min-width:0}
+.mode b{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.mode b svg{width:16px;height:16px;flex:none}
+.mode span{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+.mode[aria-pressed="true"]{border-color:var(--teams-hi);background:var(--teams-bg)}
+.mode:disabled{opacity:.55;cursor:default}
+.mode .pill{align-self:flex-start;font-size:10.5px;padding:2px 8px}
+.privacy{margin:12px 0 0;padding:11px 14px;border-radius:12px;font-size:13px;line-height:1.45;display:flex;gap:10px;align-items:flex-start;background:var(--ground);border:1px solid var(--line);color:var(--ink-soft)}
+.privacy svg{flex:none;width:16px;height:16px;margin-top:1px;color:var(--ok)}
+.privacy b{color:var(--ink)}
+.msconn{margin-top:14px;display:flex;flex-direction:column;gap:12px}
+.msstat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.msstat div{background:var(--ground);border-radius:12px;padding:10px 12px;min-width:0}
+.msstat small{display:block;font-size:11.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em}
+.msstat b{display:block;font-size:14.5px;font-weight:600;overflow-wrap:anywhere}
+.btn.ms{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#1b1b1b;border:1px solid #8c8c8c;border-radius:6px;padding:9px 14px}
+.btn.ms svg{width:16px;height:16px}
+.map{width:100%;border-collapse:collapse;font-size:13px;min-width:0}
+.map td,.map th{padding:7px 6px}
+.map code{font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--teams-hi)}
+.map .arrow{color:var(--ink-dim);width:20px;text-align:center}
+.map tr.no td{color:var(--ink-dim)}
+.map tr.no code{color:var(--ink-dim);text-decoration:line-through}
+.ov{color:var(--teams-hi);font-size:11px;font-weight:600;margin-left:4px}
+.blank{color:var(--warn);font-size:12px}
+.chip.off{color:var(--bad)}
+.acts button.simbtn{border:1px dashed var(--line);color:var(--warn);font-size:12px}
+/* Microsoft's consent screen, simulated */
+.consent{border:0;padding:0;border-radius:6px;max-width:440px;width:calc(100% - 32px);background:#fff;color:#1b1b1b;font:400 15px/1.45 "Segoe UI",system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.consent::backdrop{background:rgba(10,11,16,.7)}
+.consent-in{padding:28px 32px 24px;display:flex;flex-direction:column;gap:12px}
+.consent .mslogo{display:flex;align-items:center;gap:8px;font:600 15px "Segoe UI",system-ui,sans-serif;color:#5e5e5e}
+.consent .mslogo svg{width:20px;height:20px}
+.consent h2{margin:4px 0 0;font:600 22px "Segoe UI",system-ui,sans-serif}
+.consent p{margin:0;font-size:13.5px;color:#323130}
+.consent ul{margin:0;padding:0 0 0 18px;font-size:13.5px;color:#323130;display:flex;flex-direction:column;gap:6px}
+.consent small{font-size:12px;color:#605e5c}
+.consent .row{justify-content:flex-end;margin-top:6px}
+.consent .btn{border-radius:2px;padding:8px 22px}
+.consent .btn.no{background:#e1dfdd;color:#1b1b1b}
+.consent .btn.yes{background:#0067b8;color:#fff}
+.consent .sim{font-size:11.5px;color:#a19f9d;text-align:center}
+/* logo: upload slots, then the live preview of the phone's 200 x 40 header slot */
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.slot .src{font-size:11px;font-weight:600;color:var(--teams-hi)}
 .slot{border:1px dashed var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .slot b{font-size:13.5px;font-weight:600}
 .slot small{font-size:12px;color:var(--ink-dim);line-height:1.35}
@@ -157,8 +202,8 @@ td .inp{padding:6px 9px;margin:2px 0}
   .sides[data-show="phone"] .console{display:none}
   .sides[data-show="admin"] .phonecol{display:none}
   .phonecol{position:static;max-width:420px;width:100%;margin:0 auto}
-  .slots{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+@media (max-width:760px){.modes,.msstat{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:620px){
   .previews,.rules{grid-template-columns:minmax(0,1fr)}
   .grid2{grid-template-columns:minmax(0,1fr);gap:4px}
@@ -177,7 +222,7 @@ td .inp{padding:6px 9px;margin:2px 0}
     <span class="grow"></span>
     <button class="ghost" id="reset" type="button">Reset sample data</button>
   </header>
-  <p class="disclaimer" id="disclaimer">v2 prototype. The server is simulated in this browser (sync.js), so nothing is saved online, emailed or charged. Harbour Studio and everyone in it are made up.</p>
+  <p class="disclaimer" id="disclaimer">v2 prototype. The server and Microsoft 365 are both simulated in this browser (sync.js), so nothing is saved online, emailed or charged. Harbour Studio and everyone in it are made up.</p>
 
   <div class="seg switch" id="switch" role="group" aria-label="Show">
     <button type="button" data-show="admin" aria-pressed="true">Admin console</button>
@@ -187,6 +232,34 @@ td .inp{padding:6px 9px;margin:2px 0}
   <div class="sides" id="sides" data-show="admin">
     <section class="console" aria-label="Admin console">
       <div class="side-h"><h2>Admin console</h2><small id="count"></small></div>
+
+      <div class="card" id="source">
+        <h3>Where work cards come from</h3>
+        <div class="modes" role="group" aria-label="Where work cards come from">
+          <button class="mode" type="button" data-mode="microsoft"><b><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Microsoft 365</b><span>Cards come straight from your directory (Entra ID). Joiners, changes and leavers follow automatically.</span></button>
+          <button class="mode" type="button" data-mode="manual"><b>By hand</b><span>For small teams: add people here and keep their details up to date yourself.</span></button>
+          <button class="mode" type="button" disabled><b>Google Workspace</b><span>Your Google directory.</span><span class="pill">Coming soon</span></button>
+        </div>
+        <p class="privacy" id="privacy"></p>
+        <div class="msconn" id="ms-off" hidden>
+          <p class="muted">An IT admin signs in with Microsoft and approves read-only access to your directory. Cardshare reads only the fields below, one person at a time, when their phone checks in, and keeps none of it.</p>
+          <div class="row"><button class="btn ms" id="ms-connect" type="button"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Connect Microsoft 365</button><span class="msg" id="ms-msg"></span></div>
+        </div>
+        <div class="msconn" id="ms-on" hidden>
+          <div class="msstat">
+            <div><small>Tenant</small><b id="ms-tenant"></b></div>
+            <div><small>Last sync</small><b id="ms-sync"></b></div>
+            <div><small>People found</small><b id="ms-people"></b></div>
+          </div>
+          <p class="muted small" id="ms-perm"></p>
+          <div class="row"><button class="btn" id="ms-resync" type="button">Sync now</button><button class="ghost" id="ms-disconnect" type="button">Disconnect</button></div>
+        </div>
+        <div id="ms-map" hidden>
+          <h4>Field mapping</h4>
+          <table class="map"><tbody id="map-rows"></tbody></table>
+          <p class="muted small" style="margin-top:6px">Blank or wrong in Microsoft 365? Fix it there, or set an override for one person under People. Overrides are the only staff details Cardshare stores.</p>
+        </div>
+      </div>
 
       <div class="card" id="org">
         <h3>Organisation</h3>
@@ -202,6 +275,7 @@ td .inp{padding:6px 9px;margin:2px 0}
 
       <div class="card" id="brand">
         <h3>Logo</h3>
+        <div class="row" id="ms-brand-row" style="margin:-4px 0 12px" hidden><button class="btn ms" id="ms-brand" type="button"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Use our Microsoft 365 sign-in logo</button><span class="muted small">Takes the banner and square logos from your Microsoft sign-in page. You can still upload your own to replace either.</span></div>
         <div class="slots" id="slots"></div>
         <div class="samples" id="samples"><span class="muted small">Try a sample:</span></div>
         <h4>On the phone: the 200 × 40 header slot</h4>
@@ -219,6 +293,7 @@ td .inp{padding:6px 9px;margin:2px 0}
         <h3>People <span class="grow"></span>
           <button class="btn" type="button" id="p-import-t">Add from a spreadsheet</button>
           <button class="btn primary" type="button" id="p-invite">Send sign-in links</button></h3>
+        <p class="privacy" id="p-source" hidden></p>
         <div class="import" id="p-import" hidden>
           <p class="muted">Paste rows: name, title, office phone, email. One person per line.</p>
           <textarea id="csv" spellcheck="false" aria-label="Spreadsheet rows">Sofia Rossi,Office Manager,+44 161 496 0104,sofia.rossi@harbour.example
@@ -234,7 +309,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
           <button class="btn" type="submit">Add</button>
         </form>
         <p class="msg" id="p-msg" style="margin:8px 0 0"></p>
-        <p class="muted small" style="margin-top:10px">You manage name, title, company, office phone and work email. Each person's mobile and their Personal card stay on their own phone, out of your reach.</p>
+        <p class="muted small" style="margin-top:10px" id="p-foot">You manage name, title, company, office phone and work email. Each person's mobile and their Personal card stay on their own phone, out of your reach.</p>
       </div>
 
       <div class="card" id="mail" hidden>
@@ -262,12 +337,32 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   </div>
 </div>
 
+<dialog class="consent" id="consent" aria-label="Microsoft permission request (simulated)">
+  <div class="consent-in">
+    <div class="mslogo"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Microsoft</div>
+    <small>it.admin@harbour.example</small>
+    <h2>Permissions requested</h2>
+    <p><b>Cardshare</b> (unverified prototype) wants these permissions for everyone in <b>Harbour Studio Ltd</b>:</p>
+    <ul>
+      <li>Read all users' full profiles <small>(User.Read.All, application)</small></li>
+      <li>Read organisational branding <small>(OrganizationalBranding.Read.All, application)</small></li>
+    </ul>
+    <p>Read-only. Cardshare can't change anything in your directory. Mobile numbers are never requested.</p>
+    <small>Accepting gives consent for your whole organisation. You can remove it at any time in Microsoft Entra admin centre → Enterprise applications.</small>
+    <div class="row"><button class="btn no" id="cs-no" type="button">Cancel</button><button class="btn yes" id="cs-yes" type="button">Accept</button></div>
+    <p class="sim">Simulated. In the real flow this is Microsoft's own page.</p>
+  </div>
+</dialog>
+
 <script src="../sync.js"></script>
 <script src="../logo.js"></script>
 <script>
 (function(){
   var Sync=window.CardshareSync,Logo=window.CardshareLogo,A=Sync.admin(),$=function(id){return document.getElementById(id)};
-  var S={org:null,people:[],editing:null,flash:null};
+  var S={org:null,people:[],source:"manual",editing:null,flash:null};
+  var SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
+  function isMs(){return S.org&&S.org.source==="microsoft"&&S.org.ms}
+  function when(t){if(!t)return "never";var a=ago(t);return a==="just now"?a:hm(t)+" ("+a+")"}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
   function hm(t){var d=new Date(t);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
   function ago(t){if(!t)return "";var s=(Date.now()-t)/1000;return s<60?"just now":s<3600?Math.round(s/60)+" min ago":s<86400?Math.round(s/3600)+" h ago":Math.round(s/86400)+" d ago"}
@@ -276,8 +371,73 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
 
   // ---------------------------------------------------------------- organisation
   function paintOrg(){
-    var o=S.org;$("o-name").value=o.name;$("o-company").value=o.company||"";$("o-domains").value=(o.domains||[]).join(", ");$("o-disc").checked=!!o.discoverable;
+    var o=S.org,ms=isMs();$("o-name").value=o.name;$("o-company").value=o.company||"";$("o-domains").value=(o.domains||[]).join(", ");$("o-disc").checked=!!o.discoverable;
+    $("o-domains").readOnly=!!ms;$("o-domains").title=ms?"Your Microsoft 365 verified domains":"";
+    paintSource();
   }
+  // ---------------------------------------------------------------- where work cards come from
+  var MAP=[["displayName","Name"],["jobTitle","Title"],["companyName","Company","blank: falls back to “On the card”, then the organisation name"],["businessPhones[0]","Office phone"],["mail","Work email"],
+    ["department","Department","optional",1],["officeLocation","Location","optional",1],["mobilePhone","Mobile","never read: the mobile is each person's own, on their phone",2]];
+  var pickMode=null;
+  function paintSource(){
+    var ms=isMs(),mode=pickMode||(ms?"microsoft":"manual");
+    document.querySelectorAll("[data-mode]").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.mode===mode))});
+    $("privacy").innerHTML=SHIELD+(mode==="microsoft"?"<span><b>We don't store your people's data. It comes straight from your own directory.</b> When a phone checks in, Cardshare asks Microsoft for that one person's card, passes it on and keeps nothing. Stored: your organisation, verified domains, Microsoft tenant ID and consent, signed-in phones, and any overrides you type.</span>"
+      :"<span><b>By hand, Cardshare stores what you type here</b>: name, title, company, office phone and work email for each person, until you remove them. Removing someone deletes their details. Mobiles and Personal cards never leave each person's phone.</span>");
+    $("ms-off").hidden=!(mode==="microsoft"&&!ms);$("ms-on").hidden=!ms;$("ms-map").hidden=mode!=="microsoft";
+    if(ms){var m=S.org.ms;$("ms-tenant").textContent=m.tenantName;$("ms-sync").textContent=when(m.lastSync);$("ms-people").textContent=m.peopleFound+" active";
+      $("ms-perm").textContent="Read-only access granted"+(m.consentedBy?" by "+m.consentedBy:"")+" "+when(m.connectedAt)+": "+m.permissions.join("; ")+"."}
+    var mp=(S.org&&S.org.map)||{};
+    $("map-rows").innerHTML=MAP.map(function(r){
+      var tog=r[3]===1?'<label class="check" style="font-size:12.5px"><input type="checkbox" data-map="'+r[0]+'"'+(mp[r[0]]?" checked":"")+(ms?"":" disabled")+'> on the card</label>':r[3]===2?'<span class="muted small">not read</span>':'<span class="muted small">always</span>';
+      return '<tr class="'+(r[3]===2?"no":"")+'"><td><code>'+r[0]+'</code></td><td class="arrow">→</td><td><b>'+r[1]+'</b>'+(r[2]?'<div class="t">'+esc(r[2])+'</div>':"")+'</td><td>'+tog+'</td></tr>';
+    }).join("");
+    $("ms-brand-row").hidden=!ms;
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-mode]");if(!b)return;
+    var ms=isMs();pickMode=b.dataset.mode;
+    if(pickMode==="manual"&&ms){toast("Disconnect Microsoft 365 first to manage people by hand.");pickMode=null}
+    else if(pickMode==="microsoft"&&ms)pickMode=null;
+    paintSource();
+  });
+  document.addEventListener("change",function(e){
+    var k=e.target.dataset&&e.target.dataset.map;if(!k)return;var mp={};mp[k]=e.target.checked;
+    A.updateOrg({map:mp}).then(function(o){S.org=o;paintSource();refreshLog();toast("Saved. Phones pick it up at their next check-in.")}).catch(fail);
+  });
+  $("ms-connect").addEventListener("click",function(){
+    var n=S.people.length,warn=n?"Connecting deletes the "+n+" people typed in by hand. Phones already signed in stay signed in if the person is in your directory.":"";
+    if(warn&&$("ms-connect").dataset.armed!=="1"){$("ms-connect").dataset.armed="1";$("ms-msg").className="msg warn";$("ms-msg").textContent=warn+" Click again to continue.";return}
+    $("ms-connect").dataset.armed="";$("ms-msg").textContent="";
+    var d=$("consent");if(d.showModal)d.showModal();else d.setAttribute("open","");
+  });
+  $("cs-no").addEventListener("click",function(){$("consent").close();$("ms-msg").className="msg";$("ms-msg").textContent="Not connected: consent was cancelled."});
+  $("cs-yes").addEventListener("click",function(){
+    $("consent").close();$("ms-msg").className="msg";$("ms-msg").textContent="Connecting…";
+    A.connectMicrosoft({tenant:"harbour",consent:true,consentedBy:"it.admin@harbour.example"})
+      .then(function(o){S.org=o;pickMode=null;$("ms-msg").textContent="";paintOrg();paintLogo();return reloadPeople()})
+      .then(function(){refreshLog();toast("Connected to Microsoft 365. Everyone in your directory can now sign in.")})
+      .catch(function(e){$("ms-msg").className="msg err";$("ms-msg").textContent=e.message});
+  });
+  $("ms-disconnect").addEventListener("click",function(){
+    var b=$("ms-disconnect");
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Click again: phones drop their work cards at next check-in";setTimeout(function(){b.dataset.armed="";b.textContent="Disconnect"},5000);return}
+    b.dataset.armed="";b.textContent="Disconnect";
+    A.disconnectMicrosoft().then(function(o){S.org=o;paintOrg();paintLogo();return reloadPeople()}).then(function(){refreshLog();toast("Disconnected. Remove Cardshare in Entra admin centre too.")}).catch(fail);
+  });
+  $("ms-resync").addEventListener("click",function(){A.syncMicrosoft().then(function(o){S.org=o;paintSource();return reloadPeople()}).then(function(){toast("Read from Microsoft 365 just now.")}).catch(fail)});
+  // Logo from the tenant's sign-in branding: bannerLogo → horizontal, squareLogo → mark, squareLogoDark → mark for dark screens.
+  // They go through the same trimming and fit rules as an upload; an upload replaces any of them.
+  function fileFromURL(u,name){return fetch(u).then(function(r){return r.blob()}).then(function(b){try{return new File([b],name,{type:b.type})}catch(e){b.name=name;return b}})}
+  $("ms-brand").addEventListener("click",function(){
+    A.microsoftBranding().then(function(br){
+      var jobs=[["bannerLogo","horizontal"],["squareLogo","mark"],["squareLogoDark","markLight"]].filter(function(x){return br[x[0]]});
+      if(!jobs.length){toast("No sign-in logo is set in Microsoft 365. Upload one here instead.");return}
+      return jobs.reduce(function(p,x){return p.then(function(){
+        return fileFromURL(br[x[0]],x[0]+".svg").then(Logo.prepare).then(function(l){delete l.warnings;l.source="microsoft";return A.putLogo(x[1],l)}).then(function(o){S.org=o});
+      })},Promise.resolve()).then(function(){paintLogo();refreshLog();toast("Using your Microsoft 365 sign-in logos.")});
+    }).catch(fail);
+  });
   $("o-save").addEventListener("click",function(){
     $("o-msg").className="msg";$("o-msg").textContent="Saving…";
     A.updateOrg({name:$("o-name").value,company:$("o-company").value,domains:$("o-domains").value.split(/[\s,;]+/).filter(Boolean),discoverable:$("o-disc").checked})
@@ -287,13 +447,14 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
 
   // ---------------------------------------------------------------- logo
   var VARIANTS=[{k:"horizontal",n:"Horizontal logo",d:"Wordmark or logo with name. Used first."},{k:"mark",n:"Square mark",d:"Icon only. Shown 36 × 36 with the name beside it."},
-    {k:"light",n:"Light version",d:"Optional. For dark phone themes."},{k:"dark",n:"Dark version",d:"Optional. For the light phone theme."}];
+    {k:"light",n:"Light version",d:"Optional. For dark phone themes."},{k:"dark",n:"Dark version",d:"Optional. For the light phone theme."},
+    {k:"markLight",n:"Square mark, light",d:"Optional. Square mark for dark themes."}];
   function paintLogo(){
     var L=S.org.logos||{};
     $("slots").innerHTML=VARIANTS.map(function(v){
       var l=L[v.k];
       return '<div class="slot"><b>'+v.n+'</b><small>'+v.d+'</small><div class="thumb">'+(l?'<img alt="" src="'+esc(l.url)+'">':'<small>None</small>')+'</div>'+
-        (l?'<span class="meta">'+(l.type==="image/svg+xml"?"SVG":"PNG "+l.w+" × "+l.h)+' · ratio '+(+l.ratio).toFixed(2)+(l.trimmed?" · trimmed":"")+'</span>':"")+
+        (l?'<span class="meta">'+(l.type==="image/svg+xml"?"SVG":"PNG "+l.w+" × "+l.h)+' · ratio '+(+l.ratio).toFixed(2)+(l.trimmed?" · trimmed":"")+'</span>'+(l.source==="microsoft"?'<span class="src">From Microsoft 365</span>':""):"")+
         '<div class="row"><label class="btn file">'+(l?"Replace":"Upload")+'<input type="file" accept=".svg,image/svg+xml,image/png,image/webp" data-variant="'+v.k+'" aria-label="Upload '+v.n+'"></label>'+(l?'<button class="x" type="button" data-rm="'+v.k+'">Remove</button>':"")+'</div></div>';
     }).join("");
     var org={name:S.org.name,logos:L},pv=$("previews");pv.textContent="";
@@ -341,9 +502,16 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   });
 
   // ---------------------------------------------------------------- people
-  function status(p){return p.devices?"on":p.invitedAt?"invited":"none"}
+  function status(p){return p.source==="microsoft"&&!p.accountEnabled?"off":p.devices?"on":p.invitedAt?"invited":"none"}
+  var OVF=[["name","Name"],["title","Title"],["company","Company"],["office","Office phone"],["email","Work email"],["department","Department"],["officeLocation","Location"]];
   function paintPeople(){
-    var n=S.people.length;$("count").textContent=S.org.name+" · "+n+(n===1?" person":" people");
+    var ms=S.source==="microsoft"&&isMs(),n=S.people.length;
+    $("count").textContent=S.org.name+" · "+n+(n===1?" person":" people")+(ms?" in Microsoft 365":"");
+    $("p-add").hidden=$("p-import-t").hidden=!!ms;if(ms)$("p-import").hidden=true;
+    $("p-source").hidden=!ms;
+    if(ms)$("p-source").innerHTML=SHIELD+"<span>Read live from <b>"+esc(S.org.ms.tenantName)+"</b>'s directory for this page, not saved. Joiners appear here automatically; to remove someone, disable or delete them in Microsoft 365.</span>";
+    $("p-foot").textContent=ms?"Overrides fill blanks or correct one field for one person; clear a field to use the directory value again. Mobile numbers are never read from Microsoft 365.":"You manage name, title, company, office phone and work email. Each person's mobile and their Personal card stay on their own phone, out of your reach.";
+    if(ms)return paintMsPeople();
     $("p-invite").disabled=!S.people.some(function(p){return !p.invitedAt&&!p.devices});
     if(!n){$("p-table").innerHTML='<p class="empty">No one yet. Add people below or paste them from a spreadsheet.</p>';return}
     var h='<div class="tablewrap"><table><thead><tr><th>Person</th><th>Office phone</th><th>Work email</th><th>Status</th><th><span hidden>Actions</span></th></tr></thead><tbody>';
@@ -361,11 +529,38 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     });
     $("p-table").innerHTML=h+'</tbody></table></div>';
   }
-  function reloadPeople(){return A.employees().then(function(r){S.people=r.employees;paintPeople()})}
+  function paintMsPeople(){
+    $("p-invite").disabled=!S.people.some(function(p){return p.accountEnabled&&!p.invitedAt&&!p.devices});
+    var h='<div class="tablewrap"><table><thead><tr><th>Person</th><th>Office phone</th><th>Work email</th><th>Status</th><th><span hidden>Actions</span></th></tr></thead><tbody>';
+    S.people.forEach(function(p){
+      var st=status(p),ov=p.overrides||{},mark=function(k){return ov[k]?'<span class="ov" title="Override. Microsoft 365 has: '+esc(p.dir[k]||"blank")+'">override</span>':""};
+      var chip=st==="off"?'<span class="chip off">Disabled in Microsoft 365</span>':st==="on"?'<span class="chip on">Signed in</span><div class="t">'+p.devices+(p.devices===1?" phone":" phones")+(p.lastSeen?", checked in "+ago(p.lastSeen):"")+'</div>':st==="invited"?'<span class="chip invited">Invited</span>':'<span class="chip">Not signed in</span>';
+      var fl=S.flash===p.id?' class="flash"':"";
+      if(S.editing===p.id){
+        h+='<tr'+fl+'><td colspan="4"><div class="grid2" style="grid-template-columns:110px minmax(0,1fr)">'+OVF.map(function(f){
+          return '<label for="ov-'+f[0]+'">'+f[1]+'</label><input class="inp" id="ov-'+f[0]+'" value="'+esc(ov[f[0]]||"")+'" placeholder="'+esc(p.dir[f[0]]?"From Microsoft 365: "+p.dir[f[0]]:"Blank in Microsoft 365")+'">'}).join("")+
+          '</div></td><td><div class="acts"><button type="button" data-act="ovsave" data-id="'+p.id+'">Save</button><button type="button" data-act="cancel">Cancel</button></div></td></tr>';
+        return;
+      }
+      var blanks=(p.blanks||[]).filter(function(k){return !ov[k]});
+      h+='<tr'+fl+'><td><div class="n">'+esc(p.name)+mark("name")+'</div><div class="t">'+(p.title?esc(p.title)+mark("title"):'<span class="blank">No title</span>')+' · '+esc(p.company)+mark("company")+'</div>'+
+        (blanks.length?'<div class="blank">Blank in Microsoft 365: '+blanks.join(", ")+'</div>':"")+'</td>'+
+        '<td class="num">'+(p.office?esc(p.office)+mark("office"):'<span class="blank">None</span>')+'</td><td>'+esc(p.email)+mark("email")+'</td><td>'+chip+'</td>'+
+        '<td><div class="acts" style="flex-direction:column;align-items:flex-end"><button type="button" data-act="edit" data-id="'+p.id+'">Override</button>'+
+        '<button type="button" class="simbtn" data-act="simdisable" data-id="'+p.id+'" title="Prototype: as if an IT admin disabled this account in Microsoft 365" aria-label="'+(p.accountEnabled?"Simulate: disabled in Microsoft 365":"Simulate: re-enabled in Microsoft 365")+'">'+(p.accountEnabled?"Simulate: disable":"Simulate: re-enable")+'</button></div></td></tr>';
+    });
+    $("p-table").innerHTML=h+'</tbody></table></div>';
+  }
+  function reloadPeople(){return A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual";paintPeople()})}
   var armed=null;
   document.addEventListener("click",function(e){
     var t=e.target.closest("button[data-act]");if(!t)return;var a=t.dataset.act,id=t.dataset.id;
-    if(a==="edit"){S.editing=id;paintPeople();$("e-title").focus();return}
+    if(a==="edit"){S.editing=id;paintPeople();var f=$("e-title")||$("ov-title");if(f)f.focus();return}
+    if(a==="ovsave"){var patch={};OVF.forEach(function(f){patch[f[0]]=$("ov-"+f[0]).value});
+      A.updateEmployee(id,patch).then(function(){S.editing=null;S.flash=id;return reloadPeople()}).then(function(){refreshLog();toast("Override saved. Their phone updates at its next check-in.");setTimeout(function(){S.flash=null},1500)}).catch(fail);return}
+    if(a==="simdisable"){var g=Sync.mockServer&&Sync.mockServer.graph;if(!g)return;var pp=S.people.filter(function(x){return x.id===id})[0];
+      g.sim.update(id,{accountEnabled:!pp.accountEnabled});
+      reloadPeople().then(function(){toast(pp.accountEnabled?"Disabled in (simulated) Microsoft 365. Their phone drops the work card at its next check-in.":"Re-enabled in (simulated) Microsoft 365. They can sign in again.")});return}
     if(a==="cancel"){S.editing=null;paintPeople();return}
     if(a==="save"){
       A.updateEmployee(id,{name:$("e-name").value,title:$("e-title").value,company:$("e-company").value,office:$("e-office").value,email:$("e-email").value})
@@ -390,14 +585,13 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
       .then(reloadPeople).then(function(){refreshLog();$("csvmsg").textContent="Imported "+ok+(errs.length?". Skipped: "+errs.join("; "):".")});
   });
   $("p-invite").addEventListener("click",function(){
-    A.invite(S.people.filter(function(p){return !p.invitedAt&&!p.devices}).map(function(p){return p.id})).then(function(r){toast("Sign-in links sent to "+r.sent+(r.sent===1?" person":" people")+" (simulated)");return reloadPeople()}).then(refreshLog).catch(fail);
+    A.invite(S.people.filter(function(p){return !p.invitedAt&&!p.devices&&p.accountEnabled!==false}).map(function(p){return p.id})).then(function(r){toast("Sign-in links sent to "+r.sent+(r.sent===1?" person":" people")+" (simulated)");return reloadPeople()}).then(refreshLog).catch(fail);
   });
 
   // ---------------------------------------------------------------- outbox (mock only), activity
   function paintOutbox(){
     if(!Sync.mockServer){$("mail").hidden=true;return}
-    var db;try{db=JSON.parse(localStorage.getItem("cardshare-mock-server-v1")||"null")}catch(e){}
-    var items=((db&&db.outbox)||[]).filter(function(o){var L=db.links[o.token];return L&&!L.used&&L.exp>Date.now()}).slice(0,6);
+    var items=Sync.mockServer.outbox().slice(0,6);
     $("mail").hidden=!items.length;
     $("outbox").innerHTML=items.map(function(o){return '<li><span>Sign-in link to <b>'+esc(o.to)+'</b> · '+hm(o.at)+'</span><button class="btn" type="button" data-open="'+esc(o.token)+'">Open on the phone</button></li>'}).join("");
   }
@@ -406,7 +600,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     paintOutbox();
     return A.activity().then(function(r){$("log").innerHTML=r.activity.map(function(l){return '<li><time>'+hm(l.at)+'</time>'+esc(l.t)+'</li>'}).join("")||'<li>Nothing yet.</li>'});
   }
-  function refreshAll(){return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees})]).then(function(){if(!S.editing)paintPeople();refreshLog()})}
+  function refreshAll(){return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual"})]).then(function(){if(!S.editing){paintPeople();paintSource()}refreshLog()})}
 
   // ---------------------------------------------------------------- phone frame
   function phoneWin(){try{return $("phone").contentWindow}catch(e){return null}}
@@ -414,7 +608,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   $("ph-reload").addEventListener("click",function(){$("phone").src="../";setTimeout(refreshAll,2000)});
   $("ph-off").checked=localStorage.getItem("cardshare-mock-offline")==="1";
   $("ph-off").addEventListener("change",function(){try{localStorage.setItem("cardshare-mock-offline",$("ph-off").checked?"1":"0")}catch(e){}toast($("ph-off").checked?"The phone is offline: check-ins fail, the work card still shows.":"Back online.")});
-  addEventListener("storage",function(e){if(e.key==="cardshare-mock-server-v1")refreshAll()});
+  addEventListener("storage",function(e){if(e.key===(Sync.mockServer&&Sync.mockServer.KEY)||e.key==="cardshare-mock-entra-v1")refreshAll()});
   function show(side){$("sides").dataset.show=side;document.querySelectorAll("#switch button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.show===side))})}
   document.querySelectorAll("#switch button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.show)})});
   $("reset").addEventListener("click",function(){
@@ -424,7 +618,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   });
   if(!Sync.mock){$("disclaimer").textContent="Connected to "+window.CARDSHARE_API+".";$("reset").hidden=true}
 
-  Promise.all([A.org(),A.employees()]).then(function(r){S.org=r[0];S.people=r[1].employees;paintOrg();paintLogo();paintPeople();refreshLog()}).catch(fail);
+  Promise.all([A.org(),A.employees()]).then(function(r){S.org=r[0];S.people=r[1].employees;S.source=r[1].source||"manual";paintOrg();paintLogo();paintPeople();refreshLog()}).catch(fail);
   setInterval(function(){if(!document.hidden&&!S.editing)refreshAll()},15000);
 })();
 </script>

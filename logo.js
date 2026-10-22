@@ -42,6 +42,7 @@
   function initials(n) { var w = String(n || "").replace(/&/g, " ").split(/\s+/).filter(Boolean); return (((w[0] || "")[0] || "") + ((w[1] || "")[0] || "")).toUpperCase() || "?"; }
 
   // ------------------------------------------------------------- choose and size
+  // org: {name, logos:{horizontal, mark, markLight, light, dark}}; markLight = a square mark for dark screens (Microsoft's squareLogoDark).
   // org: {name, logos:{horizontal, mark, light, dark}}; each logo {url, w, h, ratio, lum, vector}.
   // light = a light-coloured version for dark screens, dark = a dark-coloured version for light screens.
   function layout(org, gl) {
@@ -51,7 +52,7 @@
     if (wide) {
       var r = wide.ratio || 1;
       out.logo = wide; out.kind = r >= 0.8 && r <= 1.25 ? "mark" : r >= 2.5 ? "wide" : "stacked";
-    } else if (L.mark) { out.kind = "mark"; out.logo = L.mark; }
+    } else if (L.mark || L.markLight) { out.kind = "mark"; out.logo = darkScreen ? (L.markLight || L.mark) : (L.mark || L.markLight); }
     if (!out.logo) return out;
     var lg = out.logo, w = lg.w || 1, h = lg.h || 1, cap = lg.vector ? Infinity : 1;
     var boxW = out.kind === "mark" ? MARK : SLOT_W, boxH = out.kind === "mark" ? MARK : SLOT_H;
