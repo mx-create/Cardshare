@@ -1,5 +1,8 @@
 # Cardshare
 
+> **Branch `v2-teams`: work in progress, do not merge.** Cardshare v2 adds Work cards managed by an organisation
+> ("Cardshare for Teams") to the main app. See [v2 on this branch](#v2-on-this-branch) below. Production is `main`.
+
 A free contact card that lives on your phone. Make a Personal and a Work card, add your links, and show a QR
 that any phone camera can read. No sign-up, no app, no server: everything stays in the browser.
 
@@ -50,3 +53,30 @@ When `index.html`, `qrcode.js`, the fonts or the icons change, bump `CACHE` in `
 
 Cards, links and the chosen theme are saved in the browser's local storage on that device. Nothing is sent
 anywhere. Clearing the browser's site data, or opening the page on another device, starts from blank.
+
+## v2 on this branch
+
+Free personal mode is unchanged and still needs no sign-in. On top of it:
+
+- **Work tab, two modes.** Filled in by hand as before, or managed: typing a work email at a domain of an organisation
+  on Cardshare suggests signing in ("Harbour Studio manages work cards"), and a line at the top of Work offers it any time.
+- **Magic-link sign-in.** "Check your work email" is worded the same whether or not the address is known. In this
+  prototype no email is sent; an "Open my link" button stands in for tapping it.
+- **Synced, not shared.** After sign-in the phone keeps a device token and a cached copy of the card. The organisation's
+  fields are locked; the mobile is the employee's own, stays on the phone and is never sent.
+- **Check-in.** On open and once a day the phone asks "anything changed?" (ETag). Edits arrive at the next check-in;
+  a removed employee's phone wipes the work card and goes back to manual. "Sign out" does the same locally.
+- **Company logo** in the header on Work (My card and Share), never inside the QR. Fit rules in `logo.js` and
+  `docs/v2-design/LogoRules.dc.html`.
+- **Admin console** at `/admin/`, with the real app in a phone frame to watch changes arrive.
+
+| File | What it is |
+|---|---|
+| `sync.js` | Every server call, plus a mock server in localStorage so all of it runs with no backend |
+| `logo.js` | The 200 × 40 logo slot, its fallbacks, and upload trimming |
+| `admin/index.html` | Admin console (prototype) |
+| `worker/` | Cloudflare Worker skeleton: D1 schema, R2 logos, the same API as the mock. Not deployed |
+| `docs/v2-design/` | The approved phone mock-ups |
+
+To try it: serve the folder (`python3 -m http.server`) and open `/admin/`, or open `/`, go to My card → Work and type
+`maya.patel@harbour.example`. The service worker on this branch uses its own cache name (`cardshare-v2-dev-N`).
