@@ -55,7 +55,7 @@
     if (!out.logo) return out;
     var lg = out.logo, w = lg.w || 1, h = lg.h || 1, cap = lg.vector ? Infinity : 1;
     var boxW = out.kind === "mark" ? MARK : SLOT_W, boxH = out.kind === "mark" ? MARK : SLOT_H;
-    out.chip = typeof lg.lum === "number" && !isNaN(lg.lum) && contrast(lg.lum, gl) < 2.2;
+    out.chip = typeof lg.lum === "number" && !isNaN(lg.lum) && contrast(lg.lum, gl) < (out.kind === "mark" ? 1.5 : 2.2); // a square mark usually carries its own solid shape
     if (out.chip && out.kind !== "mark") { boxW -= CHIP_PAD * 2; boxH = SLOT_H - 4 - 6; }
     var s = Math.min(boxW / w, boxH / h, cap);
     out.dw = Math.max(1, Math.round(w * s)); out.dh = Math.max(1, Math.round(h * s));
