@@ -8,7 +8,43 @@ CREATE TABLE IF NOT EXISTS orgs (
   company        TEXT NOT NULL DEFAULT '',       -- company name on the card (default: name)
   discoverable   INTEGER NOT NULL DEFAULT 1,     -- suggest sign-in when staff type an email at its domains
   brand_version  INTEGER NOT NULL DEFAULT 1,     -- bumped on name/company/logo change; part of every card ETag
+  source         TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual','microsoft')),
+  map_department INTEGER NOT NULL DEFAULT 0,     -- Microsoft: put department on the card
+  map_location   INTEGER NOT NULL DEFAULT 0,     -- Microsoft: put officeLocation on the card
   created_at     INTEGER NOT NULL
+);
+
+-- Microsoft 365 connection: the minimum needed to call Graph for this tenant. No tokens are stored: app-only tokens are
+-- fetched with the client credential when needed and kept in memory. No users are stored.
+CREATE TABLE IF NOT EXISTS ms_tenants (
+  org_id        TEXT PRIMARY KEY REFERENCES orgs(id) ON DELETE CASCADE,
+  tenant_id     TEXT NOT NULL UNIQUE,            -- Entra tenant GUID, from the admin-consent callback
+  tenant_name   TEXT NOT NULL,
+  consented_by  TEXT NOT NULL DEFAULT '',        -- the Cardshare admin who started the consent
+  consented_at  INTEGER NOT NULL,
+  last_sync     INTEGER,                         -- last successful Graph read
+  people_found  INTEGER,                         -- a count only, from the admin console's last People read
+  delta_link    TEXT                             -- reserved for /users/delta if we ever cache; unused today
+);
+
+-- Admin-typed corrections for Microsoft users (fill a blank, fix one field). The only staff details stored in Microsoft mode.
+-- Deleted with the user's leave (next 410), on disconnect, or when the admin clears them.
+CREATE TABLE IF NOT EXISTS ms_overrides (
+  org_id     TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  ms_user_id TEXT NOT NULL,                      -- Entra user object ID
+  field      TEXT NOT NULL CHECK (field IN ('name','title','company','office','email','department','officeLocation')),
+  value      TEXT NOT NULL,
+  PRIMARY KEY (org_id, ms_user_id, field)
+);
+
+-- Short-lived state for the Microsoft redirects (admin consent, phone sign-in). Deleted when used or after 10 minutes.
+CREATE TABLE IF NOT EXISTS oauth_state (
+  state      TEXT PRIMARY KEY,
+  kind       TEXT NOT NULL CHECK (kind IN ('consent','signin')),
+  admin_id   TEXT,
+  nonce      TEXT,
+  return_to  TEXT,
+  expires_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS domains (
@@ -34,30 +70,37 @@ CREATE TABLE IF NOT EXISTS employees (
   office      TEXT NOT NULL DEFAULT '',          -- office phone
   version     INTEGER NOT NULL DEFAULT 1,        -- bumped on every edit; part of the card ETag
   invited_at  INTEGER,
-  removed_at  INTEGER,                           -- set on removal: the next check-in answers 410 and the phone wipes the card
+  removed_at  INTEGER,                           -- unused: removal deletes the row; kept for a possible grace period
   created_at  INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS employees_active_email ON employees(email) WHERE removed_at IS NULL;
 CREATE INDEX IF NOT EXISTS employees_org ON employees(org_id);
 
--- One-time sign-in links. Only a SHA-256 of the token is stored.
+-- One-time sign-in links. Only a SHA-256 of the token is stored. A link is for a hand-typed employee (employee_id),
+-- a Microsoft user (org_id + ms_user_id) or an admin.
 CREATE TABLE IF NOT EXISTS links (
   token_hash  TEXT PRIMARY KEY,
   employee_id TEXT REFERENCES employees(id) ON DELETE CASCADE,
+  org_id      TEXT REFERENCES orgs(id) ON DELETE CASCADE,
+  ms_user_id  TEXT,
   admin_id    TEXT REFERENCES admins(id) ON DELETE CASCADE,
   expires_at  INTEGER NOT NULL,
   used_at     INTEGER
 );
 
--- A signed-in phone. Only a SHA-256 of the device token is stored.
+-- A signed-in phone. Only a SHA-256 of the device token is stored. Manual mode: employee_id. Microsoft mode: org_id +
+-- ms_user_id (the Entra object ID), and nothing else about the person.
 CREATE TABLE IF NOT EXISTS devices (
   token_hash  TEXT PRIMARY KEY,
-  employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+  employee_id TEXT REFERENCES employees(id) ON DELETE SET NULL, -- so a removed person's phone gets 410, not 401
+  org_id      TEXT REFERENCES orgs(id) ON DELETE CASCADE,
+  ms_user_id  TEXT,
   label       TEXT NOT NULL DEFAULT '',
   created_at  INTEGER NOT NULL,
   last_seen   INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS devices_employee ON devices(employee_id);
+CREATE INDEX IF NOT EXISTS devices_ms ON devices(org_id, ms_user_id);
 
 -- Admin console sessions (admins sign in with a magic link too).
 CREATE TABLE IF NOT EXISTS admin_sessions (
@@ -69,7 +112,8 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
 -- Logo metadata; the files live in R2 under logos/<org_id>/<variant>-<brand_version>.<ext>.
 CREATE TABLE IF NOT EXISTS logos (
   org_id    TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
-  variant   TEXT NOT NULL CHECK (variant IN ('horizontal','mark','light','dark')),
+  variant   TEXT NOT NULL CHECK (variant IN ('horizontal','mark','markLight','light','dark')),
+  source    TEXT NOT NULL DEFAULT 'upload' CHECK (source IN ('upload','microsoft')),
   r2_key    TEXT NOT NULL,
   type      TEXT NOT NULL,                       -- image/svg+xml or image/png
   w         INTEGER NOT NULL,

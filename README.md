@@ -56,27 +56,51 @@ anywhere. Clearing the browser's site data, or opening the page on another devic
 
 ## v2 on this branch
 
-Free personal mode is unchanged and still needs no sign-in. On top of it:
+**MVP scope.** An organisation manages its staff's work cards in one of two ways:
 
-- **Work tab, two modes.** Filled in by hand as before, or managed: typing a work email at a domain of an organisation
-  on Cardshare suggests signing in ("Harbour Studio manages work cards"), and a line at the top of Work offers it any time.
-- **Magic-link sign-in.** "Check your work email" is worded the same whether or not the address is known. In this
-  prototype no email is sent; an "Open my link" button stands in for tapping it.
-- **Synced, not shared.** After sign-in the phone keeps a device token and a cached copy of the card. The organisation's
-  fields are locked; the mobile is the employee's own, stays on the phone and is never sent.
-- **Check-in.** On open and once a day the phone asks "anything changed?" (ETag). Edits arrive at the next check-in;
-  a removed employee's phone wipes the work card and goes back to manual. "Sign out" does the same locally.
-- **Company logo** in the header on Work (My card and Share), never inside the QR. Fit rules in `logo.js` and
-  `docs/v2-design/LogoRules.dc.html`.
-- **Admin console** at `/admin/`, with the real app in a phone frame to watch changes arrive.
+1. **Connect Microsoft 365 (Entra ID).** *"We don't store your people's data: it comes straight from your own directory."*
+   When a phone checks in, the Worker reads that one person from Microsoft Graph, maps it to a card, returns it, and keeps
+   nothing. Joiners can sign in straight away; anyone disabled or deleted in Microsoft 365 loses their work card at the
+   next check-in. Read: name, title, company, office phone, work email, optionally department and office location.
+   **Never read:** the mobile.
+2. **By hand**, in the admin panel, for small firms. Cardshare stores what the admin types, until they remove the person;
+   the panel says so.
+
+Google Workspace is phase 2 and shows as "coming soon". Free personal mode is unchanged and still needs no sign-in.
+
+What Cardshare stores for a Microsoft-connected organisation: the org record, its verified domains, the Microsoft tenant
+ID and consent state, one row per signed-in phone (tenant + user object ID + a hashed device token), and any per-person
+overrides the admin types to fill blanks. No Graph tokens are stored; they're fetched when needed and kept in memory.
+
+**On the phone**
+- **Work tab, two modes.** Filled in by hand as before, or managed. Typing a work email at an organisation's domain
+  suggests signing in; a line at the top of Work offers it any time. Microsoft-connected organisations get
+  **Sign in with Microsoft** as well as the emailed link.
+- **Magic link.** "Check your work email" is worded the same whether or not the address is known. In the prototype no
+  email is sent; an "Open my link" button stands in for tapping it.
+- **Synced, not shared.** The phone keeps a device token and a cached copy of the card. The organisation's fields are
+  locked; the mobile is the employee's own and is never sent.
+- **Check-in.** On open and once a day the phone asks "anything changed?" (ETag). Changes arrive at the next check-in; a
+  leaver's phone wipes the card and goes back to manual. "Sign out" does the same locally.
+- **Company logo** in the header on Work (My card and Share), never inside the QR (`logo.js`,
+  `docs/v2-design/LogoRules.dc.html`).
+
+**Admin console** (`/admin/`)
+- Choose where work cards come from: Microsoft 365 / by hand / Google (coming soon). Each has its own privacy line.
+- Microsoft: connect through a simulated admin-consent screen; connected state (tenant, last sync, people found); field
+  mapping; per-person overrides for blanks or wrong values; "Simulate: disable" to show a leaver; Disconnect.
+- Logo: upload, or "Use our Microsoft 365 sign-in logo" (banner, square, square dark), all through the same fit rules.
+- The real app runs in a phone frame, with "Check in now" and an Offline switch.
 
 | File | What it is |
 |---|---|
-| `sync.js` | Every server call, plus a mock server in localStorage so all of it runs with no backend |
+| `sync.js` | Every server call, plus a mock server and a simulated Microsoft 365 tenant in localStorage, so all of it runs with no backend |
 | `logo.js` | The 200 × 40 logo slot, its fallbacks, and upload trimming |
 | `admin/index.html` | Admin console (prototype) |
-| `worker/` | Cloudflare Worker skeleton: D1 schema, R2 logos, the same API as the mock. Not deployed |
+| `worker/` | Cloudflare Worker skeleton: D1 schema, R2 logos, Graph client and Entra app notes, the same API as the mock. Not deployed |
 | `docs/v2-design/` | The approved phone mock-ups |
 
-To try it: serve the folder (`python3 -m http.server`) and open `/admin/`, or open `/`, go to My card → Work and type
-`maya.patel@harbour.example`. The service worker on this branch uses its own cache name (`cardshare-v2-dev-N`).
+To try it: serve the folder (`python3 -m http.server`) and open `/admin/`. For Microsoft, pick Microsoft 365 → Connect →
+Accept, then on the phone go to My card → Work → "Sign in with work email", type `priya.shah@harbour.example`, and tap
+Sign in with Microsoft. Without connecting, type `maya.patel@harbour.example` on Work to use the hand-typed list.
+The service worker on this branch uses its own cache name (`cardshare-v2-dev-N`).

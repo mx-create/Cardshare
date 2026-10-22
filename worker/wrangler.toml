@@ -7,6 +7,8 @@ compatibility_date = "2026-10-01"
 
 [vars]
 APP_ORIGIN = "https://cardshare.io"          # where sign-in links point (<APP_ORIGIN>/?signin=<token>) and CORS allows
+API_ORIGIN = "https://api.cardshare.io"      # this Worker; Microsoft redirect URIs are registered under it
+MS_CLIENT_ID = "REPLACE_WITH_ENTRA_APP_CLIENT_ID"   # multi-tenant app registration (public, not a secret)
 MAIL_FROM = "sign-in@cardshare.io"
 
 [[d1_databases]]
@@ -19,4 +21,5 @@ binding = "LOGOS"
 bucket_name = "cardshare-logos"
 
 # Secrets (never committed):
-#   MAIL_API_KEY   key for the email provider that sends sign-in links
+#   MAIL_API_KEY       key for the email provider that sends sign-in links
+#   MS_CLIENT_SECRET   Entra app client secret (prefer a certificate credential in production; see README)
