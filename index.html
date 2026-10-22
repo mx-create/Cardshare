@@ -212,6 +212,62 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .swatch i{border:2px solid var(--line);box-shadow:none}
 .swatch[aria-checked="true"]{color:var(--ink)}
 .swatch[aria-checked="true"] i{border-color:var(--focus)}
+/* v2: Work cards managed by an organisation (docs/v2-design). The Teams colour marks anything that comes from the organisation. */
+:root{--teams:#7366e8;--teams-hi:#a79df5;--teams-bg:#2a2230;--teams-line:#5b4fc4;--teams-ink:#d6ceea}
+:root[data-theme="daylight"]{--teams:#6654e8;--teams-hi:#5b48e0;--teams-bg:#eeebff;--teams-line:#b9b0f5;--teams-ink:#4a3f8c}
+:root[data-theme="ocean"]{--teams-bg:#1c2540;--teams-line:#4a51a8}
+.brand{display:contents}
+.cologo-top{align-self:center}
+.signline{align-self:center;margin:-8px 0 -6px;border:0;background:none;padding:4px 6px;color:var(--ink-soft);font:400 13px var(--body);cursor:pointer;text-align:center}
+.signline b{color:var(--teams-hi);font-weight:600}
+.teams{display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:20px;background:var(--teams-bg);border:1px solid var(--teams-line)}
+.teams-h{display:flex;gap:12px;align-items:center}
+.teams-h i{flex:none;width:40px;height:40px;border-radius:12px;background:var(--teams);display:flex;align-items:center;justify-content:center}
+.teams-h i svg{width:22px;height:22px}
+.teams-h div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.teams-h b{font-size:16px;font-weight:600}
+.teams-h span{font-size:13px;line-height:1.4;color:var(--teams-ink)}
+.btn.teams-btn{background:var(--teams);color:#fff;box-shadow:0 10px 26px -10px var(--teams)}
+.btn.teams-btn:disabled{opacity:.6;cursor:default}
+.textbtn.soft{color:var(--ink-soft);text-decoration:none;font-weight:500;font-size:14px}
+.teams .fmsg{margin:0}
+.teams.removed{border-style:dashed;border-color:var(--err);background:none}
+.teams.removed b{color:var(--err)}
+.teams.removed span{font-size:13.5px;color:var(--ink-soft)}
+.sent{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:4px 6px}
+.sent-ico{width:88px;height:88px;border-radius:28px;background:var(--teams-bg);border:1px solid var(--teams-line);display:flex;align-items:center;justify-content:center}
+.sent-ico svg{width:40px;height:40px}
+.sent h2{margin:0;font-size:24px;font-weight:600;letter-spacing:-.02em}
+.sent>p{margin:0;font-size:15px;line-height:1.55;color:var(--ink-soft)}
+.sent>p b{color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.steps{list-style:none;margin:0;padding:16px;width:100%;display:flex;flex-direction:column;gap:12px;text-align:left;background:var(--panel);border-radius:18px}
+.steps li{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.45;color:var(--ink-soft)}
+.steps i{flex:none;width:24px;height:24px;border-radius:50%;background:var(--panel-hi);color:var(--lime-hi);font:700 13px var(--body);font-style:normal;display:flex;align-items:center;justify-content:center}
+:root[data-theme="daylight"] .steps i{color:var(--violet)}
+.sent .acts{width:100%;display:flex;flex-direction:column;gap:10px}
+.btn.outline{background:none;border:1px solid var(--line);box-shadow:none}
+.btn.outline:disabled{color:var(--ink-dim);cursor:default}
+.proto{font-size:12px;color:var(--ink-dim)}
+.synced{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border-radius:14px;background:var(--teams-bg);border:1px solid var(--teams-line);color:var(--teams-ink);font:400 13px var(--body);text-align:left;cursor:pointer}
+.synced svg{flex:none;width:18px;height:18px;color:var(--teams-hi)}
+.synced span{flex:1;min-width:0}
+.synced b{color:var(--ink);font-weight:600}
+.synced.busy svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.synced.busy svg{animation:none}}
+.field.locked{padding-block:15px;gap:10px}
+.field.locked .v{flex:1;min-width:0;font:500 15.5px var(--body);overflow-wrap:anywhere}
+.field.locked svg{flex:none;width:14px;height:14px;color:var(--ink-dim)}
+.field.locked .lbl{color:var(--ink-dim);font-size:12.5px;white-space:nowrap}
+.lockrows .field + .field{border-top:1px solid var(--hair)}
+.lockrows + .field,.field + .lockrows[hidden] + .field{border-top:1px solid var(--hair)}
+.uptodate{margin:14px 0 0!important}
+.field.mine{background:var(--panel-hi);border-radius:0 0 var(--r) var(--r)}
+.field.mine label{color:var(--violet-hi)}
+.uptodate{display:flex;align-items:center;justify-content:center;gap:8px;margin:-6px 0 -8px;font-size:13px;color:var(--ink-soft)}
+.uptodate svg{width:16px;height:16px;flex:none;color:var(--lime-hi)}
+:root[data-theme="daylight"] .uptodate svg{color:var(--ok)}
+.uptodate.stale svg{color:var(--warn)}
 </style>
 <script>try{var t=localStorage.getItem("cardshare-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
@@ -219,7 +275,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 
 <main class="app">
   <div class="top" id="top">
-    <div class="logo" id="logo" aria-label="card share"><span>card</span><span>share</span></div>
+    <div class="brand" id="brand">
+      <div class="logo" id="logo" aria-label="card share"><span>card</span><span>share</span></div>
+      <!-- v2: on a managed Work card (My card → Work, and Share → Work) the company logo takes the Cardshare logo's place -->
+      <div class="cologo-top" id="cologo" hidden></div>
+    </div>
     <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="dialog" aria-label="Change theme">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
     </button>
@@ -245,20 +305,49 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       <button role="tab" id="ek-work" data-kind="work" aria-selected="false">Work</button>
       <button role="tab" id="ek-links" data-kind="links" aria-selected="false">Links</button>
     </div>
-    <p class="note privacy">Your details stay in this browser. No account, nothing sent to a server. <a href="about/#privacy">How</a></p>
+    <!-- v2: a way into a managed Work card, at the top of Work while it is filled in by hand -->
+    <button class="signline" id="w-signline" type="button" hidden>Work card from your organisation? <b>Sign in with work email</b></button>
+    <div class="teams removed" id="w-removed" role="status" hidden><b>Work card removed</b><span id="wr-text"></span><button class="textbtn soft" id="wr-ok" type="button">OK</button></div>
+    <p class="note privacy" id="privacy"><span id="privacy-text">Your details stay in this browser. No account, nothing sent to a server.</span> <a href="about/#privacy">How</a></p>
     <p class="note lead" id="links-lead" hidden>Each link gets its own QR on the Share tab.</p>
+    <!-- v2: shown above a managed Work card; tap to check for changes now -->
+    <button class="synced" id="w-synced" type="button" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span id="ws-text"></span></button>
     <form class="panel fields" id="card-form" autocomplete="off">
       <div class="field"><input id="f-name" placeholder="Your name"><label for="f-name">Name</label></div>
       <div class="field"><input id="f-title" placeholder="What you do"><label for="f-title">Title</label></div>
       <div class="field"><input id="f-org" placeholder="Company or brand"><label for="f-org">Company</label></div>
-      <div class="field col" id="f-tel-field"><div class="frow"><button class="cc" id="f-tel-cc" type="button" aria-haspopup="dialog"></button><input id="f-tel" type="tel" inputmode="tel"><label for="f-tel">Mobile</label></div><p class="fmsg" id="f-tel-msg" hidden></p></div>
+      <!-- v2: the organisation's fields on a managed Work card, read-only -->
+      <div class="lockrows" id="lockrows" hidden></div>
+      <div class="field col" id="f-tel-field"><div class="frow"><button class="cc" id="f-tel-cc" type="button" aria-haspopup="dialog"></button><input id="f-tel" type="tel" inputmode="tel"><label for="f-tel" id="f-tel-label">Mobile</label></div><p class="fmsg" id="f-tel-msg" hidden></p></div>
       <div class="field col" id="f-email-field"><div class="frow"><input id="f-email" type="email" inputmode="email" placeholder="you@example.com" autocapitalize="off" spellcheck="false"><label for="f-email">Email</label></div><p class="fmsg" id="f-email-msg" hidden></p></div>
     </form>
+    <p class="note" id="lock-note" hidden></p>
     <div class="qrmeter" id="qrmeter" hidden>
       <div class="qm-top"><span>QR size</span><b id="qm-state"></b></div>
       <div class="qm-bar" aria-hidden="true"><i></i><i></i><i></i><span id="qm-mark"></span></div>
       <div class="qm-key" aria-hidden="true"><span>Quick to scan</span><span>Dense</span><span>Too big</span></div>
       <p id="qm-text"></p>
+    </div>
+    <!-- v2: the work email's domain belongs to an organisation on Cardshare (or they asked to sign in from the line above) -->
+    <div class="teams" id="w-teams" hidden>
+      <div class="teams-h"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg></i><div><b id="wt-title"></b><span id="wt-text"></span></div></div>
+      <div id="wt-ask" hidden><input class="ccsearch" id="wt-email" type="email" inputmode="email" placeholder="you@company.com" autocomplete="email" autocapitalize="off" spellcheck="false" aria-label="Work email"></div>
+      <p class="fmsg err" id="wt-msg" hidden></p>
+      <button class="btn teams-btn" id="wt-send" type="button">Send sign-in link</button>
+      <button class="textbtn soft" id="wt-no" type="button">No thanks, I'll fill it in myself</button>
+    </div>
+    <!-- v2: after "Send sign-in link". Worded the same whether or not the address is known, so nobody can probe who uses Cardshare. -->
+    <div class="sent" id="w-sent" hidden>
+      <div class="sent-ico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--teams-hi)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+      <h2>Check your work email</h2>
+      <p id="ws-line"></p>
+      <ol class="steps"><li><i>1</i>Tap the link in the email</li><li><i>2</i>Your work card downloads to this phone</li><li><i>3</i>It updates itself when your organisation changes it</li></ol>
+      <div class="acts">
+        <button class="btn teams-btn" id="ws-open" type="button" hidden>Open my link</button>
+        <p class="proto" id="ws-proto" hidden>Prototype: no email is sent. This button stands in for tapping the link in it.</p>
+        <button class="btn outline" id="ws-resend" type="button"></button>
+        <button class="textbtn soft" id="ws-other" type="button">Use a different email</button>
+      </div>
     </div>
     <div class="view" id="link-form" hidden>
     <div class="panel fields">
@@ -285,6 +374,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     </div>
     </div>
     <button class="btn primary" id="save-card" type="button">Save and show my QR</button>
+    <button class="textbtn soft" id="w-signout" type="button" hidden></button>
     <p class="note" id="edit-note"></p>
   </section>
 
@@ -304,6 +394,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         <button class="btn primary" id="tb-edit" type="button">Edit my card</button>
       </div>
       <div class="who"><span class="n" id="w-name"></span><span class="p" id="w-tel"></span><span class="t" id="w-title"></span></div>
+      <!-- v2: under a managed Work card's QR -->
+      <p class="uptodate" id="uptodate" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="ut-text"></span></p>
       <!-- Monzo and UPI only: an amount for this payment; the QR redraws as it is typed. Kept for this visit, not saved. -->
       <label class="amount" id="amount-row" hidden><span id="amount-cur">£</span><input id="amount" inputmode="decimal" placeholder="Amount (optional)" autocomplete="off" aria-label="Amount"></label>
     </div>
@@ -355,6 +447,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 
 <script src="qrcode.js"></script>
 <script src="icons.js"></script>
+<script src="sync.js"></script>
+<script src="logo.js"></script>
 <script>
 (function(){
   var KEY="cardshare-lite-v2",OLD="cardshare-lite-card";
@@ -381,6 +475,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   var links=blankLinks();LK.forEach(function(k){if(data.links&&typeof data.links[k]==="string")links[k]=data.links[k]});
   data={web:data.web||"",webCard:data.webCard!==false,cards:data.cards,links:links};
   var draft=copy(data),editKind="personal",shareKind="personal",linkSel="",tipOn=false;
+  // v2: a Work card managed by an organisation. ws is the synced state from sync.js (null in free, manual mode);
+  // wflow is the sign-in flow on the Work tab: {stage:"nudge"|"ask"|"sent", email, org}. curView is the screen showing.
+  var Sync=window.CardshareSync||null,ws=Sync?Sync.state():null,wflow=null,curView="share";
+  if(ws&&!ws.card)ws=null;
+  if(ws)isNew=false; // a synced Work card counts as a saved card
   var amt={monzo:"",upi:""}; // typed on Share for this visit only
   var $=function(id){return document.getElementById(id)};
 
@@ -392,6 +491,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     if(c.org)L.push("ORG:"+esc(c.org));
     if(c.title)L.push("TITLE:"+esc(c.title));
     var tel=e164(readPhone(c.tel,HOME));if(tel)L.push("TEL;TYPE=CELL:"+tel);
+    if(c.office){var ot=e164(readPhone(c.office,HOME))||c.office.replace(/[^\d+]/g,"");if(ot)L.push("TEL;TYPE=WORK,VOICE:"+ot)} // v2: managed Work cards only
     if(c.email)L.push("EMAIL:"+esc(c.email));
     if(web)L.push("URL:"+url(web));
     L.push("END:VCARD");return L.join("\r\n");
@@ -621,7 +721,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     select("sk-",["personal","work","links"],shareKind);
     $("qrbox").classList.remove("empty");$("qr").hidden=false;$("empty-msg").hidden=true;$("empty-btn").hidden=true;
     var isLinks=shareKind==="links",items=isLinks?linkItems():[];
-    $("amount-row").hidden=true;$("toobig").hidden=true;$("qrbox").hidden=false;
+    $("amount-row").hidden=true;$("toobig").hidden=true;$("qrbox").hidden=false;$("uptodate").hidden=true;updateBrand();
     $("sk-links").textContent="Links";
     if(isLinks){
       $("qr-title").textContent="Links";
@@ -640,14 +740,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
         :"Their camera opens your "+(it.id==="web"?"website":it.n)+". Showing the QR needs no signal on your phone.";
       return;
     }
-    var c=data.cards[shareKind];
-    $("qr-title").textContent=LABEL[shareKind];
+    var c=cardFor(shareKind),mg=shareKind==="work"&&!!ws;
+    $("qr-title").textContent=mg?"Work \u00b7 "+ws.org.name:LABEL[shareKind];
     if(!c.name){empty("No "+shareKind+" card yet","Add "+shareKind+" card");return}
-    var vc=vcard(c,cardWeb(data));
+    var vc=vcard(c,mg?"":cardWeb(data));
     if(bytes(vc)>QR_MAX){tooBig(c);return}
     drawQR(vc);
     $("w-name").textContent=c.name;$("w-tel").textContent=prettyPhone(c.tel)||c.email;$("w-title").textContent=[c.title,c.org].filter(Boolean).join(" · ");
-    $("share-help").textContent="Works with no signal. Their camera offers to add you as a contact.";
+    $("share-help").textContent=mg?"The QR is built on this phone from your synced card. Nothing is sent when someone scans it.":"Works with no signal. Their camera offers to add you as a contact.";
+    if(mg){$("w-tel").textContent=prettyPhone(c.tel)||c.office||c.email;paintUpToDate()}
   }
   // In place of a QR nobody could scan: what is taking the space, and a way to trim each.
   function tooBig(c){
@@ -668,7 +769,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   // Under the card form once the card gets dense: where it sits, and what would help most.
   function updateMeter(){
     var m=$("qrmeter");
-    if(editKind==="links"){m.hidden=true;return 0}
+    if(editKind==="links"||managedEdit()){m.hidden=true;return 0}
     var c=draft.cards[editKind],n=c.name.trim()?bytes(vcard(c,cardWeb(draft))):0;
     m.hidden=n<=QR_DENSE;if(m.hidden)return n;
     var big=n>QR_MAX,top=heavy(c,cardWeb(draft))[0];
@@ -689,10 +790,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     $("save-card").textContent=onLinks?"Save and show QR":"Save and show my QR";
     $("edit-note").textContent=onLinks?"Usernames only, except Spotify, Stripe and your own link, which take a pasted link. UPI takes your UPI ID."
       :isNew?"Fill in only what you want to share. You can change it any time.":"";
+    paintWork();
+    if(editKind==="work"&&!ws&&!wflow&&Sync)lookForOrg(draft.cards.work.email||"");
   }
   function show(view){
+    curView=view;
     ["edit","share"].forEach(function(v){$("view-"+v).hidden=v!==view;$("tab-"+v).setAttribute("aria-selected",String(v===view))});
     $("intro").hidden=!isNew;
+    updateBrand();
   }
   // After a save or a change of theme the logo gives way to a nudge for a few seconds, then comes back; "lead" is the bold
   // word it opens with. The first save on a phone that can add Cardshare to its home screen offers that, once; any other
@@ -709,11 +814,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     if(hint){a=document.createElement("button");a.type="button";a.textContent="Add";a.addEventListener("click",function(){done();install(true)})}
     else{a=document.createElement("a");a.href=BEER;a.target="_blank";a.rel="noopener";a.textContent="Buy me a beer"}
     a.className="btn small";t.append(p,a);
-    tipOn=true;$("logo").hidden=$("theme-btn").hidden=true;$("top").append(t);
+    tipOn=true;$("brand").hidden=$("theme-btn").hidden=true;$("top").append(t);
     var timer=setTimeout(done,hint?8000:5000);
     function done(){
       if(gone)return;gone=true;clearTimeout(timer);t.classList.add("out");
-      setTimeout(function(){t.remove();$("logo").hidden=$("theme-btn").hidden=false;tipOn=false},300);
+      setTimeout(function(){t.remove();$("brand").hidden=$("theme-btn").hidden=false;tipOn=false},300);
     }
   }
 
@@ -726,6 +831,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     var th=THEMES.filter(function(x){return x.id===theme})[0];
     document.documentElement.setAttribute("data-theme",theme);
     var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",th.g);
+    updateBrand(true); // a logo's light chip depends on the theme's ground
     var box=$("theme-chips");box.textContent="";
     THEMES.forEach(function(x){
       var b=document.createElement("button");b.type="button";b.className="chip swatch";b.setAttribute("role","radio");b.setAttribute("aria-checked",String(x.id===theme));
@@ -763,12 +869,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("picker").addEventListener("click",function(e){if(e.target===$("picker"))closePicker()});
   $("picker-edit").addEventListener("click",function(){closePicker();openLinks()});
   ["personal","work","links"].forEach(function(k){$("ek-"+k).addEventListener("click",function(){editKind=k;loadForm()})});
-  var telField=PhoneField("f-tel",false,function(v){draft.cards[editKind].tel=v;updateMeter()});
+  var ownTel=ws&&ws.own?ws.own.tel||"":""; // v2: the mobile typed on a managed Work card, before it is saved on this phone
+  var telField=PhoneField("f-tel",false,function(v){if(managedEdit()){ownTel=v;return}draft.cards[editKind].tel=v;updateMeter()});
   var waField=PhoneField("l-whatsapp",true,function(v){draft.links.whatsapp=v});
   F.forEach(function(k){if(k!=="tel")$("f-"+k).addEventListener("input",function(){draft.cards[editKind][k]=$("f-"+k).value;updateMeter()})});
   // Email: tidied and checked when they leave the field; once a message shows, it updates as they fix it.
   $("f-email").addEventListener("blur",function(){var v=tidyEmail($("f-email").value);$("f-email").value=v;draft.cards[editKind].email=v;paintEmail(true)});
-  $("f-email").addEventListener("input",function(){if(!$("f-email-msg").hidden)paintEmail(true)});
+  $("f-email").addEventListener("input",function(){if(!$("f-email-msg").hidden)paintEmail(true);if(editKind==="work")lookForOrg($("f-email").value)});
   $("f-web").addEventListener("input",function(){draft.web=$("f-web").value});
   $("f-webcard").addEventListener("change",function(){draft.webCard=$("f-webcard").checked});
   LK.forEach(function(k){if(k!=="whatsapp")$("l-"+k).addEventListener("input",function(){draft.links[k]=$("l-"+k).value})});
@@ -780,6 +887,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   $("empty-btn").addEventListener("click",function(){shareKind==="links"?openLinks("f-web"):openEdit(shareKind)});
   $("save-card").addEventListener("click",function(){
     if(editKind==="links"){saveLinks();return}
+    if(managedEdit()){saveOwn();return}
     if(!draft.cards[editKind].name.trim()){$("edit-note").textContent="Add a name to your "+editKind+" card first, or switch to the other card.";$("f-name").focus();return}
     ["personal","work"].forEach(function(kd){F.forEach(function(k){draft.cards[kd][k]=(draft.cards[kd][k]||"").trim()});draft.cards[kd].email=tidyEmail(draft.cards[kd].email)});
     if(cardProblems())return;
@@ -832,6 +940,205 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   }
   $("install").addEventListener("click",function(){install(false)});
   if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+
+  // ================================================================ v2: Work cards from an organisation
+  // Free mode is untouched: with no sign-in nothing here calls sync.js except the domain lookup on the Work email,
+  // which sends only the part after @ (and is skipped entirely if sync.js is missing).
+  var LOCKSVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Managed"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  var DKEY="cardshare-teams-dismissed",RKEY="cardshare-work-removed",RESEND=60;
+  function managedEdit(){return editKind==="work"&&!!ws}
+  // The card a QR is built from: a managed Work card is the organisation's fields plus the employee's own mobile.
+  function cardFor(kind){
+    if(kind!=="work"||!ws)return data.cards[kind];
+    var c=ws.card;return {name:c.name||"",title:c.title||"",org:c.org||"",email:c.email||"",office:c.office||"",tel:(ws.own&&ws.own.tel)||""};
+  }
+  function orgName(){return ws?ws.org.name:wflow&&wflow.org?wflow.org.name:"your organisation"}
+  function when(t){
+    if(!t)return "not yet";var d=new Date(t),n=new Date(),hm=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+    if(n-d<60000)return "just now";
+    if(d.toDateString()===n.toDateString())return "today "+hm;
+    var y=new Date(n);y.setDate(n.getDate()-1);if(d.toDateString()===y.toDateString())return "yesterday "+hm;
+    return d.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+hm;
+  }
+  // The header: the company logo on a managed Work card (My card → Work, Share → Work), the Cardshare logo everywhere else.
+  var brandKey="";
+  function updateBrand(force){
+    var on=!!ws&&window.CardshareLogo&&((curView==="edit"&&editKind==="work"&&!wflow)||(curView==="share"&&shareKind==="work"));
+    $("logo").hidden=!!on;$("cologo").hidden=!on;
+    if(!on){brandKey="";return}
+    var key=JSON.stringify([ws.etag,document.documentElement.getAttribute("data-theme")]);
+    if(key===brandKey&&!force)return;brandKey=key;
+    $("cologo").textContent="";$("cologo").append(CardshareLogo.render(ws.org));
+  }
+  function dismissed(){try{return JSON.parse(localStorage.getItem(DKEY)||"[]")}catch(e){return []}}
+  function domainOf(v){v=tidyEmail(v);var i=v.lastIndexOf("@");return i>0?v.slice(i+1):""}
+  // As the Work email is typed: does its domain belong to an organisation on Cardshare? Asked once per domain, after a pause.
+  var lookT=0,looked={};
+  function lookForOrg(v){
+    clearTimeout(lookT);if(!Sync||ws||(wflow&&wflow.stage!=="nudge"))return;
+    var dom=domainOf(v);
+    if(wflow&&wflow.stage==="nudge"&&domainOf(wflow.email)!==dom){wflow=null;paintWork()}
+    if(emailCheck(v).k!=="ok"||dismissed().indexOf(dom)>=0)return;
+    lookT=setTimeout(function(){
+      var p=looked[dom]||(looked[dom]=Sync.discover(tidyEmail(v)));
+      p.then(function(org){
+        if(!org||ws||editKind!=="work"||domainOf($("f-email").value)!==dom||(wflow&&wflow.stage!=="nudge"))return;
+        wflow={stage:"nudge",email:tidyEmail($("f-email").value),org:org};paintWork();
+      });
+    },500);
+  }
+  // Everything on the Work tab that v2 adds, for the state it is in: manual, a nudge or sign-in form, link sent, or managed.
+  function paintWork(){
+    var onWork=editKind==="work",mg=onWork&&!!ws,stage=onWork&&!ws&&wflow?wflow.stage:"",sent=stage==="sent";
+    var removed=null;try{removed=JSON.parse(localStorage.getItem(RKEY)||"null")}catch(e){}
+    $("w-removed").hidden=!(onWork&&!ws&&removed&&!wflow);
+    if(removed)$("wr-text").textContent=removed.why==="removed"?removed.org+" removed your work card, so it is no longer on this phone. Your Personal card and Links are untouched. If this is a mistake, ask your admin."
+      :"You were signed out of "+removed.org+" and its work card was taken off this phone. Your Personal card and Links are untouched.";
+    $("w-signline").hidden=!(onWork&&!ws&&!wflow&&Sync);
+    $("w-teams").hidden=!(stage==="nudge"||stage==="ask");
+    $("w-sent").hidden=!sent;
+    $("w-synced").hidden=!mg;$("lockrows").hidden=!mg;$("lock-note").hidden=!mg;$("w-signout").hidden=!mg;
+    ["f-name","f-title","f-org"].forEach(function(id){$(id).parentNode.hidden=mg});$("f-email-field").hidden=mg;
+    $("f-tel-field").classList.toggle("mine",mg);$("f-tel-label").textContent=mg?"Mobile · yours":"Mobile";
+    $("card-form").hidden=editKind==="links"||sent;
+    $("save-card").hidden=sent||stage==="nudge"||stage==="ask";
+    $("privacy").hidden=sent;
+    $("privacy-text").textContent=onWork&&(mg||stage)?"Personal and Links stay on this phone. Work cards come from your organisation.":"Your details stay in this browser. No account, nothing sent to a server.";
+    if(sent){$("qrmeter").hidden=true;$("edit-note").textContent=""}
+    if(stage==="nudge"){
+      $("wt-title").textContent=wflow.org.name+" manages work cards";
+      $("wt-text").textContent="Your title, company and office details fill in for you and stay up to date.";
+      $("wt-ask").hidden=true;
+    }else if(stage==="ask"){
+      $("wt-title").textContent="Sign in with your work email";
+      $("wt-text").textContent="If your organisation manages work cards on Cardshare, your title, company and office details fill in for you and stay up to date.";
+      $("wt-ask").hidden=false;
+    }
+    if(stage!=="nudge"&&stage!=="ask")$("wt-msg").hidden=true;
+    if(sent){
+      $("ws-line").innerHTML="";
+      $("ws-line").append("If "+(wflow.org?wflow.org.name:"your organisation")+" uses Cardshare, a sign-in link is on its way to ");
+      var b=document.createElement("b");b.textContent=wflow.email;$("ws-line").append(b,". Open it on this phone.");
+      $("ws-open").hidden=$("ws-proto").hidden=!(Sync&&Sync.mock);
+      paintResend();
+    }
+    if(mg){
+      var c=ws.card,rows=[["Name",c.name],["Title",c.title],["Company",c.org],["Office",c.office],["Email",c.email]],box=$("lockrows");box.textContent="";
+      rows.forEach(function(r){if(!r[1])return;
+        var f=document.createElement("div");f.className="field locked";
+        var v=document.createElement("span");v.className="v";v.textContent=r[1];
+        var l=document.createElement("span");l.className="lbl";l.textContent=r[0];
+        f.append(v);f.insertAdjacentHTML("beforeend",LOCKSVG);f.append(l);box.append(f)});
+      $("lock-note").textContent="Locked fields come from "+ws.org.name+". Your mobile stays on this phone and is never sent to them.";
+      $("save-card").textContent="Show my work QR";
+      $("w-signout").textContent=signoutArmed?"Tap again to sign out of "+ws.org.name:"Sign out of "+ws.org.name;
+      paintSynced();
+      if(document.activeElement!==$("f-tel"))telField.load(ownTel);
+      $("edit-note").textContent="";
+    }
+    updateBrand();
+  }
+  var syncBusy=false,syncNote="";
+  function paintSynced(){
+    if(!ws)return;var b=$("w-synced");b.classList.toggle("busy",syncBusy);
+    $("ws-text").innerHTML="";var o=document.createElement("b");o.textContent=ws.org.name;
+    $("ws-text").append("Managed by ",o," · "+(syncBusy?"checking…":syncNote||"synced "+when(ws.syncedAt)));
+    b.setAttribute("aria-label","Managed by "+ws.org.name+". "+(syncBusy?"Checking for changes":"Synced "+when(ws.syncedAt)+". Tap to check for changes now"));
+  }
+  function paintUpToDate(){
+    var stale=!ws.syncedAt||Date.now()-ws.syncedAt>2*Sync.DAY;
+    $("uptodate").hidden=false;$("uptodate").classList.toggle("stale",stale);
+    $("ut-text").textContent=(stale?"Last synced "+when(ws.syncedAt)+" with ":"Up to date with ")+ws.org.name+" · works offline";
+  }
+  // Resend: allowed again after a minute, with the countdown on the button.
+  var resendAt=0,resendT=0;
+  function paintResend(){
+    clearTimeout(resendT);var left=Math.ceil((resendAt-Date.now())/1000),b=$("ws-resend");
+    b.disabled=left>0;b.textContent=left>0?"Resend link · "+Math.floor(left/60)+":"+("0"+left%60).slice(-2):"Resend link";
+    if(left>0&&wflow&&wflow.stage==="sent")resendT=setTimeout(paintResend,1000);
+  }
+  function sendLink(email){
+    var r=emailCheck(email);
+    if(r.k!=="ok"&&r.k!=="warn"){$("wt-msg").hidden=false;$("wt-msg").textContent=r.k==="none"?"Enter your work email, like name@company.com.":r.t;return}
+    email=tidyEmail(email);$("wt-send").disabled=true;
+    var org=wflow&&wflow.org&&domainOf(wflow.email)===domainOf(email)?wflow.org:null;
+    Promise.all([Sync.requestLink(email),org?org:Sync.discover(email)]).then(function(a){
+      wflow={stage:"sent",email:email,org:a[1]||null};resendAt=Date.now()+RESEND*1000;
+      try{localStorage.removeItem(RKEY)}catch(e){}
+      paintWork();scrollTo(0,0);
+    }).catch(function(){$("wt-msg").hidden=false;$("wt-msg").textContent="No connection. Signing in needs signal; your cards still work without it."})
+      .then(function(){$("wt-send").disabled=false});
+  }
+  // A sign-in link opens the app with ?signin=<token>. It becomes this phone's device token and the card downloads.
+  function useLink(token){
+    if(!Sync)return;
+    Sync.verify(token).then(function(r){
+      if(r.status!=="signedin"){wflow=wflow&&wflow.stage==="sent"?wflow:null;
+        editKind="work";loadForm();show("edit");$("edit-note").textContent="That sign-in link has expired or was already used. Send a new one.";return}
+      ws=r.state;
+      if(!ws.own||!ws.own.tel){var t=data.cards.work.tel||"";if(t){Sync.setOwn("tel",t);ws=Sync.state()}}
+      ownTel=(ws.own&&ws.own.tel)||"";wflow=null;syncNote="";isNew=false;
+      try{localStorage.removeItem(RKEY)}catch(e){}
+      editKind="work";loadForm();show("edit");scrollTo(0,0);
+    }).catch(function(){editKind="work";loadForm();show("edit");$("edit-note").textContent="No connection. Open the link again when you have signal."});
+  }
+  // Check-in: "anything changed?" On app open, when it comes back to the front after a day, and on a tap of the banner.
+  function checkIn(force){
+    if(!Sync||!ws||syncBusy)return;
+    syncBusy=true;paintSynced();
+    Sync.checkIn(force).then(function(r){
+      syncBusy=false;
+      if(r.status==="removed"||r.status==="signedout"){dropWork(r.status,r.was);return}
+      if(r.state)ws=r.state;
+      syncNote=r.status==="offline"?"offline, synced "+when(ws.syncedAt):r.status==="updated"?"updated "+when(ws.syncedAt):"";
+      if(curView==="share")renderShare();
+      if(editKind==="work"&&curView==="edit")paintWork();else paintSynced();
+      updateBrand();
+    });
+  }
+  // The organisation removed them, or they signed out: the synced card is gone and Work is back to filling in by hand.
+  function dropWork(why,was){
+    ws=null;ownTel="";syncBusy=false;signoutArmed=false;
+    if(why!=="local")try{localStorage.setItem(RKEY,JSON.stringify({org:(was&&was.org&&was.org.name)||"Your organisation",why:why,at:Date.now()}))}catch(e){}
+    loadForm();renderShare();updateBrand();
+  }
+  function saveOwn(){
+    var pr=telField.problem();if(pr){$("edit-note").textContent="1 thing to fix: finish the mobile number ("+pr+").";telField.focus();return}
+    Sync.setOwn("tel",ownTel);ws=Sync.state();isNew=false;shareKind="work";
+    renderShare();show("share");scrollTo(0,0);
+  }
+  var signoutArmed=false,signoutT=0;
+  $("w-signout").addEventListener("click",function(){
+    if(!signoutArmed){signoutArmed=true;paintWork();clearTimeout(signoutT);signoutT=setTimeout(function(){signoutArmed=false;if(ws)paintWork()},4000);return}
+    clearTimeout(signoutT);Sync.signOut().then(function(){dropWork("local")});
+  });
+  $("w-synced").addEventListener("click",function(){checkIn(true)});
+  $("w-signline").addEventListener("click",function(){wflow={stage:"ask",email:"",org:null};paintWork();$("wt-email").value=tidyEmail(draft.cards.work.email||"");$("wt-email").focus()});
+  $("wt-send").addEventListener("click",function(){sendLink(wflow&&wflow.stage==="ask"?$("wt-email").value:wflow.email)});
+  $("wt-email").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendLink($("wt-email").value)}});
+  $("wt-no").addEventListener("click",function(){
+    if(wflow&&wflow.stage==="nudge"){var d=dismissed(),dom=domainOf(wflow.email);if(d.indexOf(dom)<0)d.push(dom);try{localStorage.setItem(DKEY,JSON.stringify(d))}catch(e){}}
+    wflow=null;paintWork();$("f-title").focus();
+  });
+  $("ws-resend").addEventListener("click",function(){if(!wflow)return;Sync.requestLink(wflow.email);resendAt=Date.now()+RESEND*1000;paintResend()});
+  $("ws-other").addEventListener("click",function(){wflow={stage:"ask",email:"",org:null};paintWork();$("wt-email").value="";$("wt-email").focus()});
+  // Prototype stand-in for tapping the emailed link: the mock server's outbox holds it.
+  $("ws-open").addEventListener("click",function(){
+    var tok=Sync.mockServer&&Sync.mockServer.peekOutbox(wflow.email);
+    if(tok){useLink(tok);return}
+    $("edit-note").textContent="Prototype: no link went to "+wflow.email+", because no organisation on Cardshare has added that address. In the real app the email simply never arrives.";
+  });
+  $("wr-ok").addEventListener("click",function(){try{localStorage.removeItem(RKEY)}catch(e){}paintWork()});
+  if(Sync){
+    var q=/[?&]signin=([\w-]+)/.exec(location.search);
+    if(q){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(function(){useLink(q[1])},0)}
+    if(ws)setTimeout(function(){checkIn(true)},0);
+    var hiddenAt=0;
+    document.addEventListener("visibilitychange",function(){if(document.hidden)hiddenAt=Date.now();else if(ws)checkIn(false)});
+    setInterval(function(){if(ws&&!document.hidden)checkIn(false)},60*60*1000); // a phone left open still checks once a day
+    // The admin console's phone frame asks for a check-in when "Check in now" is pressed (same origin only).
+    addEventListener("message",function(e){if(e.origin===location.origin&&e.data==="cardshare-checkin"){if(ws)checkIn(true);else{ws=Sync.state();if(ws&&ws.card){loadForm();renderShare()}else ws=null}}});
+  }
   // First visit opens on the blank form; once cards are saved, the app always opens on the QR.
   loadForm();renderShare();show(isNew?"edit":"share");
 })();
