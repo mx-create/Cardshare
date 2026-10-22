@@ -1,0 +1,9 @@
+# v2 dev site (Hostinger/Apache): always revalidate code so a deploy is never mixed with an old cached copy.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|js|css|webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <Files "sw.js">
+    Header set Cache-Control "no-cache, no-store"
+  </Files>
+</IfModule>

@@ -79,7 +79,14 @@ td.num{font-variant-numeric:tabular-nums}
     </div>
   </div>
 </div>
-<script src="../../sync.js"></script>
+<script>
+// Prototype safety net: if anything fails, say so on screen instead of hanging, and free any stuck button.
+(function(){function bar(t){var b=document.getElementById("dev-err");if(!b){b=document.createElement("div");b.id="dev-err";b.setAttribute("role","alert");b.style.cssText="position:fixed;left:8px;right:8px;bottom:8px;z-index:9999;background:#7a1d1d;color:#fff;font:13px/1.4 system-ui,sans-serif;padding:10px 12px;border-radius:10px;white-space:pre-wrap";document.body.appendChild(b)}b.textContent="Something went wrong: "+t+"\nTry a hard refresh. If it keeps happening, screenshot this.";document.querySelectorAll("button[disabled]").forEach(function(x){x.disabled=false})}
+window.addEventListener("error",function(e){bar(e.message||"script error")});
+window.addEventListener("unhandledrejection",function(e){bar((e.reason&&e.reason.message)||String(e.reason))});
+window.addEventListener("load",function(){var S=window.CardshareSync;if(!S||!S.adminAuth)bar("an old copy of the app's code loaded. Refresh the page (or open it in a private window).")});})();
+</script>
+<script src="../../sync.js?v=2026102301"></script>
 <script>
 (function(){
   var Sync=window.CardshareSync,KEY="cardshare-platform-session",P=null,$=function(id){return document.getElementById(id)};

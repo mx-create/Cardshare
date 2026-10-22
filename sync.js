@@ -815,9 +815,12 @@
         return new Promise(function (ok, fail) {
           setTimeout(function () {
             // The console's "Offline" switch simulates the phone losing signal, so it leaves the consoles' own calls alone.
-            var phoneOff = localStorage.getItem("cardshare-mock-offline") === "1" && /^\/v1\/(discover|auth\/|card|checkin)/.test(req.path);
-            if (navigator.onLine === false || phoneOff) { fail(new TypeError("Failed to fetch")); return; }
-            try { ok(route(req)); } catch (e) { fail(e); }
+            try {
+              var off = false; try { off = localStorage.getItem("cardshare-mock-offline") === "1"; } catch (e0) {}
+              var phoneOff = off && /^\/v1\/(discover|auth\/|card|checkin)/.test(req.path);
+              if (navigator.onLine === false || phoneOff) { fail(new TypeError("Failed to fetch")); return; }
+              ok(route(req));
+            } catch (e) { fail(e); }
           }, 160 + Math.random() * 300);
         });
       },
