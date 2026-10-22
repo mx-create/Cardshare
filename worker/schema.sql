@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS orgs (
   discoverable   INTEGER NOT NULL DEFAULT 1,     -- suggest sign-in when staff type an email at its domains
   brand_version  INTEGER NOT NULL DEFAULT 1,     -- bumped on name/company/logo change; part of every card ETag
   source         TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual','microsoft')),
+  status         TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','suspended')), -- set by the platform console
+  plan           TEXT NOT NULL DEFAULT 'trial',  -- placeholder until billing
+  branding_json  TEXT,                           -- see accounts.js cleanBranding(); NULL = the Cardshare look
   map_department INTEGER NOT NULL DEFAULT 0,     -- Microsoft: put department on the card
   map_location   INTEGER NOT NULL DEFAULT 0,     -- Microsoft: put officeLocation on the card
   created_at     INTEGER NOT NULL
@@ -40,24 +43,49 @@ CREATE TABLE IF NOT EXISTS ms_overrides (
 -- Short-lived state for the Microsoft redirects (admin consent, phone sign-in). Deleted when used or after 10 minutes.
 CREATE TABLE IF NOT EXISTS oauth_state (
   state      TEXT PRIMARY KEY,
-  kind       TEXT NOT NULL CHECK (kind IN ('consent','signin')),
+  kind       TEXT NOT NULL CHECK (kind IN ('consent','signin','admin')),
   admin_id   TEXT,
+  org_id     TEXT,
   nonce      TEXT,
   return_to  TEXT,
   expires_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS domains (
-  domain     TEXT PRIMARY KEY,                   -- lower case, e.g. harbour.example
-  org_id     TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
-  verified   INTEGER NOT NULL DEFAULT 0          -- DNS TXT check before it is used for discovery (to build)
+  domain      TEXT PRIMARY KEY,                  -- lower case, e.g. harbour.example
+  org_id      TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  verified    INTEGER NOT NULL DEFAULT 0,        -- only verified domains are used for discovery
+  method      TEXT,                              -- 'microsoft' (connecting proves it), 'dns' (TXT record) or 'email'
+  txt_token   TEXT,                              -- value expected in the TXT record at _cardshare.<domain>
+  verified_at INTEGER
 );
 
+-- Admin accounts are people; memberships say which organisations they run and as what.
 CREATE TABLE IF NOT EXISTS admins (
   id         TEXT PRIMARY KEY,
-  org_id     TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
   email      TEXT NOT NULL UNIQUE,
+  name       TEXT NOT NULL DEFAULT '',
   created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS memberships (
+  admin_id TEXT NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
+  org_id   TEXT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  role     TEXT NOT NULL CHECK (role IN ('owner','admin')),
+  PRIMARY KEY (admin_id, org_id)
+);
+
+-- Sign-up in progress, after the email is confirmed and before the organisation is named.
+CREATE TABLE IF NOT EXISTS signups (
+  token_hash TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+
+-- Platform console (Cardshare staff, addresses in PLATFORM_OWNERS).
+CREATE TABLE IF NOT EXISTS platform_sessions (
+  token_hash TEXT PRIMARY KEY,
+  email      TEXT NOT NULL,
+  expires_at INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employees (
@@ -80,6 +108,9 @@ CREATE INDEX IF NOT EXISTS employees_org ON employees(org_id);
 -- a Microsoft user (org_id + ms_user_id) or an admin.
 CREATE TABLE IF NOT EXISTS links (
   token_hash  TEXT PRIMARY KEY,
+  kind        TEXT NOT NULL DEFAULT 'phone' CHECK (kind IN ('phone','admin','signup','domain','platform')),
+  email       TEXT,                              -- signup, platform
+  domain      TEXT,                              -- domain confirmation
   employee_id TEXT REFERENCES employees(id) ON DELETE CASCADE,
   org_id      TEXT REFERENCES orgs(id) ON DELETE CASCADE,
   ms_user_id  TEXT,
@@ -106,6 +137,7 @@ CREATE INDEX IF NOT EXISTS devices_ms ON devices(org_id, ms_user_id);
 CREATE TABLE IF NOT EXISTS admin_sessions (
   token_hash  TEXT PRIMARY KEY,
   admin_id    TEXT NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
+  org_id      TEXT REFERENCES orgs(id) ON DELETE SET NULL, -- the organisation this session is looking at (switcher)
   expires_at  INTEGER NOT NULL
 );
 

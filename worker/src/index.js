@@ -14,7 +14,12 @@
 // Admin:  POST /v1/admin/auth/link {email} -> 202, POST /v1/admin/auth/verify {token} -> {sessionToken}
 //         GET  /v1/admin/microsoft/connect?session      -> redirect to Microsoft admin consent
 //         GET  /v1/admin/microsoft/callback             -> stores tenant ID, redirects to /admin/
-//         POST /v1/admin/microsoft/disconnect | sync, GET /v1/admin/microsoft/branding
+//         POST /v1/admin/microsoft/disconnect | sync, GET /v1/admin/microsoft/branding (logos + backgroundColor)
+//         GET  /v1/admin/auth/microsoft/start           -> admin "Sign in with Microsoft" (same OIDC callback)
+//         GET /v1/admin/me, POST /v1/admin/session/org, POST /v1/admin/auth/signout, PUT /v1/admin/branding,
+//         POST /v1/admin/domains/verify, GET|POST /v1/admin/admins, DELETE /v1/admin/admins/<id>       (accounts.js)
+// Sign-up: POST /v1/signup/start | verify | org, POST /v1/domains/confirm                             (accounts.js)
+// Platform: POST /v1/platform/auth/link | verify, GET /v1/platform/orgs, POST …/<id>/suspend|restore, DELETE …/<id>
 //         GET|PATCH /v1/admin/org, PUT|DELETE /v1/admin/logos/<variant>,
 //         GET|POST /v1/admin/employees, PATCH|DELETE /v1/admin/employees/<id>,
 //         POST /v1/admin/invite {ids}, GET /v1/admin/activity
@@ -23,6 +28,7 @@
 // server-side SVG sanitising, an email provider in sendMail(), admin roles, billing, data export and delete-my-data.
 
 import * as MS from "./microsoft.js";
+import * as ACC from "./accounts.js";
 
 const LINK_TTL = 15 * 60 * 1000;          // a sign-in link the employee asked for
 const INVITE_TTL = 7 * 24 * 60 * 60 * 1000; // a link sent by the admin
@@ -51,7 +57,7 @@ async function route(req, env) {
   if (m === "POST" && p === "/v1/discover") {
     const domain = String(body.domain || "").trim().toLowerCase();
     const row = await env.DB.prepare(
-      "SELECT o.name, o.source FROM domains d JOIN orgs o ON o.id = d.org_id WHERE d.domain = ? AND d.verified = 1 AND o.discoverable = 1"
+      "SELECT o.name, o.source FROM domains d JOIN orgs o ON o.id = d.org_id WHERE d.domain = ? AND d.verified = 1 AND o.discoverable = 1 AND o.status = 'active'"
     ).bind(domain).first();
     return json(200, { org: row ? { name: row.name, microsoft: row.source === "microsoft" } : null });
   }
@@ -81,7 +87,7 @@ async function route(req, env) {
 
   if (m === "POST" && p === "/v1/auth/verify") {
     const link = await takeLink(env, body.token, now);
-    if (!link || (!link.employee_id && !link.ms_user_id)) return json(400, { error: "invalid_or_expired" });
+    if (!link || link.kind !== "phone" || (!link.employee_id && !link.ms_user_id)) return json(400, { error: "invalid_or_expired" });
     const hd = await holder(env, link);
     if (!hd) return json(400, { error: "invalid_or_expired" });
     const deviceToken = randomToken("dev_");
@@ -111,12 +117,14 @@ async function route(req, env) {
       ]);
       return json(410, { error: "removed" });
     }
+    if (hd.org.status === "suspended") return json(423, { error: "suspended" }); // the phone keeps the card hidden until restored
     await env.DB.prepare("UPDATE devices SET last_seen = ? WHERE token_hash = ?").bind(now, th).run();
     const tag = `"c${await sha256(JSON.stringify(hd.card)).then(h => h.slice(0, 16))}-o${hd.org.brand_version}"`;
     if (p === "/v1/checkin") return json(200, { changed: body.version !== tag, version: tag });
     if (req.headers.get("If-None-Match") === tag) return new Response(null, { status: 304, headers: { ETag: tag } });
     const logos = await logoMap(env, url, hd.org);
-    return json(200, { card: hd.card, org: { id: hd.org.id, name: hd.org.name, logos }, version: tag }, { ETag: tag, "Cache-Control": "no-cache" });
+    const branding = hd.org.branding_json ? JSON.parse(hd.org.branding_json) : null; // covered by the ETag via brand_version
+    return json(200, { card: hd.card, org: { id: hd.org.id, name: hd.org.name, logos, branding }, version: tag }, { ETag: tag, "Cache-Control": "no-cache" });
   }
 
   if (m === "POST" && p === "/v1/auth/signout") {
@@ -143,10 +151,19 @@ async function route(req, env) {
     return Response.redirect(MS.signInUrl(env, state, nonce, (url.searchParams.get("login_hint") || "").slice(0, 200)), 302);
   }
   if (m === "GET" && p === "/v1/auth/microsoft/callback") {
-    const st = await takeState(env, url.searchParams.get("state"), "signin", now);
+    const stateId = url.searchParams.get("state");
+    const st = (await takeState(env, stateId, "signin", now)) || (await takeState(env, stateId, "admin", now));
     if (!st || !url.searchParams.get("code")) return Response.redirect(`${env.APP_ORIGIN}/?signin_error=microsoft`, 302);
     const who = await MS.redeemSignIn(env, url.searchParams.get("code"));
     if (who.nonce !== st.nonce) return Response.redirect(`${env.APP_ORIGIN}/?signin_error=microsoft`, 302);
+    if (st.kind === "admin") {
+      // Admin sign-in: Microsoft proved the address; it must also be a Cardshare admin. Ends like an emailed admin link.
+      const adm = await env.DB.prepare("SELECT id FROM admins WHERE email = ?").bind(String(who.email || "").toLowerCase()).first();
+      if (!adm) return Response.redirect(`${env.APP_ORIGIN}/admin/?signin_error=not_admin`, 302);
+      const t2 = randomToken("adm_");
+      await env.DB.prepare("INSERT INTO links (token_hash, kind, admin_id, expires_at) VALUES (?, 'admin', ?, ?)").bind(await sha256(t2), adm.id, now + 5 * 60_000).run();
+      return Response.redirect(`${env.APP_ORIGIN}/admin/?signin=${t2}`, 302);
+    }
     const org = await env.DB.prepare("SELECT org_id FROM ms_tenants WHERE tenant_id = ?").bind(who.tenantId).first();
     if (!org) return Response.redirect(`${st.return_to}?signin_error=not_connected`, 302);
     // Same one-time link the email path uses, so the phone finishes with the usual POST /v1/auth/verify.
@@ -155,12 +172,19 @@ async function route(req, env) {
     return Response.redirect(`${st.return_to}?signin=${token}`, 302);
   }
 
-  // ------------------------------------------------------------ Microsoft: admin consent
+  if (m === "GET" && p === "/v1/admin/auth/microsoft/start") {
+    const state = randomToken("st_"), nonce = randomToken("n_");
+    await env.DB.prepare("INSERT INTO oauth_state (state, kind, nonce, expires_at) VALUES (?, 'admin', ?, ?)").bind(state, nonce, now + 600_000).run();
+    return Response.redirect(MS.signInUrl(env, state, nonce, (url.searchParams.get("login_hint") || "").slice(0, 200)), 302);
+  }
+
+  // ------------------------------------------------------------ Microsoft: admin consent (owners only)
   if (m === "GET" && p === "/v1/admin/microsoft/connect") {
     const adm = await adminSession(env, url.searchParams.get("session"), now);
-    if (!adm) return json(401, { error: "admin_signed_out" });
+    if (!adm || !adm.org_id) return json(401, { error: "admin_signed_out" });
+    if (adm.role !== "owner") return json(403, { error: "Only an owner can do that." });
     const state = randomToken("st_");
-    await env.DB.prepare("INSERT INTO oauth_state (state, kind, admin_id, expires_at) VALUES (?, 'consent', ?, ?)").bind(state, adm.admin_id, now + 600_000).run();
+    await env.DB.prepare("INSERT INTO oauth_state (state, kind, admin_id, org_id, expires_at) VALUES (?, 'consent', ?, ?, ?)").bind(state, adm.admin_id, adm.org_id, now + 600_000).run();
     return Response.redirect(MS.adminConsentUrl(env, state), 302);
   }
   if (m === "GET" && p === "/v1/admin/microsoft/callback") {
@@ -168,7 +192,8 @@ async function route(req, env) {
     const st = await takeState(env, cb.state || url.searchParams.get("state"), "consent", now);
     if (!st) return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=expired`, 302);
     if (!cb.ok) return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=declined`, 302);
-    const adm = await env.DB.prepare("SELECT id, org_id, email FROM admins WHERE id = ?").bind(st.admin_id).first();
+    const a0 = await env.DB.prepare("SELECT id, email FROM admins WHERE id = ?").bind(st.admin_id).first();
+    const adm = { id: a0.id, email: a0.email, org_id: st.org_id }; // the organisation the owner was in when they clicked Connect
     const info = await MS.organization(env, cb.tenantId); // also proves the consent works
     const taken = await env.DB.prepare("SELECT org_id FROM ms_tenants WHERE tenant_id = ? AND org_id != ?").bind(cb.tenantId, adm.org_id).first();
     if (taken) return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=tenant_in_use`, 302);
@@ -195,7 +220,8 @@ async function route(req, env) {
       env.DB.prepare("DELETE FROM links WHERE employee_id IN (SELECT id FROM employees WHERE org_id = ?)").bind(adm.org_id),
       env.DB.prepare("DELETE FROM employees WHERE org_id = ?").bind(adm.org_id),
       env.DB.prepare("DELETE FROM domains WHERE org_id = ?").bind(adm.org_id),
-      ...info.verifiedDomains.map(d => env.DB.prepare("INSERT OR IGNORE INTO domains (domain, org_id, verified) VALUES (?, ?, 1)").bind(d, adm.org_id)),
+      // Connecting counts as domain verification: Microsoft has verified the tenant's domains.
+      ...info.verifiedDomains.map(d => env.DB.prepare("INSERT OR IGNORE INTO domains (domain, org_id, verified, method, verified_at) VALUES (?, ?, 1, 'microsoft', ?)").bind(d, adm.org_id, now)),
       logStmt(env, adm.org_id, `Connected Microsoft 365 (${info.displayName}). Hand-typed records deleted; ${kept} of ${phones.length} signed-in phones kept`)
     ]);
     return Response.redirect(`${env.APP_ORIGIN}/admin/?microsoft=connected`, 302);
@@ -207,27 +233,37 @@ async function route(req, env) {
     const adm = await env.DB.prepare("SELECT id FROM admins WHERE email = ?").bind(email).first();
     if (adm) {
       const token = randomToken("adm_");
-      await env.DB.prepare("INSERT INTO links (token_hash, admin_id, expires_at) VALUES (?, ?, ?)").bind(await sha256(token), adm.id, now + LINK_TTL).run();
+      await env.DB.prepare("INSERT INTO links (token_hash, kind, admin_id, expires_at) VALUES (?, 'admin', ?, ?)").bind(await sha256(token), adm.id, now + LINK_TTL).run();
       await sendMail(env, email, "Your Cardshare admin sign-in link", `Sign in to the admin console: ${env.APP_ORIGIN}/admin/?signin=${token}\n\nThe link works once, for 15 minutes.`);
     }
     return json(202, { ok: true });
   }
   if (m === "POST" && p === "/v1/admin/auth/verify") {
     const link = await takeLink(env, body.token, now);
-    if (!link || !link.admin_id) return json(400, { error: "invalid_or_expired" });
+    if (!link || link.kind !== "admin" || !link.admin_id) return json(400, { error: "invalid_or_expired" });
     const sessionToken = randomToken("ses_");
-    await env.DB.prepare("INSERT INTO admin_sessions (token_hash, admin_id, expires_at) VALUES (?, ?, ?)").bind(await sha256(sessionToken), link.admin_id, now + SESSION_TTL).run();
-    return json(200, { sessionToken });
+    const first = await env.DB.prepare("SELECT org_id FROM memberships WHERE admin_id = ? ORDER BY rowid LIMIT 1").bind(link.admin_id).first();
+    await env.DB.prepare("INSERT INTO admin_sessions (token_hash, admin_id, org_id, expires_at) VALUES (?, ?, ?, ?)").bind(await sha256(sessionToken), link.admin_id, first ? first.org_id : null, now + SESSION_TTL).run();
+    return json(200, { sessionToken, ...(await ACC.me(env, { admin_id: link.admin_id, org_id: first ? first.org_id : null })) });
   }
+
+  const helpers = { json, sha256, randomToken, takeLink, sendMail, logStmt, orgView, bearer };
+  if (!p.startsWith("/v1/admin/")) { const r0 = await ACC.route(req, env, { url, p, m, body, now, ses: null }, helpers); if (r0) return r0; }
 
   if (p.startsWith("/v1/admin/")) {
     const ses = await adminSession(env, bearer(req), now);
     if (!ses) return json(401, { error: "admin_signed_out" });
-    const orgId = ses.org_id;
+    // Session, switcher and sign-out work even for a suspended organisation; everything else answers 423 while suspended.
+    if (["/v1/admin/me", "/v1/admin/session/org", "/v1/admin/auth/signout"].includes(p)) return ACC.route(req, env, { url, p, m, body, now, ses }, helpers);
+    if (!ses.org_id) return json(404, { error: "no_org" });
+    if (ses.status === "suspended") return json(423, { error: "This organisation is suspended by Cardshare. Contact support." });
+    const acc = await ACC.route(req, env, { url, p, m, body, now, ses }, helpers); if (acc) return acc;
+    const orgId = ses.org_id, OWNER_ONLY = ses.role === "owner" ? null : json(403, { error: "Only an owner can do that." });
     const msT = await env.DB.prepare("SELECT t.* FROM ms_tenants t JOIN orgs o ON o.id = t.org_id WHERE t.org_id = ? AND o.source = 'microsoft'").bind(orgId).first();
     const NO_MS = json(409, { error: "People come from Microsoft 365. Add or remove them there." });
 
     if (m === "POST" && p === "/v1/admin/microsoft/disconnect") {
+      if (OWNER_ONLY) return OWNER_ONLY;
       if (!msT) return json(409, { error: "Not connected" });
       // Phones drop their cards at the next check-in (holder() finds no Microsoft connection → 410).
       // The admin should also remove the enterprise app in Entra; we can't revoke consent from here.
@@ -254,6 +290,8 @@ async function route(req, env) {
         const l = await MS.brandingLogo(env, msT.tenant_id, k).catch(() => null);
         if (l) out[k] = `data:${l.type};base64,${btoa(String.fromCharCode(...l.bytes))}`;
       }
+      const info = await MS.brandingInfo(env, msT.tenant_id).catch(() => null); // sign-in page backgroundColor: a quick start for Primary
+      if (info && info.backgroundColor) out.backgroundColor = info.backgroundColor;
       return json(200, out);
     }
 
@@ -270,6 +308,7 @@ async function route(req, env) {
       const ml = body.map && typeof body.map.officeLocation === "boolean" ? +body.map.officeLocation : org.map_location;
       stmts.push(env.DB.prepare("UPDATE orgs SET name = ?, company = ?, discoverable = ?, map_department = ?, map_location = ?, brand_version = brand_version + ? WHERE id = ?")
         .bind(name, company, disc, md, ml, brand ? 1 : 0, orgId));
+      if (Array.isArray(body.domains) && !msT && OWNER_ONLY) return OWNER_ONLY;
       if (Array.isArray(body.domains) && !msT) { // Microsoft: the tenant's verified domains are used instead
         const want = body.domains.map(s => String(s).trim().toLowerCase().replace(/^@/, "")).filter(s => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s));
         for (const d of want) {
@@ -278,7 +317,7 @@ async function route(req, env) {
         }
         stmts.push(env.DB.prepare(`DELETE FROM domains WHERE org_id = ? AND domain NOT IN (${want.map(() => "?").join(",") || "''"})`).bind(orgId, ...want));
         // New domains start unverified; a DNS TXT check (to build) sets verified = 1 before discovery uses them.
-        for (const d of want) stmts.push(env.DB.prepare("INSERT OR IGNORE INTO domains (domain, org_id, verified) VALUES (?, ?, 0)").bind(d, orgId));
+        for (const d of want) stmts.push(env.DB.prepare("INSERT OR IGNORE INTO domains (domain, org_id, verified, txt_token) VALUES (?, ?, 0, ?)").bind(d, orgId, "cardshare-verify=" + randomToken("").slice(0, 20)));
       }
       if (brand) stmts.push(logStmt(env, orgId, "Organisation details changed"));
       await env.DB.batch(stmts);
@@ -454,7 +493,13 @@ function msView(u, org, ov, dev) {
 }
 async function adminSession(env, token, now) {
   if (!token) return null;
-  return env.DB.prepare("SELECT s.admin_id, a.org_id FROM admin_sessions s JOIN admins a ON a.id = s.admin_id WHERE s.token_hash = ? AND s.expires_at > ?").bind(await sha256(token), now).first();
+  // The admin, their current organisation, their role in it (null if they were removed) and its status.
+  const s = await env.DB.prepare(
+    `SELECT s.admin_id, s.org_id, m.role, o.status FROM admin_sessions s
+     LEFT JOIN memberships m ON m.admin_id = s.admin_id AND m.org_id = s.org_id LEFT JOIN orgs o ON o.id = s.org_id
+     WHERE s.token_hash = ? AND s.expires_at > ?`).bind(await sha256(token), now).first();
+  if (s && s.org_id && !s.role) s.org_id = null; // no longer a member of that organisation
+  return s;
 }
 async function takeState(env, state, kind, now) {
   if (!state) return null;
@@ -485,7 +530,7 @@ async function sha256(s) { const d = await crypto.subtle.digest("SHA-256", new T
 async function takeLink(env, token, now) {
   if (!token) return null;
   // One statement, so a link can only be used once even if opened twice at the same moment.
-  return env.DB.prepare("UPDATE links SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING employee_id, org_id, ms_user_id, admin_id")
+  return env.DB.prepare("UPDATE links SET used_at = ? WHERE token_hash = ? AND used_at IS NULL AND expires_at > ? RETURNING kind, employee_id, org_id, ms_user_id, admin_id, email, domain")
     .bind(now, await sha256(token), now).first();
 }
 function logStmt(env, orgId, text) { return env.DB.prepare("INSERT INTO activity (org_id, at, text) VALUES (?, ?, ?)").bind(orgId, Date.now(), text); }
@@ -507,13 +552,16 @@ async function logoMap(env, url, org) {
 }
 async function orgView(env, url, orgId) {
   const o = await env.DB.prepare("SELECT * FROM orgs WHERE id = ?").bind(orgId).first();
-  const { results } = await env.DB.prepare("SELECT domain FROM domains WHERE org_id = ?").bind(orgId).all();
+  const { results } = await env.DB.prepare("SELECT domain, verified, method, txt_token FROM domains WHERE org_id = ?").bind(orgId).all();
   const t = await env.DB.prepare("SELECT * FROM ms_tenants WHERE org_id = ?").bind(orgId).first();
   return { id: o.id, name: o.name, company: o.company, discoverable: !!o.discoverable, brandVersion: o.brand_version,
     source: o.source, map: { department: !!o.map_department, officeLocation: !!o.map_location },
     ms: o.source === "microsoft" && t ? { tenantId: t.tenant_id, tenantName: t.tenant_name, consentedBy: t.consented_by, connectedAt: t.consented_at,
       lastSync: t.last_sync, peopleFound: t.people_found, permissions: ["User.Read.All (application)", "OrganizationalBranding.Read.All (application, for the logo)"] } : null,
-    domains: results.map(r => r.domain), logos: await logoMap(env, url, o) };
+    status: o.status, plan: o.plan, branding: o.branding_json ? JSON.parse(o.branding_json) : null,
+    domains: results.map(r => r.domain),
+    domainStatus: results.map(r => ({ name: r.domain, verified: !!r.verified, method: r.method || "", txt: r.txt_token || "", record: "_cardshare." + r.domain })),
+    logos: await logoMap(env, url, o) };
 }
 function signInText(env, token, name) {
   return `Hi ${name},\n\nTap this link on your phone to put your work card on Cardshare:\n${env.APP_ORIGIN}/?signin=${token}\n\n` +

@@ -140,7 +140,16 @@ export async function brandingLogo(env, tenantId, which) {
   return { type: r.headers.get("Content-Type") || "image/png", bytes: new Uint8Array(await r.arrayBuffer()) };
 }
 
-// ------------------------------------------------------------ "Sign in with Microsoft" on the phone (OIDC, delegated)
+// The sign-in page's default branding properties: backgroundColor is offered as a quick start for the Primary brand colour.
+export async function brandingInfo(env, tenantId) {
+  const r = await graph(env, tenantId, `/organization/${tenantId}/branding?$select=backgroundColor`, { headers: { "Accept-Language": "0" } });
+  if (r.status === 404) return null;
+  if (!r.ok) throw graphError(r.status, "branding", await r.text());
+  const j = await r.json();
+  return { backgroundColor: /^#[0-9a-f]{6}$/i.test(j.backgroundColor || "") ? j.backgroundColor.toUpperCase() : null };
+}
+
+// ------------------------------------------------------------ "Sign in with Microsoft" (OIDC, delegated): phones, and admins
 export function signInUrl(env, state, nonce, loginHint) {
   const u = new URL(`${LOGIN}/organizations/oauth2/v2.0/authorize`);
   u.searchParams.set("client_id", env.MS_CLIENT_ID);
@@ -163,5 +172,5 @@ export async function redeemSignIn(env, code) {
   if (!r.ok) throw graphError(r.status, "signin", await r.text());
   const j = await r.json();
   const claims = JSON.parse(atob(j.id_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-  return { tenantId: claims.tid, userId: claims.oid, nonce: claims.nonce };
+  return { tenantId: claims.tid, userId: claims.oid, nonce: claims.nonce, email: claims.email || claims.preferred_username || "" };
 }

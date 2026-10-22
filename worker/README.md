@@ -37,6 +37,28 @@ The employee's mobile, Personal card and Links never reach the server in either 
 | `POST /v1/admin/microsoft/disconnect`, `/sync`; `GET /v1/admin/microsoft/branding` | admin | Disconnect, recount, sign-in page logos |
 | `/v1/admin/org`, `/logos/*`, `/employees`, `/invite`, `/activity` | admin | As before. In Microsoft mode `/employees` is read live from Graph and `PATCH` sets overrides |
 
+## Organisations, admins, branding, platform (`src/accounts.js`)
+
+- **Admins are people, not organisations.** `admins` holds one row per email; `memberships` links an admin to each
+  organisation they run, as `owner` or `admin`. A session (`admin_sessions`) is for one admin and one current
+  organisation (`org_id`, changed by `POST /v1/admin/session/org`); every `/v1/admin/*` query is scoped to it.
+  Owners: Microsoft connect/disconnect, domain verification, admins. Admins: people, branding, logo, settings.
+- **Admin sign-in:** an emailed link (`/v1/admin/auth/link` → `/admin/?signin=…`) or Sign in with Microsoft
+  (`/v1/admin/auth/microsoft/start`, the same OIDC callback as phones; the ID token's email must be a Cardshare admin).
+- **Sign-up:** `/v1/signup/start` (work email; personal domains refused) → emailed link → `/v1/signup/verify` →
+  `/v1/signup/org` (creates the organisation, its domain unverified, the owner, and a session).
+- **Domain ownership:** connecting Microsoft 365 verifies the tenant's domains. Otherwise, `POST /v1/admin/domains/verify`
+  with `dns` looks up the TXT record at `_cardshare.<domain>` over DNS-over-HTTPS, or with `email` sends a link to
+  `admin@<domain>` (`/v1/domains/confirm`). Only verified domains of active organisations are used for discovery.
+- **Branding:** `PUT /v1/admin/branding` stores `orgs.branding_json` (validated by `cleanBranding`) and bumps
+  `brand_version`, which is part of every card's ETag, so phones download it at their next check-in. It is returned in
+  the card response as `org.branding`. Phones apply their own contrast safety net. `GET /v1/admin/microsoft/branding`
+  also returns the sign-in page's `backgroundColor` (`OrganizationalBranding.Read.All`).
+- **Platform console:** sign-in by emailed link, only for addresses in `PLATFORM_OWNERS`. `GET /v1/platform/orgs` returns
+  counts only (phones; hand-typed records for manual organisations; nothing for Microsoft organisations, whose people
+  aren't stored). Suspend sets `orgs.status = 'suspended'`: phones get `423` and hide the work card until restored,
+  and admin calls get `423`. Delete removes the organisation (cascades); its phones get `410` and wipe the card.
+
 ## Microsoft 365: app registration (multi-tenant)
 
 One app registration in Cardshare's own Entra tenant, used by every customer.

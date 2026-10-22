@@ -88,6 +88,15 @@ overrides the admin types to fill blanks. No Graph tokens are stored; they're fe
   `OFFLINE_LIMIT_DAYS` in `sync.js`; it could become a per-organisation setting later.
 - **Company logo** in the header on Work (My card and Share), never inside the QR (`logo.js`,
   `docs/v2-design/LogoRules.dc.html`).
+- **Company branding** (`brand.js`). A managed Work card takes the organisation's colours: the header band, card panel,
+  Work pill, main button and "Managed by" banner, in My card and in Share when it shows Work. Personal and Links keep the
+  Cardshare theme. The QR always stays plain (dark on white, no logo, no brand colour), and "work card · via cardshare"
+  stays. Branding comes with the card at check-in (the ETag covers it) and is cached for offline use. Brand fonts load
+  from Google Fonts when online and fall back to system fonts offline.
+- **Never unreadable.** Text on the card and button text on the primary colour must reach WCAG 4.5:1. If an admin saves
+  a pair that doesn't, the phone uses the nearest passing shade of the same hue.
+- **Suspended organisations.** While Cardshare has an organisation suspended, its phones keep the work card but don't
+  show it, and say so. It comes back when the organisation is restored.
 
 **Admin console** (`/admin/`)
 - Choose where work cards come from: Microsoft 365 / by hand / Google (coming soon). Each has its own privacy line.
@@ -99,16 +108,59 @@ overrides the admin types to fill blanks. No Graph tokens are stored; they're fe
   a phone with no match is signed out and wipes its work card.
 - Logo: upload, or "Use our Microsoft 365 sign-in logo" (banner, square, square dark), all through the same fit rules.
 - The real app runs in a phone frame, with "Check in now", an Offline switch and "Simulate 15 days offline".
+- **Sign-in.** "Sign in with Microsoft" (organisations on Microsoft 365) or an emailed link ("Open my link" stands in for
+  the email). Each admin sees only their own organisation's people, branding and settings.
+- **Roles.** Owner and Admin. Owners connect or disconnect Microsoft 365, verify domains and manage admins. Admins
+  manage people, branding and the logo. An admin can belong to several organisations and switches between them in the header.
+- **Branding.** Five brand colours (Primary, Accent, Card background, Text, Button text), each with a colour picker, hex,
+  RGB and HSL. Separate light and dark versions for the app's light and dark themes (dark generated from light, or edited
+  by hand). Live WCAG checks with "Use nearest passing shade". Quick starts: pick colours from the logo, "Use Microsoft 365
+  branding" (sign-in page background colour), and presets. Card style: corners (sharp / soft / round), card background
+  (brand colour / light / dark), header logo (centre / left), and font (Inter, a serif, a geometric sans, or system).
+  A live preview runs the real app in two phone frames (My card and Share), in light or dark theme.
+- **Set up Cardshare for your organisation.** Work email → confirm by link → name the organisation → prove the domain
+  (connecting Microsoft 365 counts; otherwise a DNS TXT record at `_cardshare.<domain>`, or an email to
+  `admin@<domain>`) → choose where cards come from → pick a starting look. Personal addresses (gmail.com and so on) can't
+  own an organisation. Staff only find an organisation by typing their email once its domain is verified.
+
+**Platform console** (`/admin/platform/`, for Cardshare staff) lists every organisation: source, domains and whether
+they're verified, phones signed in, records held (hand-typed organisations only), and a plan placeholder. It can
+suspend, restore and delete organisations. It never shows anyone's staff details. In the prototype, a "Sign in as
+platform owner" button stands in for the real sign-in, which is limited to the addresses in `PLATFORM_OWNERS`.
+
+**Sample data** (in the mock):
+
+| Organisation | Cards from | Domain | Admin(s) | Look |
+|---|---|---|---|---|
+| Harbour Studio | Microsoft 365 | harbour.example | ava.collins@ (Owner) | Coral and navy, serif, wide wordmark |
+| Nordlys | By hand | nordlys.example | ingrid.solberg@ (Owner) | Deep fjord card, round corners, geometric, square mark on the left |
+| Pine & Post | By hand | pinepost.example | jo.fairley@ (Owner), ingrid.solberg@nordlys.example (Admin) | Forest and cream, sharp corners, no logo (initials) |
+| (not set up yet) | Microsoft 365 tenant | kestrel.example | rowan.blake@ to try sign-up | |
+
+Staff to try on the phone: maya.patel@harbour.example (and others in the Harbour directory), erik.dahl@nordlys.example,
+hannah.price@pinepost.example.
 
 | File | What it is |
 |---|---|
 | `sync.js` | Every server call, plus a mock server and a simulated Microsoft 365 tenant in localStorage, so all of it runs with no backend |
 | `logo.js` | The 200 × 40 logo slot, its fallbacks, and upload trimming |
+| `brand.js` | Brand colours, light/dark sets, contrast checks and fixes, palette from a logo, presets. Shared by the phone and the console |
 | `admin/index.html` | Admin console (prototype) |
+| `admin/gate.js` | Admin sign-in and "Set up Cardshare for your organisation" |
+| `admin/branding.js` | The Branding card and its live preview |
+| `admin/platform/index.html` | Platform console (prototype, Cardshare staff) |
 | `worker/` | Cloudflare Worker skeleton: D1 schema, R2 logos, Graph client and Entra app notes, the same API as the mock. Not deployed |
 | `docs/v2-design/` | The approved phone mock-ups |
 
-To try it: serve the folder (`python3 -m http.server`) and open `/admin/`. For Microsoft, pick Microsoft 365 → Connect →
-Accept, then on the phone go to My card → Work → "Sign in with work email", type `priya.shah@harbour.example`, and tap
-Sign in with Microsoft. Without connecting, type `maya.patel@harbour.example` on Work to use the hand-typed list.
+To try it: open **dev.cardshare.io/admin/**, which deploys this branch (or serve the folder with `python3 -m http.server`
+and open `/admin/`). Everything is simulated in your browser; "Reset sample data" starts again.
+1. Click a sample admin, then "Email me a sign-in link" → "Open my link" (or, for Ava, "Sign in with Microsoft").
+2. Ingrid has two organisations: switch between Nordlys and Pine & Post in the header.
+3. Branding: change a colour and watch both preview phones. Type a button text close to the primary to see the contrast
+   warning and "Use nearest passing shade".
+4. Phone frame: My card → Work → "Sign in with work email" with erik.dahl@nordlys.example (email link) or
+   maya.patel@harbour.example (Sign in with Microsoft). Each phone gets its own organisation's card and colours.
+5. Sign out → "Set up Cardshare for your organisation" with rowan.blake@kestrel.example (Microsoft 365) or any
+   name@yourco.example (by hand, DNS or email verification).
+6. `/admin/platform/` → "Sign in as platform owner": suspend Nordlys, then "Check in now" on a Nordlys phone.
 The service worker on this branch uses its own cache name (`cardshare-v2-dev-N`).

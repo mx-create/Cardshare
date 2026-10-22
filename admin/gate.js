@@ -130,6 +130,21 @@
 
   // ------------------------------------------------------------ start
   App.signOut = function () { var t = token(); keep(null); if (t) Sync.admin(t).signOut().catch(function () {}); $("au-email").value = ""; msg("au-msg", ""); panel("au-signin"); };
+  // Links from real emails (with the Worker): ?signin=<admin link>, ?signup=<sign-up link>, ?domain=<domain confirmation>.
+  var q = /[?&](signin|signup|domain)=([\w-]+)/.exec(location.search);
+  if (q) {
+    try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    if (q[1] === "signin") { Sync.adminAuth.verify(q[2]).then(signedIn).catch(function (e) { panel("au-signin"); msg("au-msg", e.message, "err"); }); return; }
+    if (q[1] === "domain") { Sync.confirmDomain(q[2]).then(function (r) { App.toast(r.domain + " verified."); }).catch(function (e) { App.toast(e.message); }); }
+    if (q[1] === "signup") {
+      Sync.signup.verify(q[2]).then(function (r) {
+        SU = { email: r.email, signupToken: r.signupToken, domain: r.domain };
+        var base = r.domain.split(".")[0]; $("su-name").value = base.charAt(0).toUpperCase() + base.slice(1); $("su-dom").textContent = r.domain;
+        msg("su3-msg", r.taken ? r.domain + " already uses Cardshare (" + r.taken + "). Ask its owner to add you as an admin." : "", r.taken ? "err" : ""); $("su-create").disabled = !!r.taken; step(3);
+      }).catch(function (e) { panel("au-signin"); msg("au-msg", e.message, "err"); });
+      return;
+    }
+  }
   var t = token();
   if (!t) { panel("au-signin"); return; }
   Sync.admin(t).me().then(function (info) { App.boot(t, info); }).catch(function () { keep(null); panel("au-signin"); });
