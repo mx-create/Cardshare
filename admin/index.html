@@ -194,6 +194,88 @@ td .inp{padding:6px 9px;margin:2px 0}
 @keyframes pop{from{opacity:0;transform:translate(-50%,6px)}}
 @media (prefers-reduced-motion:reduce){.toast,.flash td{animation:none}}
 
+/* header: who is signed in, which organisation */
+.who{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft)}
+.who select{max-width:220px}
+.pill.role{background:var(--teams-bg);color:var(--teams-hi);border:1px solid var(--teams-line)}
+/* sign-in and sign-up */
+.auth{max-width:520px;margin:10px auto 0;display:flex;flex-direction:column;gap:14px}
+.auth h2{margin:0;font:600 24px/1.25 var(--body);letter-spacing:-.015em}
+.auth .card{display:flex;flex-direction:column;gap:12px}
+.auth .btn{padding:12px 16px;font-size:14.5px}
+.auth .btn.ms{justify-content:center;border-radius:999px}
+.demos{display:flex;flex-direction:column;gap:6px}
+.demos button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--line);background:none;border-radius:12px;padding:9px 12px;font-size:13px;color:var(--ink-soft)}
+.demos button b{color:var(--ink);font-weight:600}
+.demos button:hover{border-color:var(--violet-hi)}
+.linkbtn{border:0;background:none;padding:0;color:var(--violet-hi);font-weight:600;font-size:14px;text-align:left}
+.steps2{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.steps2 li{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);padding:4px 9px 4px 4px;border-radius:999px;background:var(--panel)}
+.steps2 li i{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;background:var(--panel-hi)}
+.steps2 li.now{color:var(--ink);box-shadow:inset 0 0 0 1px var(--violet-hi)}
+.steps2 li.now i{background:var(--violet);color:#fff}
+.steps2 li.done i{background:var(--ok);color:#14210a}
+.srcs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* domains */
+.doms{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.dom{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.dom-h{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dom-h b{font-size:14px}
+.dom-o{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:var(--ground)}
+.dom-o b{font-size:13.5px}
+.dom-o span{font-size:12.5px;color:var(--ink-soft)}
+.dom-o code{display:block;font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--lime-hi);background:var(--panel);padding:7px 9px;border-radius:8px;overflow-wrap:anywhere;user-select:all}
+.dom-o .row{margin-top:4px}
+/* admins */
+.admins{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.admins li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13.5px;flex-wrap:wrap}
+.admins li:first-child{border-top:0}
+.admins li span{flex:1;min-width:160px}
+.admins li small{color:var(--ink-dim)}
+.ownernote{font-size:12.5px;color:var(--ink-dim)}
+.is-susp > .card:not(#susp){display:none}
+.card.warnc{border:1px solid var(--warn)}
+/* branding */
+.br-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:18px;align-items:start}
+.br-ctl{display:flex;flex-direction:column;gap:12px;min-width:0}
+.br-quick,.br-presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.br-preset{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:none;border-radius:999px;padding:4px 10px 4px 4px;font-size:12.5px;color:var(--ink-soft)}
+.br-preset i{display:flex;gap:2px;padding:3px;border-radius:999px}
+.br-preset i b{width:12px;height:12px;border-radius:50%}
+.br-preset[aria-pressed="true"],.br-preset:hover{border-color:var(--violet-hi);color:var(--ink)}
+.br-sw{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-radius:12px;background:var(--ground)}
+.br-sw .sw{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.25)}
+.br-modes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.seg2{display:inline-grid;grid-auto-flow:column;background:var(--ground);border-radius:999px;padding:3px;gap:3px}
+.seg2 button{border:0;background:none;border-radius:999px;padding:6px 12px;font-size:12.5px;color:var(--ink-soft);font-weight:500}
+.seg2 button[aria-selected="true"],.seg2 button[aria-pressed="true"]{background:var(--panel-hi);color:var(--ink)}
+.check.small{font-size:12.5px}
+.br-rows{display:flex;flex-direction:column;gap:6px}
+.br-row{display:grid;grid-template-columns:minmax(110px,1fr) 34px 92px 110px 128px;gap:6px;align-items:center;padding:6px 8px;border-radius:12px;border:1px solid transparent}
+.br-row.on{border-color:var(--violet-hi);background:rgba(141,124,255,.06)}
+.br-l b{display:block;font-size:13px;font-weight:600}
+.br-l small{font-size:11px;color:var(--ink-dim)}
+.br-row input[type=color]{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer}
+.inp.mono{font:500 12.5px ui-monospace,SFMono-Regular,Menlo,monospace;padding:6px 8px}
+.inp.mono.sm{font-size:11.5px}
+.inp.bad{border-color:var(--bad)}
+.br-checks{display:flex;flex-direction:column;gap:6px}
+.br-chk{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft)}
+.br-chk b{color:var(--ink);font-weight:600}
+.br-chk .dot{width:34px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:1px solid rgba(255,255,255,.15)}
+.br-chk.ok span:nth-child(2)::before{content:"\2713 ";color:var(--ok)}
+.br-chk.bad span:nth-child(2)::before{content:"! ";color:var(--warn);font-weight:700}
+.btn.sm{padding:5px 10px;font-size:12px;display:inline-flex;align-items:center;gap:6px}
+.btn.sm i{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.4)}
+.br-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.br-opt{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--ink-soft)}
+.br-pv{display:flex;flex-direction:column;gap:10px;align-items:center;position:sticky;top:12px}
+.br-frames{display:flex;gap:10px}
+.br-frames figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;color:var(--ink-dim)}
+.pvf{width:126px;height:240px;overflow:hidden;border-radius:18px;border:4px solid #0d0e13;background:#1b1d25}
+.pvf iframe{width:390px;height:744px;border:0;transform:scale(.3077);transform-origin:0 0;pointer-events:none}
+@media (max-width:1240px){.br-grid{grid-template-columns:minmax(0,1fr)}.br-pv{position:static}.pvf{width:180px;height:344px}.pvf iframe{transform:scale(.4615)}}
+@media (max-width:620px){.br-row{grid-template-columns:1fr 34px 92px}.br-row .sm{display:none}.br-opts,.srcs{grid-template-columns:1fr}.pvf{width:140px;height:267px}.pvf iframe{transform:scale(.359)}}
 @media (max-width:1040px){
   .sides{grid-template-columns:minmax(0,1fr)}
   .seg.switch{display:grid;grid-template-columns:1fr 1fr;background:var(--panel);border-radius:999px;padding:4px;gap:4px;position:sticky;top:max(8px,env(safe-area-inset-top,0px));z-index:5}
@@ -220,18 +302,113 @@ td .inp{padding:6px 9px;margin:2px 0}
     <h1>for Teams</h1>
     <span class="pill demo">Prototype</span>
     <span class="grow"></span>
+    <div class="who" id="who" hidden>
+      <label for="org-switch" class="muted small">Organisation</label><select class="inp" id="org-switch"></select>
+      <span class="pill role" id="role"></span><span id="me-email"></span>
+      <button class="ghost" id="signout" type="button">Sign out</button>
+    </div>
     <button class="ghost" id="reset" type="button">Reset sample data</button>
   </header>
-  <p class="disclaimer" id="disclaimer">v2 prototype. The server and Microsoft 365 are both simulated in this browser (sync.js), so nothing is saved online, emailed or charged. Harbour Studio and everyone in it are made up.</p>
+  <p class="disclaimer" id="disclaimer">v2 prototype. The server and Microsoft 365 are both simulated in this browser (sync.js), so nothing is saved online, emailed or charged. Harbour Studio, Nordlys, Pine &amp; Post and everyone in them are made up.</p>
 
+  <!-- sign-in and sign-up (admin/gate.js) -->
+  <div id="v-auth" hidden>
+    <section class="auth" id="au-signin" hidden>
+      <h2>Sign in to Cardshare for Teams</h2>
+      <div class="card">
+        <label class="muted" for="au-email">Work email</label>
+        <input class="inp" id="au-email" type="email" inputmode="email" autocomplete="email" spellcheck="false" autocapitalize="off" placeholder="you@company.com">
+        <button class="btn ms" id="au-ms" type="button"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Sign in with Microsoft</button>
+        <button class="btn primary" id="au-link" type="button">Email me a sign-in link</button>
+        <p class="msg" id="au-msg" role="status"></p>
+        <p class="muted small">Each admin sees only their own organisation's people, branding and settings.</p>
+      </div>
+      <div class="card">
+        <b>Sample admins (prototype)</b>
+        <div class="demos">
+          <button type="button" data-demo="ava.collins@harbour.example"><span><b>Ava Collins</b> · ava.collins@harbour.example</span><span>Owner, Harbour Studio · Microsoft 365</span></button>
+          <button type="button" data-demo="ingrid.solberg@nordlys.example"><span><b>Ingrid Solberg</b> · ingrid.solberg@nordlys.example</span><span>Owner, Nordlys · Admin, Pine &amp; Post</span></button>
+          <button type="button" data-demo="jo.fairley@pinepost.example"><span><b>Jo Fairley</b> · jo.fairley@pinepost.example</span><span>Owner, Pine &amp; Post</span></button>
+        </div>
+        <p class="muted small">Click one to fill it in, then use "Sign in with Microsoft" (Harbour only) or the email link.</p>
+      </div>
+      <button class="linkbtn" id="au-new" type="button">Set up Cardshare for your organisation &rarr;</button>
+      <a class="muted small" href="platform/">Cardshare staff: platform console</a>
+    </section>
+    <section class="auth" id="au-sent" hidden>
+      <h2>Check your email</h2>
+      <div class="card">
+        <p class="muted">If <b id="as-to"></b> is an admin on Cardshare, a sign-in link is on its way. It works once, for 15 minutes.</p>
+        <button class="btn primary" id="as-open" type="button">Open my link</button>
+        <p class="muted small">Prototype: no email is sent. "Open my link" stands in for tapping it.</p>
+        <p class="msg" id="as-msg" role="status"></p>
+        <button class="ghost" id="as-back" type="button">Use a different email</button>
+      </div>
+    </section>
+    <section class="auth" id="au-signup" hidden>
+      <h2>Set up Cardshare for your organisation</h2>
+      <ol class="steps2" id="su-steps" aria-label="Steps"></ol>
+      <div class="card" id="su-1">
+        <label class="muted" for="su-email">Your work email</label>
+        <input class="inp" id="su-email" type="email" inputmode="email" spellcheck="false" autocapitalize="off" placeholder="you@company.com">
+        <p class="muted small">You'll be the owner. Your email's domain becomes your organisation's domain. Prototype: try someone@kestrel.example to set up with Microsoft 365.</p>
+        <button class="btn primary" id="su-start" type="button">Continue</button>
+        <p class="msg" id="su1-msg" role="status"></p>
+      </div>
+      <div class="card" id="su-2" hidden>
+        <p class="muted">We sent a link to <b id="su-to"></b> to check it's yours.</p>
+        <button class="btn primary" id="su-open" type="button">Open my link</button>
+        <p class="muted small">Prototype: no email is sent. "Open my link" stands in for tapping it.</p>
+        <button class="ghost" id="su-resend" type="button">Send it again</button>
+        <p class="msg" id="su2-msg" role="status"></p>
+      </div>
+      <div class="card" id="su-3" hidden>
+        <label class="muted" for="su-name">Organisation name</label>
+        <input class="inp" id="su-name" autocomplete="organization">
+        <p class="muted small">Domain: <b id="su-dom"></b>. Shown on everyone's work card; you can change it later.</p>
+        <button class="btn primary" id="su-create" type="button">Create organisation</button>
+        <p class="msg" id="su3-msg" role="status"></p>
+      </div>
+      <div class="card" id="su-4" hidden>
+        <b>Prove you own <span id="su-d4"></span></b>
+        <p class="muted small">Until it's verified, staff can't find your organisation by typing their email. Sign-in links you send still work.</p>
+        <div id="su-dpanel"></div>
+        <p class="msg" id="su4-msg" role="status"></p>
+        <button class="btn primary" id="su-next4" type="button">Continue</button>
+      </div>
+      <div class="card" id="su-5" hidden>
+        <b>Where do work cards come from?</b>
+        <div class="srcs">
+          <button class="mode" type="button" data-susrc="microsoft"><b><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Microsoft 365</b><span>Straight from your directory. We don't store your people's data.</span></button>
+          <button class="mode" type="button" data-susrc="manual"><b>By hand</b><span>Add people in the console. Cardshare stores what you type.</span></button>
+        </div>
+        <p class="ownernote" id="su-ms-done" hidden>&#10003; Microsoft 365 connected.</p>
+        <button class="btn ms" id="su-ms-go" type="button"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Connect Microsoft 365</button>
+        <p class="ownernote">Google Workspace: coming soon.</p>
+        <p class="msg" id="su5-msg" role="status"></p>
+        <button class="btn primary" id="su-next5" type="button">Continue</button>
+      </div>
+      <div class="card" id="su-6" hidden>
+        <b>Pick a starting look</b>
+        <p class="muted small">Your Work cards use your colours. Fine-tune every colour, the corners, logo and font in the console.</p>
+        <div class="br-presets" id="su-presets"></div>
+        <p class="msg" id="su6-msg" role="status"></p>
+        <button class="btn primary" id="su-finish" type="button">Open the console</button>
+      </div>
+      <button class="ghost" id="su-cancel" type="button">Back to sign in</button>
+    </section>
+  </div>
+
+  <div id="v-console" hidden>
   <div class="seg switch" id="switch" role="group" aria-label="Show">
     <button type="button" data-show="admin" aria-pressed="true">Admin console</button>
     <button type="button" data-show="phone" aria-pressed="false">Employee's phone</button>
   </div>
 
   <div class="sides" id="sides" data-show="admin">
-    <section class="console" aria-label="Admin console">
+    <section class="console" id="console" aria-label="Admin console">
       <div class="side-h"><h2>Admin console</h2><small id="count"></small></div>
+      <div class="card warnc" id="susp" hidden><h3>Suspended</h3><p class="muted" id="susp-t"></p></div>
 
       <div class="card" id="source">
         <h3>Where work cards come from</h3>
@@ -269,6 +446,7 @@ td .inp{padding:6px 9px;margin:2px 0}
           <label for="o-domains">Email domains</label><input class="inp" id="o-domains" placeholder="harbour.example, harbour.example.co.uk" autocomplete="off" spellcheck="false">
           <span></span><label class="check"><input type="checkbox" id="o-disc"> Suggest signing in when staff type an email at these domains</label>
         </div>
+        <div class="doms" id="o-doms"></div>
         <div class="row" style="margin-top:12px"><button class="btn primary" id="o-save" type="button">Save organisation</button><span class="msg" id="o-msg"></span></div>
         <p class="muted small" style="margin-top:10px">Changes reach everyone's phone at its next check-in: when they open Cardshare, and once a day.</p>
       </div>
@@ -288,6 +466,8 @@ td .inp{padding:6px 9px;margin:2px 0}
           <span><b>QR stays plain:</b> no logo inside the code. Shown on Work only; Personal and Links keep the Cardshare logo.</span>
         </div>
       </div>
+
+      <div class="card" id="branding"></div>
 
       <div class="card" id="people">
         <h3>People <span class="grow"></span>
@@ -318,6 +498,18 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
         <ul class="outbox" id="outbox"></ul>
       </div>
 
+      <div class="card" id="admins">
+        <h3>Admins</h3>
+        <ul class="admins" id="ad-list"></ul>
+        <form class="row" id="ad-add" style="margin-top:10px" autocomplete="off">
+          <input class="inp" id="ad-email" type="email" placeholder="Work email" aria-label="New admin's work email" style="flex:1;min-width:200px">
+          <select class="inp" id="ad-role" aria-label="Role" style="width:auto"><option value="admin">Admin</option><option value="owner">Owner</option></select>
+          <button class="btn" type="submit">Add admin</button>
+        </form>
+        <p class="msg" id="ad-msg"></p>
+        <p class="ownernote">Owners connect Microsoft 365, verify domains and manage admins. Admins manage people, branding and the logo.</p>
+      </div>
+
       <div class="card">
         <h3>Activity</h3>
         <ul class="log" id="log"></ul>
@@ -333,17 +525,18 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
         <label class="btn check" style="gap:6px"><input type="checkbox" id="ph-off"> Offline</label>
         <button class="btn" id="ph-15" type="button" title="Prototype: as if this phone's last successful check-in was 15 days ago, and it is offline">Simulate 15 days offline</button>
       </div>
-      <p class="phonefoot">Phones check in when the app opens and once a day. A work card that can't check in for 14 days is paused until it can. "Check in now" asks straight away, so you can watch an edit or a removal arrive.</p>
+      <p class="phonefoot">Sign in on the phone with an email at harbour.example, nordlys.example or pinepost.example to see each organisation's card. Phones check in when the app opens and once a day. A work card that can't check in for 14 days is paused until it can. "Check in now" asks straight away, so you can watch an edit or a removal arrive.</p>
     </section>
+  </div>
   </div>
 </div>
 
 <dialog class="consent" id="consent" aria-label="Microsoft permission request (simulated)">
   <div class="consent-in">
     <div class="mslogo"><svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Microsoft</div>
-    <small>it.admin@harbour.example</small>
+    <small id="cs-who"></small>
     <h2>Permissions requested</h2>
-    <p><b>Cardshare</b> (unverified prototype) wants these permissions for everyone in <b>Harbour Studio Ltd</b>:</p>
+    <p><b>Cardshare</b> (unverified prototype) wants these permissions for everyone in your organisation:</p>
     <ul>
       <li>Read all users' full profiles <small>(User.Read.All, application)</small></li>
       <li>Read organisational branding <small>(OrganizationalBranding.Read.All, application)</small></li>
@@ -357,9 +550,10 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
 
 <script src="../sync.js"></script>
 <script src="../logo.js"></script>
+<script src="../brand.js"></script>
 <script>
 (function(){
-  var Sync=window.CardshareSync,Logo=window.CardshareLogo,A=Sync.admin(),$=function(id){return document.getElementById(id)};
+  var Sync=window.CardshareSync,Logo=window.CardshareLogo,A=null,ME=null,$=function(id){return document.getElementById(id)};
   var S={org:null,people:[],source:"manual",editing:null,flash:null};
   var SHIELD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>';
   function isMs(){return S.org&&S.org.source==="microsoft"&&S.org.ms}
@@ -410,16 +604,22 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     var n=S.people.length,warn=n?"Connecting deletes the "+n+" people typed in by hand. Phones already signed in stay signed in if the person is in your directory.":"";
     if(warn&&$("ms-connect").dataset.armed!=="1"){$("ms-connect").dataset.armed="1";$("ms-msg").className="msg warn";$("ms-msg").textContent=warn+" Click again to continue.";return}
     $("ms-connect").dataset.armed="";$("ms-msg").textContent="";
-    var d=$("consent");if(d.showModal)d.showModal();else d.setAttribute("open","");
+    consent(ME.admin.email).then(function(ok){
+      if(!ok){$("ms-msg").className="msg";$("ms-msg").textContent="Not connected: consent was cancelled.";return}
+      $("ms-msg").className="msg";$("ms-msg").textContent="Connecting…";
+      return A.connectMicrosoft({consent:true})
+        .then(function(o){S.org=o;pickMode=null;$("ms-msg").textContent="";paintOrg();paintLogo();return reloadPeople()})
+        .then(function(){refreshLog();toast("Connected to Microsoft 365. Everyone in your directory can now sign in.")});
+    }).catch(function(e){$("ms-msg").className="msg err";$("ms-msg").textContent=e.message});
   });
-  $("cs-no").addEventListener("click",function(){$("consent").close();$("ms-msg").className="msg";$("ms-msg").textContent="Not connected: consent was cancelled."});
-  $("cs-yes").addEventListener("click",function(){
-    $("consent").close();$("ms-msg").className="msg";$("ms-msg").textContent="Connecting…";
-    A.connectMicrosoft({tenant:"harbour",consent:true,consentedBy:"it.admin@harbour.example"})
-      .then(function(o){S.org=o;pickMode=null;$("ms-msg").textContent="";paintOrg();paintLogo();return reloadPeople()})
-      .then(function(){refreshLog();toast("Connected to Microsoft 365. Everyone in your directory can now sign in.")})
-      .catch(function(e){$("ms-msg").className="msg err";$("ms-msg").textContent=e.message});
-  });
+  // The simulated Microsoft consent screen. Resolves true on Accept.
+  var consentDone=null;
+  function consent(email){
+    $("cs-who").textContent=email||"";var d=$("consent");if(d.showModal)d.showModal();else d.setAttribute("open","");
+    return new Promise(function(ok){consentDone=ok});
+  }
+  $("cs-no").addEventListener("click",function(){$("consent").close();if(consentDone)consentDone(false);consentDone=null});
+  $("cs-yes").addEventListener("click",function(){$("consent").close();if(consentDone)consentDone(true);consentDone=null});
   $("ms-disconnect").addEventListener("click",function(){
     var b=$("ms-disconnect");
     if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Click again: phones drop their work cards at next check-in";setTimeout(function(){b.dataset.armed="";b.textContent="Disconnect"},5000);return}
@@ -451,6 +651,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     {k:"light",n:"Light version",d:"Optional. For dark phone themes."},{k:"dark",n:"Dark version",d:"Optional. For the light phone theme."},
     {k:"markLight",n:"Square mark, light",d:"Optional. Square mark for dark themes."}];
   function paintLogo(){
+    if(window.AdminBranding)window.AdminBranding.refresh();
     var L=S.org.logos||{};
     $("slots").innerHTML=VARIANTS.map(function(v){
       var l=L[v.k];
@@ -592,7 +793,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
   // ---------------------------------------------------------------- outbox (mock only), activity
   function paintOutbox(){
     if(!Sync.mockServer){$("mail").hidden=true;return}
-    var items=Sync.mockServer.outbox().slice(0,6);
+    var items=Sync.mockServer.outbox(S.org&&S.org.id).slice(0,6);
     $("mail").hidden=!items.length;
     $("outbox").innerHTML=items.map(function(o){return '<li><span>Sign-in link to <b>'+esc(o.to)+'</b> · '+hm(o.at)+'</span><button class="btn" type="button" data-open="'+esc(o.token)+'">Open on the phone</button></li>'}).join("");
   }
@@ -601,7 +802,7 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     paintOutbox();
     return A.activity().then(function(r){$("log").innerHTML=r.activity.map(function(l){return '<li><time>'+hm(l.at)+'</time>'+esc(l.t)+'</li>'}).join("")||'<li>Nothing yet.</li>'});
   }
-  function refreshAll(){return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual"})]).then(function(){if(!S.editing){paintPeople();paintSource()}refreshLog()}).catch(function(){})}
+  function refreshAll(){if(!A)return Promise.resolve();return Promise.all([A.org().then(function(o){S.org=o}),A.employees().then(function(r){S.people=r.employees;S.source=r.source||"manual"})]).then(function(){if(!S.editing){paintPeople();paintSource()}refreshLog()}).catch(function(){})}
 
   // ---------------------------------------------------------------- phone frame
   function phoneWin(){try{return $("phone").contentWindow}catch(e){return null}}
@@ -619,19 +820,111 @@ James Wright,Finance Lead,+44 161 496 0105,james.wright@harbour.example</textare
     toast("Phone: last check-in 15 days ago, and offline. Its work card is paused (limit "+Sync.OFFLINE_LIMIT_DAYS+" days).");
   });
   $("ph-off").addEventListener("change",function(){try{localStorage.setItem("cardshare-mock-offline",$("ph-off").checked?"1":"0")}catch(e){}toast($("ph-off").checked?"The phone is offline: check-ins fail, the work card still shows.":"Back online.")});
-  addEventListener("storage",function(e){if(e.key===(Sync.mockServer&&Sync.mockServer.KEY)||e.key==="cardshare-mock-entra-v1")refreshAll()});
+  addEventListener("storage",function(e){if(A&&(e.key===(Sync.mockServer&&Sync.mockServer.KEY)||e.key==="cardshare-mock-entra-v2"))refreshAll()});
   function show(side){$("sides").dataset.show=side;document.querySelectorAll("#switch button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.show===side))})}
   document.querySelectorAll("#switch button").forEach(function(b){b.addEventListener("click",function(){show(b.dataset.show)})});
   $("reset").addEventListener("click",function(){
     if($("reset").dataset.armed!=="1"){$("reset").dataset.armed="1";$("reset").textContent="Tap again to reset";setTimeout(function(){$("reset").dataset.armed="";$("reset").textContent="Reset sample data"},4000);return}
-    Sync.mockServer&&Sync.mockServer.reset();try{localStorage.removeItem("cardshare-work-v2");localStorage.removeItem("cardshare-work-removed");localStorage.removeItem("cardshare-mock-offline")}catch(e){}
+    Sync.mockServer&&Sync.mockServer.reset();try{localStorage.removeItem("cardshare-admin-session");localStorage.removeItem("cardshare-work-v2");localStorage.removeItem("cardshare-work-removed");localStorage.removeItem("cardshare-mock-offline")}catch(e){}
     location.reload();
   });
   if(!Sync.mock){$("disclaimer").textContent="Connected to "+window.CARDSHARE_API+".";$("reset").hidden=true}
 
-  Promise.all([A.org(),A.employees()]).then(function(r){S.org=r[0];S.people=r[1].employees;S.source=r[1].source||"manual";paintOrg();paintLogo();paintPeople();refreshLog()}).catch(fail);
-  setInterval(function(){if(!document.hidden&&!S.editing)refreshAll()},15000);
+  // ---------------------------------------------------------------- domains: verify by Microsoft, DNS TXT record, or email
+  // Used here (Organisation card) and by the sign-up steps. opts: {microsoft: offer Connect, onVerified(org, how)}.
+  function domainPanel(box,d,api,opts){
+    opts=opts||{};box.innerHTML="";
+    var el=document.createElement("div");el.className="dom";box.append(el);
+    function head(){return '<div class="dom-h"><b>'+esc(d.name)+'</b>'+(d.verified?'<span class="chip on">Verified'+(d.method?" ("+({microsoft:"Microsoft 365",dns:"DNS record",email:"email"}[d.method]||d.method)+")":"")+'</span>':'<span class="chip invited">Not verified</span>')+'</div>'}
+    if(d.verified||opts.readOnly){el.innerHTML=head()+(d.verified||!opts.readOnly?"":'<p class="ownernote">An owner can verify this domain.</p>');return}
+    el.innerHTML=head()+
+      (opts.microsoft?'<div class="dom-o"><b>Connect Microsoft 365</b><span>Verifies the domain and sets up your directory in one go.</span><div class="row"><button class="btn ms" type="button" data-dv="ms">'+'<svg viewBox="0 0 21 21" aria-hidden="true"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>Connect Microsoft 365</button></div></div>':"")+
+      '<div class="dom-o"><b>Add a DNS record</b><span>At your DNS provider, add a TXT record named <b>'+esc(d.record)+'</b> with this value:</span><code>'+esc(d.txt)+'</code><div class="row"><button class="btn" type="button" data-dv="dns">Check DNS</button></div></div>'+
+      '<div class="dom-o"><b>Or confirm by email</b><span>We email a link to admin@'+esc(d.name)+'. Whoever opens it confirms the domain.</span><div class="row"><button class="btn" type="button" data-dv="email">Send the email</button><button class="btn" type="button" data-dv="open" hidden>Open the link (prototype)</button></div></div>'+
+      '<p class="msg" data-dv-msg></p>';
+    var m=el.querySelector("[data-dv-msg]");
+    function done(o,how){d.verified=true;d.method=how;el.innerHTML=head();if(opts.onVerified)opts.onVerified(o,how)}
+    el.addEventListener("click",function(e){
+      var b=e.target.closest("[data-dv]");if(!b)return;
+      if(b.dataset.dv==="dns"){m.className="msg";m.textContent="Looking up "+d.record+"…";
+        api.verifyDomain(d.name,"dns").then(function(o){done(o,"dns")}).catch(function(err){m.className="msg err";m.textContent=err.message})}
+      if(b.dataset.dv==="email")api.verifyDomain(d.name,"email").then(function(r){m.className="msg ok";m.textContent="Sent to "+r.sent+".";el.querySelector('[data-dv="open"]').hidden=!Sync.mock}).catch(function(err){m.className="msg err";m.textContent=err.message});
+      if(b.dataset.dv==="open"){var tk=Sync.mockServer.peekOutbox("admin@"+d.name,"domain");if(!tk)return;
+        Sync.confirmDomain(tk).then(function(){return api.org()}).then(function(o){done(o,"email")}).catch(function(err){m.className="msg err";m.textContent=err.message})}
+      if(b.dataset.dv==="ms")consent(ME?ME.admin.email:"").then(function(ok){if(!ok)return;
+        return api.connectMicrosoft({consent:true}).then(function(o){done(o,"microsoft")})}).catch(function(err){m.className="msg err";m.textContent=err.message});
+    });
+  }
+  function paintDomains(){
+    var box=$("o-doms");box.textContent="";var ms=isMs(),owner=ME&&ME.role==="owner";
+    (S.org.domainStatus||[]).forEach(function(d){var c=document.createElement("div");box.append(c);
+      domainPanel(c,d,A,{readOnly:ms||!owner,onVerified:function(o){S.org=o;refreshLog();toast(d.name+" verified. Staff typing an email there are now offered sign-in.")}})});
+  }
+
+  // ---------------------------------------------------------------- admins of this organisation
+  function paintAdmins(){
+    var owner=ME.role==="owner";$("ad-add").hidden=!owner;
+    A.admins().then(function(r){
+      $("ad-list").innerHTML=r.admins.map(function(a){return '<li><span><b>'+esc(a.name)+'</b> <small>'+esc(a.email)+'</small></span><span class="pill'+(a.role==="owner"?" role":"")+'">'+(a.role==="owner"?"Owner":"Admin")+'</span>'+(a.you?'<small>you</small>':"")+
+        (owner&&!a.you?'<button class="ghost" type="button" data-rmadmin="'+esc(a.id)+'">Remove</button>':"")+'</li>'}).join("");
+    }).catch(fail);
+  }
+  $("ad-add").addEventListener("submit",function(e){e.preventDefault();
+    A.addAdmin($("ad-email").value,$("ad-role").value).then(function(){$("ad-email").value="";$("ad-msg").className="msg ok";$("ad-msg").textContent="Added. They get a sign-in link by email.";paintAdmins();refreshLog()})
+      .catch(function(err){$("ad-msg").className="msg err";$("ad-msg").textContent=err.message})});
+  document.addEventListener("click",function(e){var b=e.target.closest("[data-rmadmin]");if(!b)return;
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Click again to remove";return}
+    A.removeAdmin(b.dataset.rmadmin).then(function(){paintAdmins();refreshLog()}).catch(fail)});
+
+  // ---------------------------------------------------------------- session, organisation switcher, roles
+  function paintWho(){
+    $("who").hidden=false;$("me-email").textContent=ME.admin.email;$("role").textContent=ME.role==="owner"?"Owner":"Admin";
+    $("org-switch").innerHTML=ME.orgs.map(function(o){return '<option value="'+esc(o.id)+'"'+(o.id===ME.orgId?" selected":"")+'>'+esc(o.name)+(o.status!=="active"?" (suspended)":"")+'</option>'}).join("");
+    $("org-switch").disabled=ME.orgs.length<2;
+  }
+  function paintRole(){
+    var owner=ME.role==="owner";
+    $("ms-connect").disabled=!owner;$("ms-disconnect").disabled=!owner;
+    $("o-domains").readOnly=!owner||!!isMs();
+    if(!owner){$("ms-msg").className="msg";$("ms-msg").textContent="Only an owner can connect or disconnect Microsoft 365."}
+  }
+  $("org-switch").addEventListener("change",function(){
+    A.switchOrg($("org-switch").value).then(function(info){ME=info;loadConsole()}).catch(fail);
+  });
+  $("signout").addEventListener("click",function(){A=null;ME=null;$("who").hidden=true;window.AdminApp.signOut()});
+  function sampleCard(){
+    var p=S.people.filter(function(x){return x.accountEnabled!==false})[0];
+    return p?{name:p.name,title:p.title,org:p.company||S.org.company||S.org.name,office:p.office,email:p.email}
+      :{name:"Alex Morgan",title:"Design Lead",org:S.org.company||S.org.name,office:"+44 161 496 0199",email:"alex.morgan@"+((S.org.domains||[])[0]||"company.example")};
+  }
+  function loadConsole(focus){
+    paintWho();pickMode=null;S.editing=null;
+    $("console").classList.remove("is-susp");$("susp").hidden=true;
+    return Promise.all([A.org(),A.employees()]).then(function(r){
+      S.org=r[0];S.people=r[1].employees;S.source=r[1].source||"manual";
+      var dom=(S.org.domains||[])[0]||"company.example";
+      $("csv").value="Sam Taylor,Office Manager,+44 161 496 0150,sam.taylor@"+dom+"\nRiley Chen,Account Manager,+44 161 496 0151,riley.chen@"+dom;
+      paintOrg();paintLogo();paintPeople();paintDomains();paintAdmins();paintRole();refreshLog();
+      window.AdminBranding.load(S.org);
+      if(focus){var el=$(focus);if(el)el.scrollIntoView({block:"start"})}
+    }).catch(function(e){
+      if(e.status===423){$("console").classList.add("is-susp");$("susp").hidden=false;$("susp-t").textContent=e.message;$("count").textContent="";return}
+      fail(e);
+    });
+  }
+  var mounted=false;
+  window.AdminApp={Sync:Sync,state:S,toast:toast,fail:fail,consent:consent,domainPanel:domainPanel,sampleCard:sampleCard,
+    api:function(){return A},refreshLog:function(){return refreshLog()},
+    boot:function(token,info,focus){
+      A=Sync.admin(token);ME=info;
+      $("v-auth").hidden=true;$("v-console").hidden=false;
+      if(!mounted){window.AdminBranding.mount(window.AdminApp);mounted=true}
+      return A.me().then(function(m){ME=m;return loadConsole(focus)});
+    }};
+  setInterval(function(){if(A&&!document.hidden&&!S.editing)refreshAll()},15000);
 })();
 </script>
+<script src="branding.js"></script>
+<script src="gate.js"></script>
 </body>
 </html>

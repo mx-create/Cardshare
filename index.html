@@ -274,6 +274,35 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .uptodate svg{width:16px;height:16px;flex:none;color:var(--lime-hi)}
 :root[data-theme="daylight"] .uptodate svg{color:var(--ok)}
 .uptodate.stale svg{color:var(--warn)}
+/* v2: an organisation's branding (brand.js), on a managed Work card only: the header band, the card panel, the Work pill,
+   the main button and the "Managed by" banner. Personal and Links keep the Cardshare theme. The QR box is never branded. */
+html.brand-on{--glow:var(--b-glow)}
+html.brand-on .top{background:var(--b-card);border-radius:var(--b-radius);padding:10px 54px}
+html.brand-on.brand-left .top{justify-content:flex-start;padding-left:16px}
+html.brand-on.brand-left .top .cologo{align-items:flex-start}
+html.brand-on .top .cologo small{color:var(--b-dim)}
+html.brand-on .top .cologo small b{color:var(--b-text)}
+html.brand-on .top .cologo-name{color:var(--b-text);font-family:var(--b-font)}
+html.brand-on .top .cologo-badge{background:var(--b-primary);color:var(--b-btn)}
+html.brand-on .top .theme-btn{right:8px;background:var(--b-hair);color:var(--b-text);box-shadow:none}
+html.brand-on #card-form,html.brand-on .qrcard{background:var(--b-card);color:var(--b-text);border-radius:var(--b-radius);box-shadow:none;font-family:var(--b-font)}
+html.brand-on #card-form .field+.field,html.brand-on .lockrows .field+.field,html.brand-on .lockrows+.field{border-color:var(--b-hair)}
+html.brand-on .field.locked .v,html.brand-on #card-form input{color:var(--b-text);font-family:var(--b-font)}
+html.brand-on #card-form input::placeholder{color:var(--b-dim)}
+html.brand-on .field.locked .lbl,html.brand-on .field.locked svg,html.brand-on #card-form label{color:var(--b-dim)}
+html.brand-on .field.mine{background:var(--b-hair);border-radius:0 0 var(--b-radius) var(--b-radius)}
+html.brand-on .field.mine label{color:var(--b-text)}
+html.brand-on #card-form .cc{background:var(--b-hair);color:var(--b-text)}
+html.brand-on #card-form .cc small,html.brand-on #card-form .fmsg{color:var(--b-soft)}
+html.brand-on #ek-work[aria-selected="true"],html.brand-on #sk-work[aria-selected="true"]{background:var(--b-primary);color:var(--b-btn)}
+html.brand-on #save-card{background:var(--b-primary);color:var(--b-btn);box-shadow:none;border-radius:var(--b-btn-radius)}
+html.brand-on #w-synced{background:var(--b-accent-bg);border-color:var(--b-accent)}
+html.brand-on #w-synced svg{color:var(--b-accent)}
+html.brand-on .qrcard h2,html.brand-on .who .p{color:var(--b-text)}
+html.brand-on .who .n,html.brand-on .uptodate{color:var(--b-soft)}
+html.brand-on .who .t{color:var(--b-dim)}
+html.brand-on .uptodate svg{color:var(--b-text)}
+html.brand-on .qrbox{background:#fff;border-radius:min(var(--b-radius),14px)}
 </style>
 <script>try{var t=localStorage.getItem("cardshare-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
@@ -459,6 +488,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 <script src="icons.js"></script>
 <script src="sync.js"></script>
 <script src="logo.js"></script>
+<script src="brand.js"></script>
 <script>
 (function(){
   var KEY="cardshare-lite-v2",OLD="cardshare-lite-card";
@@ -487,7 +517,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   var draft=copy(data),editKind="personal",shareKind="personal",linkSel="",tipOn=false;
   // v2: a Work card managed by an organisation. ws is the synced state from sync.js (null in free, manual mode);
   // wflow is the sign-in flow on the Work tab: {stage:"nudge"|"ask"|"sent", email, org}. curView is the screen showing.
-  var Sync=window.CardshareSync||null,ws=Sync?Sync.state():null,wflow=null,curView="share";
+  // ?preview=edit|share: the admin console's live branding preview. Shows what it is sent, reads no work card and calls no server.
+  var PREVIEW=(/[?&]preview=(edit|share)\b/.exec(location.search)||[])[1]||"";
+  var Sync=window.CardshareSync||null,ws=Sync&&!PREVIEW?Sync.state():null,wflow=null,curView="share";
   if(ws&&!ws.card)ws=null;
   if(ws)isNew=false; // a synced Work card counts as a saved card
   var amt={monzo:"",upi:""}; // typed on Share for this visit only
@@ -950,7 +982,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     if(reveal&&!h.hidden)h.scrollIntoView({block:"center"});
   }
   $("install").addEventListener("click",function(){install(false)});
-  if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+  if("serviceWorker" in navigator&&!PREVIEW)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
 
   // ================================================================ v2: Work cards from an organisation
   // Free mode is untouched: with no sign-in nothing here calls sync.js except the domain lookup on the Work email,
@@ -959,8 +991,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   var DKEY="cardshare-teams-dismissed",RKEY="cardshare-work-removed",RESEND=60;
   function managedEdit(){return editKind==="work"&&!!ws&&!workExpired()}
   // No successful check-in for Sync.OFFLINE_LIMIT_DAYS: the work card is kept on the phone but not shown or shared.
-  function workExpired(){return !!ws&&!!Sync&&Sync.expired(ws)}
-  function expiredText(){return "Your work card needs to check in with "+ws.org.name+". Connect to the internet to refresh it."}
+  // Paused: past the offline limit, or the organisation's Cardshare account is suspended. Kept on the phone, not shown.
+  function workExpired(){return !!ws&&!!Sync&&(!!ws.suspended||Sync.expired(ws))}
+  function expiredText(){return ws.suspended?"Work cards from "+ws.org.name+" are paused while its Cardshare account is on hold. Ask your admin."
+    :"Your work card needs to check in with "+ws.org.name+". Connect to the internet to refresh it."}
   // The card a QR is built from: a managed Work card is the organisation's fields plus the employee's own mobile.
   function cardFor(kind){
     if(kind!=="work"||!ws)return data.cards[kind];
@@ -979,10 +1013,25 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
   function updateBrand(force){
     var on=!!ws&&!workExpired()&&window.CardshareLogo&&((curView==="edit"&&editKind==="work"&&!wflow)||(curView==="share"&&shareKind==="work"));
     $("logo").hidden=!!on;$("cologo").hidden=!on;
+    var r=applyBrand(on);
     if(!on){brandKey="";return}
-    var key=JSON.stringify([ws.etag,document.documentElement.getAttribute("data-theme")]);
+    var key=JSON.stringify([ws.etag,document.documentElement.getAttribute("data-theme"),ws.org.branding||null]);
     if(key===brandKey&&!force)return;brandKey=key;
-    $("cologo").textContent="";$("cologo").append(CardshareLogo.render(ws.org));
+    // On a brand band the logo's light/dark chip is judged against the band's colour, not the page.
+    $("cologo").textContent="";$("cologo").append(CardshareLogo.render(ws.org,r?{ground:r.cardLum}:{}));
+  }
+  // The organisation's colours, after brand.js's contrast safety net, as CSS variables on <html>.
+  function applyBrand(on){
+    var root=document.documentElement,B=window.CardshareBrand,br=on&&B&&ws&&ws.org&&ws.org.branding;
+    root.classList.toggle("brand-on",!!br);root.classList.toggle("brand-left",!!br&&br.logoPlace==="left");
+    if(!br)return null;
+    var r=B.resolve(br,root.getAttribute("data-theme")!=="daylight"),st=root.style;
+    [["primary","primary"],["accent","accent"],["card","card"],["text","text"],["btn","buttonText"],["hair","hair"],["soft","soft"],["dim","dim"],["glow","glow"],["accent-bg","accentBg"],["font","font"]]
+      .forEach(function(p){st.setProperty("--b-"+p[0],r[p[1]])});
+    st.setProperty("--b-radius",r.radius+"px");st.setProperty("--b-btn-radius",r.buttonRadius+"px");
+    // A web font for the brand when online; offline (or blocked) the stack falls back to the system's fonts.
+    if(r.fontUrl&&!document.querySelector('link[data-brand-font="'+br.font+'"]')){var l=document.createElement("link");l.rel="stylesheet";l.href=r.fontUrl;l.setAttribute("data-brand-font",br.font);document.head.append(l)}
+    return r;
   }
   function dismissed(){try{return JSON.parse(localStorage.getItem(DKEY)||"[]")}catch(e){return []}}
   function domainOf(v){v=tidyEmail(v);var i=v.lastIndexOf("@");return i>0?v.slice(i+1):""}
@@ -1113,9 +1162,10 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
       syncBusy=false;
       if(r.status==="removed"||r.status==="signedout"){dropWork(r.status,r.was);return}
       if(r.state)ws=r.state;
+      if(workExpired())wasExpired=true;
       syncNote=r.status==="offline"?"offline, synced "+when(ws.syncedAt):r.status==="updated"?"updated "+when(ws.syncedAt):"";
       if(curView==="share")renderShare();
-      if(editKind==="work"&&curView==="edit"){paintWork();if(r.status==="offline"&&workExpired()){$("we-msg").hidden=false;$("we-msg").className="fmsg err";$("we-msg").textContent="Still no connection. Try again when you have signal."}}else paintSynced();
+      if(editKind==="work"&&curView==="edit"){paintWork();if(r.status==="offline"&&workExpired()&&!ws.suspended){$("we-msg").hidden=false;$("we-msg").className="fmsg err";$("we-msg").textContent="Still no connection. Try again when you have signal."}}else paintSynced();
       if(r.status!=="offline")$("we-msg").hidden=true;
       if(r.status!=="offline"&&!workExpired()&&wasExpired){wasExpired=false;loadForm()}
       updateBrand();
@@ -1177,7 +1227,18 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
     $("edit-note").textContent="Prototype: no link went to "+wflow.email+", because no organisation on Cardshare has added that address. In the real app the email simply never arrives.";
   });
   $("wr-ok").addEventListener("click",function(){try{localStorage.removeItem(RKEY)}catch(e){}paintWork()});
-  if(Sync){
+  if(PREVIEW){
+    // The console posts {type:"cardshare-preview", org, card, tel, theme} on every change; nothing here is saved.
+    addEventListener("message",function(e){
+      if(e.origin!==location.origin||!e.data||e.data.type!=="cardshare-preview")return;
+      var d=e.data;document.documentElement.setAttribute("data-theme",d.theme||"midnight");
+      ws={card:d.card,org:d.org,own:{tel:d.tel||""},syncedAt:Date.now(),checkedAt:Date.now(),etag:String(Math.random())};
+      ownTel=ws.own.tel;isNew=false;wflow=null;editKind="work";shareKind="work";
+      loadForm();renderShare();show(PREVIEW);
+    });
+    try{parent.postMessage({type:"cardshare-preview-ready",view:PREVIEW},location.origin)}catch(e){}
+  }
+  if(Sync&&!PREVIEW){
     var q=/[?&]signin=([\w-]+)/.exec(location.search);
     if(q){try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}setTimeout(function(){useLink(q[1])},0)}
     if(ws)setTimeout(function(){checkIn(true)},0);

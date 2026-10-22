@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1b1d25">
+<title>Cardshare Platform Console</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../../icons/favicon-32.png">
+<style>
+@font-face{font-family:"Inter";font-style:normal;font-weight:400 600;font-display:swap;src:url(../../fonts/inter-latin.woff2) format("woff2")}
+@font-face{font-family:"Poppins";font-style:normal;font-weight:800;font-display:swap;src:url(../../fonts/poppins-800-latin.woff2) format("woff2")}
+[hidden]{display:none!important}
+:root{color-scheme:dark;--ground:#1b1d25;--panel:#2a2c38;--panel-hi:#343644;--line:#3d4050;--ink:#f3f2f8;--ink-soft:#a9a8b8;--ink-dim:#7c7b90;
+  --violet:#7461f2;--violet-hi:#8d7cff;--lime:#c8e62b;--lime-hi:#bfff6b;--ok:#a6e86b;--warn:#f2b84b;--bad:#ff8a7a;--body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--ground)}
+body{color:var(--ink);font:400 15px/1.45 var(--body);padding:20px max(16px,env(safe-area-inset-left,0px)) 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--lime-hi);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.logo{position:relative;font:800 24px/1 "Poppins","Arial Black",system-ui,sans-serif;letter-spacing:-.05em;color:var(--violet-hi);padding:10px 4px;display:flex;gap:.28em}
+.logo span{position:relative;z-index:1}
+.logo::before,.logo::after{content:"";position:absolute;transform:skewX(-20deg)}
+.logo::before{background:var(--lime);left:28%;right:38%;top:22%;bottom:0}
+.logo::after{background:var(--lime-hi);left:45%;right:20%;top:0;bottom:16%}
+.bar h1{margin:0;font:600 20px var(--body)}
+.grow{flex:1}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;letter-spacing:.04em;background:var(--panel-hi);color:var(--ink-soft)}
+.pill.demo{background:var(--warn);color:#2a1d00;text-transform:uppercase}
+.pill.ok{color:var(--ok)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}
+.card{background:var(--panel);border-radius:20px;padding:18px 20px;min-width:0}
+.muted{color:var(--ink-soft);font-size:13.5px;margin:0}
+.btn{border:0;border-radius:999px;padding:9px 16px;font-weight:600;font-size:13.5px;background:var(--panel-hi);color:var(--ink)}
+.btn.primary{background:var(--violet);color:#fff}
+.ghost{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 12px;color:var(--ink-soft);font-size:12.5px;font-weight:500}
+.ghost.bad{color:var(--bad);border-color:rgba(255,138,122,.4)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stats div{background:var(--panel);border-radius:16px;padding:12px 14px}
+.stats small{display:block;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim)}
+.stats b{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto;margin:0 -6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
+th{text-align:left;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;padding:8px 6px}
+td{padding:11px 6px;border-top:1px solid rgba(255,255,255,.06);vertical-align:top}
+td .t{color:var(--ink-soft);font-size:12.5px}
+td.num{font-variant-numeric:tabular-nums}
+.acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:10px 16px;border-radius:999px;background:var(--panel-hi);border:1px solid var(--violet-hi);font-size:13.5px;max-width:calc(100% - 32px)}
+.gate{max-width:460px;margin:30px auto;display:flex;flex-direction:column;gap:12px}
+@media (max-width:700px){.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="logo" aria-label="Cardshare"><span>card</span><span>share</span></div>
+    <h1>Platform console</h1><span class="pill demo">Prototype</span><span class="grow"></span>
+    <a class="ghost" href="../">Admin console</a>
+    <button class="ghost" id="out" type="button" hidden>Sign out</button>
+  </header>
+
+  <div class="card gate" id="gate">
+    <h2 style="margin:0;font-size:20px">Cardshare staff only</h2>
+    <p class="muted">Every organisation on Cardshare, for running the service: status, domains, phone counts and plan. It never shows anyone's staff details; Microsoft 365 organisations' people aren't stored at all.</p>
+    <button class="btn primary" id="in" type="button">Sign in as platform owner (prototype)</button>
+    <p class="muted" style="font-size:12.5px">In the real service this is a separate sign-in limited to Cardshare's own accounts (see worker/README.md).</p>
+  </div>
+
+  <div id="main" hidden>
+    <div class="stats" id="stats"></div>
+    <div class="card" style="margin-top:14px">
+      <div class="tablewrap"><table>
+        <thead><tr><th>Organisation</th><th>Cards from</th><th>Domains</th><th>Phones</th><th>Records held</th><th>Plan</th><th>Status</th><th><span hidden>Actions</span></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <p class="muted" style="margin-top:12px;font-size:12.5px">Suspending pauses an organisation: its admins can't make changes and its phones hide work cards until it's restored. Deleting removes the organisation, its domains, admins and any hand-typed records; its phones wipe their work cards at their next check-in.</p>
+    </div>
+  </div>
+</div>
+<script src="../../sync.js"></script>
+<script>
+(function(){
+  var Sync=window.CardshareSync,KEY="cardshare-platform-session",P=null,$=function(id){return document.getElementById(id)};
+  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  var tt;function toast(t){var el=document.querySelector(".toast");if(el)el.remove();el=document.createElement("div");el.className="toast";el.setAttribute("role","status");el.textContent=t;document.body.append(el);clearTimeout(tt);tt=setTimeout(function(){el.remove()},3200)}
+  function load(){
+    return P.orgs().then(function(r){
+      var o=r.orgs;
+      $("stats").innerHTML=[["Organisations",o.length],["Microsoft 365",o.filter(function(x){return x.source==="microsoft"}).length],["Phones signed in",o.reduce(function(a,x){return a+x.phones},0)],["Suspended",o.filter(function(x){return x.status!=="active"}).length]]
+        .map(function(s){return '<div><small>'+s[0]+'</small><b>'+s[1]+'</b></div>'}).join("");
+      $("rows").innerHTML=o.map(function(x){
+        var ms=x.source==="microsoft";
+        return '<tr data-id="'+esc(x.id)+'"><td><b>'+esc(x.name)+'</b><div class="t">'+x.admins+(x.admins===1?" admin":" admins")+' · since '+new Date(x.createdAt).toLocaleDateString()+'</div></td>'+
+          '<td>'+(ms?"Microsoft 365<div class=\"t\">"+esc(x.tenantName)+"</div>":"By hand")+'</td>'+
+          '<td>'+(x.domains.map(function(d){return esc(d.name)+' <span class="pill '+(d.verified?"ok":"warn")+'">'+(d.verified?"verified":"pending")+'</span>'}).join("<br>")||'<span class="t">none</span>')+'</td>'+
+          '<td class="num">'+x.phones+'</td>'+
+          '<td class="num">'+(ms?'<span class="t">None: read from their directory</span>':x.storedPeople+' <span class="t">people typed in</span>')+'</td>'+
+          '<td>'+esc(x.plan)+'<div class="t">placeholder</div></td>'+
+          '<td><span class="pill '+(x.status==="active"?"ok":"bad")+'">'+(x.status==="active"?"Active":"Suspended")+'</span></td>'+
+          '<td><div class="acts">'+(x.status==="active"?'<button class="ghost" type="button" data-a="suspend">Suspend</button>':'<button class="ghost" type="button" data-a="restore">Restore</button>')+
+          '<button class="ghost bad" type="button" data-a="delete">Delete</button></div></td></tr>';
+      }).join("");
+    }).catch(function(e){if(e.status===401){signOut();return}toast(e.message)});
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-a]");if(!b)return;var id=b.closest("tr").dataset.id,a=b.dataset.a;
+    if(a==="delete"&&b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Click again to delete";setTimeout(function(){b.dataset.armed="";b.textContent="Delete"},4000);return}
+    (a==="suspend"?P.suspend(id):a==="restore"?P.restore(id):P.remove(id)).then(function(){toast(a==="suspend"?"Suspended.":a==="restore"?"Restored.":"Deleted.");load()}).catch(function(err){toast(err.message)});
+  });
+  function signIn(t){P=Sync.platform(t);$("gate").hidden=true;$("main").hidden=false;$("out").hidden=false;load()}
+  function signOut(){try{localStorage.removeItem(KEY)}catch(e){}P=null;$("gate").hidden=false;$("main").hidden=true;$("out").hidden=true}
+  $("in").addEventListener("click",function(){Sync.platformSignIn().then(function(r){try{localStorage.setItem(KEY,r.token)}catch(e){}signIn(r.token)})});
+  $("out").addEventListener("click",signOut);
+  var t=null;try{t=localStorage.getItem(KEY)}catch(e){}
+  if(t)signIn(t);
+  addEventListener("storage",function(e){if(P&&e.key===(Sync.mockServer&&Sync.mockServer.KEY))load()});
+})();
+</script>
+</body>
+</html>
